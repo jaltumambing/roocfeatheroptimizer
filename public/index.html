@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.4 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.5 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -595,7 +595,12 @@ function runOptimizer(){
     document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
   },30);
 }
-function fmtV(v){if(Math.abs(v)<0.1&&v!==0)return v.toFixed(4);return Math.round(v).toLocaleString();}
+const PCT_STATS=new Set(['PDMG','MDMG','PDMGRed','MDMGRed']);
+function fmtV(v,k){
+  if(k&&PCT_STATS.has(k))return(v*100).toFixed(2)+'%';
+  if(Math.abs(v)<0.01&&v!==0)return v.toFixed(4);
+  return Math.round(v).toLocaleString();
+}
 function getTotals(build){const t={};SK.forEach(k=>{t[k]=0;});build.statues.forEach(st=>{const r=calcStatueResult(st.slots,st.type);if(r)SK.forEach(k=>{t[k]+=(r.stats[k]||0);});});return t;}
 function renderPools(){
   const html=POOLS.map(p=>`<div class="pool-card"><div class="pool-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}">${p.r}</span></div><div class="pool-members">${p.members.join(' · ')}</div><div class="pool-inp-row"><span class="pool-inp-label">Total copies:</span><input class="pool-inp" type="number" min="0" max="9999" value="${state.pools[p.name]||0}" oninput="state.pools['${p.name}']=parseInt(this.value)||0"></div></div>`).join('');
@@ -831,7 +836,7 @@ function renderFilterResults(){
     const exp=state.expandedF.has(i);
     const tot=build.filterTotals||getTotals(build);
     const effPct=Math.round(build.efficiency*1000)/10;
-    const chips=Object.keys(filters).map(k=>{const v=tot[k]||0;const pass=v>=filters[k];return`<span class="b-chip b-chip-${STAT_META[k]?.cat||'atk'}" style="border-color:${pass?'var(--green2)':'var(--red2)'}">${WEIGHT_META[k]?.label||k} ${fmtV(v)}${pass?' ✓':' ✗'}</span>`;}).join('');
+    const chips=Object.keys(filters).map(k=>{const v=tot[k]||0;const pass=v>=filters[k];return`<span class="b-chip b-chip-${STAT_META[k]?.cat||'atk'}" style="border-color:${pass?'var(--green2)':'var(--red2)'}">${WEIGHT_META[k]?.label||k} ${fmtV(v,k)}${pass?' ✓':' ✗'}</span>`;}).join('');
     html+=`<div class="build-card" id="fbc-${i}"><div class="build-hdr"><span class="b-rank">#${i+1}</span><div class="b-score-block"><span class="b-score">${effPct}</span><span class="b-score-lbl">effcy</span></div><div class="b-chips"><span class="b-chip b-chip-atk" style="font-weight:700">ATK T${build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span><span class="b-chip b-chip-def" style="font-weight:700">DEF T${build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span>${chips}</div><button class="b-toggle" onclick="toggleFilterBuild(${i})">${exp?'▲':'▼'}</button></div><div class="build-detail ${exp?'on':''}">`;
     if(exp){
       html+=`<div class="tier-dist">`;build.statues.slice(0,5).forEach((st,j)=>{const at=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-atk">ATK${j+1} T${at}</span>`;});build.statues.slice(5,10).forEach((st,j)=>{const dt=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-def">DEF${j+1} T${dt}</span>`;});html+=`</div>`;
@@ -841,7 +846,7 @@ function renderFilterResults(){
         st.slots.forEach(sl=>{const f=FEATHERS.find(x=>x.name===sl.f);const above=sl.lv>(sl.floor||st.tier);html+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;});html+=`</div>`;
       });
       html+=`<div class="divider"></div><div class="stat-sum">`;
-      Object.keys(filters).forEach(k=>{const v=tot[k]||0;const pass=v>=filters[k];html+=`<div class="ss-row"><span class="ss-n" style="color:${pass?'var(--green3)':'var(--red3)'}">${WEIGHT_META[k]?.label||k}</span><span class="ss-v">${fmtV(v)} <span style="font-size:9px;color:var(--text3)">/ ${filters[k]}</span></span></div>`;});
+      Object.keys(filters).forEach(k=>{const v=tot[k]||0;const pass=v>=filters[k];html+=`<div class="ss-row"><span class="ss-n" style="color:${pass?'var(--green3)':'var(--red3)'}">${WEIGHT_META[k]?.label||k}</span><span class="ss-v">${fmtV(v,k)} <span style="font-size:9px;color:var(--text3)">/ ${filters[k]}</span></span></div>`;});
       html+=`</div>`;
     }
     html+=`</div></div>`;
@@ -887,7 +892,7 @@ function renderResults(areaId,results,expandedSet,sfx){
     const defT=build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
     const tiersHtml=`<div class="tiers-cell"><span class="td-pill td-atk">ATK ${atkT.join('-')}</span><span class="td-pill td-def">DEF ${defT.join('-')}</span></div>`;
     let tr=`<tr class="data-row${exp?' expanded':''}" onclick="toggleBuildTbl(${i},'${areaId}','${sfx}')"><td>${i+1}</td><td>${Math.round(build.score).toLocaleString()}</td><td>${tiersHtml}</td>`;
-    visCols.forEach(({k})=>{const v=tot[k]||0;tr+=`<td>${v?fmtV(v):'—'}</td>`;});
+    visCols.forEach(({k})=>{const v=tot[k]||0;const show=PCT_STATS.has(k)?v!==0:v>0.001;tr+=`<td>${show?fmtV(v,k):'—'}</td>`;});
     tr+=`</tr>`;
     // detail row
     tr+=`<tr class="detail-row${exp?' on':''}"><td colspan="${3+visCols.length}" style="padding:0">`;
@@ -938,7 +943,7 @@ function renderResults(areaId,results,expandedSet,sfx){
       detail+=`</div>`;
       // stat summary
       detail+=`<div class="detail-stats">`;
-      Object.entries(COL_LABELS).forEach(([k,lbl])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return;detail+=`<div class="ds-row"><span class="ds-n">${lbl}</span><span class="ds-v">${fmtV(v)}</span></div>`;});
+      Object.entries(COL_LABELS).forEach(([k,lbl])=>{const v=tot[k];if(!PCT_STATS.has(k)&&(!v||Math.round(Math.abs(v)*10000)===0))return;if(PCT_STATS.has(k)&&!v)return;detail+=`<div class="ds-row"><span class="ds-n">${lbl}</span><span class="ds-v">${fmtV(v,k)}</span></div>`;});
       detail+=`</div></div>`;
       tr+=detail;
     }
@@ -975,7 +980,7 @@ function exportCSV(results){
     const tot=getTotals(b);
     const atkT=b.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-');
     const defT=b.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-');
-    return[i+1,Math.round(b.score),atkT,defT,...cols.map(k=>fmtV(tot[k]||0))];
+    return[i+1,Math.round(b.score),atkT,defT,...cols.map(k=>fmtV(tot[k]||0,k))];
   });
   const csv=[header,...rows].map(r=>r.join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='feather-builds.csv';a.click();
