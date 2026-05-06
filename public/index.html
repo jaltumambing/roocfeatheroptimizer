@@ -233,7 +233,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.1 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.3 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -491,12 +491,13 @@ const WEIGHT_META={
 };
 // 0=Ignore 1=Nice to have 2=Important 3=Priority 4=Must maximize
 const PRESETS={
-  'PvE DPS':{desc:'Maximize PvE damage. ATK statues: Ignore PDEF + PATK + PvE DMG. DEF statues: MIX feathers contribute PATK as surplus.',w:{PATK:3,MATK:2,IgnorePDEF:4,IgnoreMDEF:2,PvEDMG:3,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
-  'PvP DPS':{desc:'Maximize PvP damage. Prioritizes Ignore PDEF, PATK, and PvP DMG Bonus.',w:{PATK:3,MATK:2,IgnorePDEF:4,IgnoreMDEF:2,PvPDMG:3,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMGRed:0}},
-  'Tank PvE':{desc:'Maximize PvE survivability. PDEF/MDEF + PvE DMG Reduction.',w:{PDEF:4,MDEF:4,HP:2,PvEDMGRed:3,PDMGRed:1,MDMGRed:1,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvPDMGRed:0}},
-  'Tank PvP':{desc:'Maximize PvP survivability. PDEF/MDEF + PvP DMG Reduction.',w:{PDEF:4,MDEF:4,HP:2,PvPDMGRed:3,PDMGRed:1,MDMGRed:1,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvEDMGRed:0}},
-  'PvE ATK / PvP DEF':{desc:'ATK statues chase PvE damage. DEF statues chase PvP survivability.',w:{PATK:2,MATK:2,IgnorePDEF:4,IgnoreMDEF:2,PvEDMG:3,PDMG:1,MDMG:1,PDEF:3,MDEF:3,HP:2,PDMGRed:1,MDMGRed:1,PvEDMGRed:0,PvPDMG:1,PvPDMGRed:3}},
-  'Balanced':{desc:'Equal priority across all stats. Good general-purpose build.',w:{PATK:2,MATK:2,IgnorePDEF:2,IgnoreMDEF:1,PDEF:2,MDEF:2,HP:1,PvEDMG:1,PvPDMG:1,PDMG:1,MDMG:1,PDMGRed:1,MDMGRed:1,PvEDMGRed:1,PvPDMGRed:1}},
+  'PvE Attack':{desc:'Maximize PvE damage output. Aggressively chases Ign.PDEF, PvE DMG Bonus, PATK and MATK.',w:{PATK:3,MATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:4,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
+  'PvE Defense':{desc:'Maximize PvE survivability. Prioritizes PDEF, MDEF, HP, and PvE DMG Reduction.',w:{PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:4,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Attack':{desc:'Maximize PvP damage output. Ign.PDEF, PvP DMG Bonus, PATK and MATK are top priority.',w:{PATK:3,MATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMG:4,PvPDMGRed:0}},
+  'PvP Defense':{desc:'Maximize PvP survivability. Prioritizes PDEF, MDEF, HP, and PvP DMG Reduction.',w:{PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:4}},
+  'PvE Balanced':{desc:'Balanced PvE build with equal ATK and DEF. Chases PvE DMG Bonus and Ign.PDEF while keeping PDEF/MDEF as a solid foundation.',w:{PATK:2,MATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:3,PvEDMGRed:2,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Balanced':{desc:'Balanced PvP build with equal ATK and DEF. Prioritizes PvP DMG Bonus, PvP DMG Reduction, and Ign.PDEF. Neither offense nor defense dominates.',w:{PATK:2,MATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:3,PvPDMGRed:3}},
+  'ALL Balanced':{desc:'Equal weight across all stats. Good general-purpose build for players who participate in both PvE and PvP content.',w:{PATK:2,MATK:2,IgnorePDEF:2,IgnoreMDEF:1,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:1,PvEDMGRed:1,PvPDMG:1,PvPDMGRed:1}},
 };
 // Stat max values at Lv20 for normalization
 const STAT_MAX={PATK:56,MATK:56,IgnorePDEF:164,IgnoreMDEF:164,PDMG:56,MDMG:56,PDEF:56,MDEF:56,HP:1320,PDMGRed:56,MDMGRed:56,PvEDMG:80,PvEDMGRed:80,PvPDMG:69,PvPDMGRed:69};
