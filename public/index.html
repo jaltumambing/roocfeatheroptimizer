@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROOC Feather Optimizer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b22;--bg3:#1c2330;
+  --border:#30363d;--border2:#21262d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --gold:#c9a227;--gold2:#f0d060;--gold3:#8a6c10;
+  --blue:#4a7fa5;--blue2:#7fb5d4;
+  --red:#c0392b;--red2:#e8705e;--red3:#fca5a5;
+  --green:#1a6b3c;--green2:#4fa06a;--green3:#86efac;
+  --purple:#5b3fa0;--purple2:#9b7fd4;--purple3:#c4b5fd;
+  --radius:8px;--radius-sm:5px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:var(--text);font-size:13px;line-height:1.5;background:var(--bg);min-height:100vh}
+.app{max-width:1100px;margin:0 auto;padding:0 0 40px}
+
+/* Header */
+.hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg2);position:sticky;top:0;z-index:100}
+.hdr-title{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.hdr-title span{color:var(--gold)}
+.hdr-sub{font-size:11px;color:var(--text3);margin-left:4px}
+.version-badge{margin-left:auto;font-size:10px;padding:2px 8px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text3)}
+
+/* Tabs */
+.tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.tab{padding:10px 18px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);transition:all .15s;font-weight:500}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* Panes */
+.pane{display:none;padding:20px}
+.pane.on{display:block}
+
+/* Section headers */
+.sec-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--text3)}
+
+/* Tooltip */
+.tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+.tooltip-btn{width:16px;height:16px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text3);font-size:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;user-select:none}
+.tooltip-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.tooltip-box{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:300px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-size:11px;color:var(--text2);line-height:1.6;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.tooltip-box::before{content:'';position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:var(--bg3);border-left:1px solid var(--border);border-top:1px solid var(--border);rotate:45deg}
+.tooltip-wrap:hover .tooltip-box,.tooltip-btn:focus+.tooltip-box{display:block}
+.tooltip-box b{color:var(--text);display:block;margin-bottom:4px}
+.tooltip-table{width:100%;border-collapse:collapse;margin-top:6px}
+.tooltip-table td{padding:2px 6px;border-bottom:1px solid var(--border2);font-size:10px}
+.tooltip-table td:first-child{color:var(--gold);font-weight:600;white-space:nowrap}
+
+/* Pool grid */
+.pool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;margin-bottom:18px}
+.pool-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;transition:border-color .15s}
+.pool-card:hover{border-color:var(--blue)}
+.pool-name{font-weight:600;font-size:12px;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.pool-members{font-size:10px;color:var(--text3);margin-bottom:7px}
+.pool-inp-row{display:flex;align-items:center;gap:8px}
+.pool-inp-label{font-size:11px;color:var(--text2)}
+.pool-inp{padding:4px 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);color:var(--text);text-align:center;width:80px;transition:border-color .15s}
+.pool-inp:focus{outline:none;border-color:var(--blue)}
+.badge-y{font-size:9px;padding:1px 6px;border-radius:8px;background:#2a1f00;color:#c9a227;font-weight:600;border:1px solid #5a4010}
+.badge-p{font-size:9px;padding:1px 6px;border-radius:8px;background:#1a1030;color:#9b7fd4;font-weight:600;border:1px solid #3a2860}
+
+/* Presets */
+.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.preset-btn{padding:5px 13px;font-size:11px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--bg3);color:var(--text2);font-weight:500;transition:all .15s}
+.preset-btn:hover{border-color:var(--blue);color:var(--text)}
+.preset-btn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.preset-desc{font-size:11px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border);display:none;line-height:1.6}
+.preset-desc.on{display:block}
+
+/* Sliders */
+.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 24px;margin-bottom:16px}
+.sl-row{display:flex;align-items:center;gap:8px}
+.sl-name{font-size:11px;color:var(--text2);min-width:115px}
+.sl-wrap{flex:1;position:relative;height:18px;cursor:pointer}
+.sl-track{position:absolute;top:7px;left:0;right:0;height:3px;border-radius:2px;background:var(--border)}
+.sl-fill{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--blue)}
+.sl-thumb{position:absolute;top:-6px;width:15px;height:15px;border-radius:50%;background:var(--text);border:2px solid var(--blue);transform:translateX(-50%);transition:border-color .15s}
+.sl-wrap:hover .sl-thumb{border-color:var(--blue2)}
+.sl-val{font-size:11px;font-weight:600;min-width:28px;text-align:right;color:var(--text)}
+
+/* Run button */
+.run-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.run-btn{padding:9px 24px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.run-btn:hover{background:var(--gold2)}
+.run-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed}
+.status{font-size:11px;color:var(--text3)}
+
+/* Progress */
+.prog-bar{height:3px;border-radius:2px;background:var(--bg3);margin-bottom:10px;overflow:hidden;display:none}
+.prog-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .2s}
+
+/* Notice */
+.notice{font-size:11px;padding:8px 12px;border-radius:var(--radius-sm);background:#1a1400;border:1px solid var(--gold3);color:#c9a227;margin-bottom:14px}
+
+/* Results */
+.results-area{margin-top:4px}
+.build-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:border-color .15s}
+.build-card:hover{border-color:var(--blue)}
+.build-hdr{padding:10px 14px;display:flex;align-items:flex-start;gap:10px}
+.b-rank{font-size:11px;color:var(--text3);min-width:24px;flex-shrink:0;padding-top:3px}
+.b-score-block{flex-shrink:0;min-width:68px}
+.b-score{font-size:15px;font-weight:700;color:var(--gold)}
+.b-score-lbl{font-size:9px;color:var(--text3);display:block;margin-top:1px}
+.b-chips{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.b-chip{font-size:10px;padding:2px 7px;border-radius:4px;pointer-events:none;font-weight:500}
+.b-chip-atk{background:#2a0f0f;color:#e8705e;border:1px solid #5a1f1f}
+.b-chip-def{background:#0a1f12;color:#4fa06a;border:1px solid #1a4a28}
+.b-chip-pve{background:#0a1228;color:#7fb5d4;border:1px solid #1a3050}
+.b-chip-pvp{background:#1a0a2a;color:#9b7fd4;border:1px solid #3a1a5a}
+.b-chip-neu{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.b-toggle{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);font-size:11px;color:var(--text3);user-select:none;margin-top:1px;transition:all .15s}
+.b-toggle:hover{border-color:var(--blue);color:var(--blue2)}
+
+/* Build detail */
+.build-detail{display:none;border-top:1px solid var(--border);padding:12px 14px}
+.build-detail.on{display:block}
+.tier-dist{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;padding:7px 10px;background:var(--bg3);border-radius:var(--radius-sm)}
+.td-pill{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500}
+.td-atk{background:#2a0f0f;color:#e8705e;border:1px solid #5a1f1f}
+.td-def{background:#0a1f12;color:#4fa06a;border:1px solid #1a4a28}
+.st-row{display:flex;gap:5px;margin-bottom:6px;align-items:flex-start;flex-wrap:wrap}
+.st-lbl{font-size:10px;font-weight:600;color:var(--text2);min-width:58px;padding-top:3px;flex-shrink:0}
+.f-chip{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.f-yellow{background:#1a1200;border-color:#6a4e10;color:#c9a227}
+.f-purple{background:#110a20;border-color:#4a3070;color:#9b7fd4}
+.f-yellow.above{font-weight:700;border-color:var(--gold)}
+.f-purple.above{font-weight:700;border-color:var(--purple2)}
+.tier-b{font-size:9px;padding:1px 5px;border-radius:3px;background:#1a1200;color:var(--gold);font-weight:600;border:1px solid var(--gold3)}
+.set-b{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600;margin-left:2px}
+.set-valid{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
+.set-invalid{background:#1a0a0a;border:1px solid #6b1a1a;color:#e8705e}
+.divider{height:1px;background:var(--border);margin:10px 0}
+.stat-sum{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+.ss-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border2)}
+.ss-row:last-child{border-bottom:none}
+.ss-n{color:var(--text2)}.ss-v{font-weight:600;color:var(--text)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-state h3{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text2)}
+.empty-icon{font-size:32px;margin-bottom:12px;opacity:.5}
+
+/* Build Editor */
+.be-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.be-st{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}
+.be-st:hover{border-color:var(--blue)}
+.be-hdr{padding:7px 12px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600}
+.be-atk .be-hdr{background:#1a0808;color:#e8705e;border-bottom:1px solid #3a1414}
+.be-def .be-hdr{background:#081a10;color:#4fa06a;border-bottom:1px solid #143a20}
+.be-slot{display:flex;align-items:center;gap:4px;padding:4px 10px;border-bottom:1px solid var(--border2)}
+.be-slot:last-of-type{border-bottom:none}
+.be-sn{font-size:9px;color:var(--text3);min-width:10px}
+.be-sel{flex:1;min-width:0;padding:3px 5px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--text);transition:border-color .15s}
+.be-sel:focus{outline:none;border-color:var(--blue)}
+.be-lv{width:38px;padding:3px 4px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--text);text-align:center;transition:border-color .15s}
+.be-lv:focus{outline:none;border-color:var(--blue)}
+.be-res{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.be-res.active{background:#1a1200;color:var(--gold);border-color:var(--gold3)}
+.be-sp{margin:4px 10px 7px;padding:5px 8px;background:var(--bg3);border-radius:4px;border:1px solid var(--border2)}
+.be-spr{display:flex;justify-content:space-between;font-size:10px;padding:1px 0;color:var(--text2)}
+.be-spr span:last-child{font-weight:600;color:var(--text)}
+.val-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.vbox{flex:1;min-width:200px;font-size:11px;border-radius:var(--radius-sm);padding:7px 11px;line-height:1.6}
+.vbox-ok{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
+.vbox-err{background:#1a0505;border:1px solid #6b1a1a;color:#e8705e}
+.vbox-warn{background:#1a1000;border:1px solid var(--gold3);color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="hdr">
+  <div class="hdr-title">Feather <span>Optimizer</span></div>
+  <span class="hdr-sub">Ragnarok Origin Classic</span>
+  <span class="version-badge">v8.1 · Raven's Hour</span>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="showTab('opt')">Optimizer</div>
+  <div class="tab" onclick="showTab('editor')">Build Editor</div>
+</div>
+
+<div id="pane-opt" class="pane on">
+  <div class="sec-row"><span class="sec">Pool Inventory</span></div>
+  <div class="pool-grid" id="pool-grid"></div>
+
+  <div class="sec-row">
+    <span class="sec">Stat Weights</span>
+    <div class="tooltip-wrap">
+      <div class="tooltip-btn" tabindex="0">?</div>
+      <div class="tooltip-box">
+        <b>How stat weights work</b>
+        Each slider sets a multiplier (0.0–2.0) for that stat. The optimizer scores every build using:<br><br>
+        <code style="background:var(--bg);padding:2px 6px;border-radius:3px;font-size:10px">Score = Σ (stat_value × weight)</code><br><br>
+        <table class="tooltip-table">
+          <tr><td>0.0</td><td>Ignore completely — copies spent here are wasted</td></tr>
+          <tr><td>0.5</td><td>Nice to have, low priority</td></tr>
+          <tr><td>1.0</td><td>Equal importance to other 1.0 stats</td></tr>
+          <tr><td>1.5</td><td>Important — optimizer favors feathers that gain this</td></tr>
+          <tr><td>2.0</td><td>Top priority — aggressively chased</td></tr>
+        </table>
+        <br>
+        <span style="color:var(--text3)">⚠ Stats have different raw scales — IgnorePDEF reaches ~164 at Lv20 while PATK reaches ~56. Higher weight partly compensates for smaller raw values.</span>
+      </div>
+    </div>
+  </div>
+  <div class="preset-row" id="presets"></div>
+  <div id="preset-desc" class="preset-desc"></div>
+  <div class="slider-grid" id="slider-grid"></div>
+
+  <div class="notice">⚠ Only <strong>Raven's Hour</strong> set data loaded (4 Yellow + 1 Purple per statue). Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
+
+  <div class="run-row">
+    <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
+    <span class="status" id="status-txt"></span>
+  </div>
+  <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="results-area" id="results-area">
+    <div class="empty-state">
+      <div class="empty-icon">⚗</div>
+      <h3>No builds yet</h3>
+      <p>Enter pool inventory, set stat weights, then click Run Optimizer.</p>
+    </div>
+  </div>
+</div>
+
+<div id="pane-editor" class="pane">
+  <div class="sec-row"><span class="sec">Manual Build Editor</span></div>
+  <div class="be-grid" id="be-grid"></div>
+  <div class="val-bar" id="val-bar"></div>
+</div>
+
+</div>
+<script>
+const FEATHERS=[
+  {name:'Valor', r:'Purple',t:'ATK',pool:'25SF Purple'},
+  {name:'Faith', r:'Purple',t:'ATK',pool:'25SF Purple'},
+  {name:'Glory', r:'Purple',t:'ATK',pool:'25SF Purple'},
+  {name:'Soul',  r:'Purple',t:'DEF',pool:'25SF Purple'},
+  {name:'Virtue',r:'Purple',t:'DEF',pool:'25SF Purple'},
+  {name:'Mercy', r:'Purple',t:'DEF',pool:'25SF Purple'},
+  {name:'Justice',r:'Purple',t:'MIX',pool:'25SF Purple'},
+  {name:'Grace', r:'Purple',t:'MIX',pool:'25SF Purple'},
+  {name:'Dark',  r:'Yellow',t:'MIX',pool:'Light/Dark'},
+  {name:'Light', r:'Yellow',t:'MIX',pool:'Light/Dark'},
+  {name:'Day',   r:'Yellow',t:'ATK',pool:'Day/Night'},
+  {name:'Night', r:'Yellow',t:'DEF',pool:'Day/Night'},
+  {name:'Nature',r:'Yellow',t:'DEF',pool:'Time/Space'},
+  {name:'Divine',r:'Yellow',t:'DEF',pool:'Time/Space'},
+  {name:'Space', r:'Yellow',t:'ATK',pool:'Time/Space'},
+  {name:'Time',  r:'Yellow',t:'ATK',pool:'Time/Space'},
+  {name:'Sky',   r:'Yellow',t:'ATK',pool:'Sky/Terra'},
+  {name:'Terra', r:'Yellow',t:'DEF',pool:'Sky/Terra'},
+];
+const POOLS=[
+  {name:'25SF Purple',r:'Purple',members:['Valor','Faith','Glory','Soul','Virtue','Mercy','Justice','Grace']},
+  {name:'Light/Dark', r:'Yellow',members:['Dark','Light']},
+  {name:'Day/Night',  r:'Yellow',members:['Day','Night']},
+  {name:'Time/Space', r:'Yellow',members:['Nature','Divine','Space','Time']},
+  {name:'Sky/Terra',  r:'Yellow',members:['Sky','Terra']},
+];
+const LEVELCOST={};
+(function(){
+  function cum(a){const o={1:0};let t=0;for(let i=0;i<a.length;i++){t+=a[i];o[i+2]=t;}return o;}
+  const P=cum([2,3,4,5,6,7,12,16,28,32,32,32,32,32,40,40,40,40,40]);
+  const S=cum([4,6,7,9,10,12,13,15,22,25,25,25,25,25,30,30,30,30,30]);
+  const L=cum([6,8,10,12,14,16,18,20,28,33,33,33,33,33,45,45,45,45,45]);
+  const LD=cum([9,12,13,15,17,19,21,24,28,33,35,37,39,41,47,49,51,54,57]);
+  FEATHERS.forEach(f=>{LEVELCOST[f.name]=f.r==='Purple'?P:f.pool==='Light/Dark'?LD:f.pool==='Time/Space'?L:S;});
+})();
+function costAt(n,lv){return LEVELCOST[n][lv]||0;}
+const SD={
+  Valor:  {1:[0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0],5:[0,0,0,5,5,0,0,0,0,0,3,0,0,0,0,0,0,0,0],10:[0,0,0,10,10,0,0,0,0,0,5,0,0,0,0,0,0,0,0],15:[0,0,0,15,15,0,0,0,0,0,6,0,0,0,0,0,0,0,0],20:[0,0,0,20,20,0,0,0,0,0,7,0,0,0,0,0,0,0,0]},
+  Faith:  {1:[0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0],5:[0,0,0,5,5,0,0,0,0,0,0,3,0,0,0,0,0,0,0],10:[0,0,0,10,10,0,0,0,0,0,0,5,0,0,0,0,0,0,0],15:[0,0,0,15,15,0,0,0,0,0,0,6,0,0,0,0,0,0,0],20:[0,0,0,20,20,0,0,0,0,0,0,7,0,0,0,0,0,0,0]},
+  Glory:  {1:[0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0],5:[0,0,0,5,5,0,0,0,0,0,0,0,3,0,0,0,0,0,0],10:[0,0,0,10,10,0,0,0,0,0,0,0,5,0,0,0,0,0,0],15:[0,0,0,15,15,0,0,0,0,0,0,0,6,0,0,0,0,0,0],20:[0,0,0,20,20,0,0,0,0,0,0,0,7,0,0,0,0,0,0]},
+  Soul:   {1:[2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[10,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[20,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[25,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[30,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  Virtue: {1:[0,0,20,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],5:[0,0,60,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0],10:[0,0,110,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0],15:[0,0,160,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0],20:[0,0,210,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0]},
+  Mercy:  {1:[2,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[10,0,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[20,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[25,0,160,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[30,0,210,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  Justice:{1:[2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[10,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[20,0,0,10,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[25,0,0,15,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[30,0,0,20,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  Grace:  {1:[0,0,20,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,60,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,110,10,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,160,15,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,210,20,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  Dark:   {1:[0,0,0,9,9,0,0,0,11,0,0,0,0,0,11,0,0,0.0028,0.0028],5:[0,0,0,21,21,0,0,0,33,0,0,0,0,0,33,0,0,0.006,0.006],10:[0,0,0,36,36,0,0,0,60,0,0,0,0,0,60,0,0,0.010,0.010],15:[0,0,0,51,51,0,0,0,88,0,0,0,0,0,88,0,0,0.014,0.014],20:[0,0,0,66,66,0,0,0,115,0,0,0,0,0,115,0,0,0.018,0.018]},
+  Light:  {1:[0,0,0,9,9,0,0,0,11,0,0,0,0,0,11,0.0028,0.0028,0,0],5:[0,0,0,21,21,0,0,0,33,0,0,0,0,0,33,0.006,0.006,0,0],10:[0,0,0,36,36,0,0,0,60,0,0,0,0,0,60,0.010,0.010,0,0],15:[0,0,0,51,51,0,0,0,88,0,0,0,0,0,88,0.014,0.014,0,0],20:[0,0,0,66,66,0,0,0,115,0,0,0,0,0,115,0.018,0.018,0,0]},
+  Day:    {1:[0,0,0,0,0,8,2,12,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,0,0,36,9,24,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,0,0,68,17,40,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,0,0,88,22,56,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,0,0,108,27,72,0,0,0,0,0,0,0,0,0,0,0]},
+  Night:  {1:[4,1,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0],5:[18,9,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,0],10:[34,19,0,0,0,0,0,0,0,40,0,0,0,0,0,0,0,0,0],15:[44,20,0,0,0,0,0,0,0,56,0,0,0,0,0,0,0,0,0],20:[54,22,0,0,0,0,0,0,0,72,0,0,0,0,0,0,0,0,0]},
+  Nature: {1:[6,2,108,0,0,0,0,0,0,17,0,0,0,0,0,0,0,0,0],5:[26,10,300,0,0,0,0,0,0,45,0,0,0,0,0,0,0,0,0],10:[52,18,540,0,0,0,0,0,0,80,0,0,0,0,0,0,0,0,0],15:[78,20,780,0,0,0,0,0,0,115,0,0,0,0,0,0,0,0,0],20:[104,23,1020,0,0,0,0,0,0,150,0,0,0,0,0,0,0,0,0]},
+  Divine: {1:[6,2,108,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0],5:[26,10,300,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0],10:[52,18,540,0,0,0,0,0,0,0,0,0,0,0,32,0,0,0,0],15:[78,20,780,0,0,0,0,0,0,0,0,0,0,0,46,0,0,0,0],20:[104,23,1020,0,0,0,0,0,0,0,0,0,0,0,60,0,0,0,0]},
+  Space:  {1:[0,0,0,7,7,12,3,0,8,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,17,17,44,11,0,18,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,30,30,84,21,0,32,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,43,43,124,31,0,46,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,56,56,164,41,0,60,0,0,0,0,0,0,0,0,0,0]},
+  Time:   {1:[0,0,0,7,7,12,3,17,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,17,17,44,11,45,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,30,30,84,21,80,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,43,43,124,31,115,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,56,56,164,41,150,0,0,0,0,0,0,0,0,0,0,0]},
+  Sky:    {1:[0,0,0,2,2,4,1,0,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,10,10,20,5,0,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,20,20,40,10,0,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,30,30,50,13,0,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,40,40,60,15,0,0,0,0,0,0,0,0,0,0,0,0]},
+  Terra:  {1:[2,1,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[10,5,165,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[20,10,330,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[25,13,495,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[30,15,660,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+};
+const SK=['PDEF','MDEF','HP','PATK','MATK','IgnorePDEF','IgnoreMDEF','PvEDMG','PvPDMG','PvEDMGRed','STR','INT','DEX','VIT','PvPDMGRed','PDMG','MDMG','PDMGRed','MDMGRed'];
+const STAT_META={
+  PATK:{label:'PATK',cat:'atk'},MATK:{label:'MATK',cat:'atk'},IgnorePDEF:{label:'Ign.PDEF',cat:'atk'},IgnoreMDEF:{label:'Ign.MDEF',cat:'atk'},PDMG:{label:'PDMG',cat:'atk'},MDMG:{label:'MDMG',cat:'atk'},
+  PDEF:{label:'PDEF',cat:'def'},MDEF:{label:'MDEF',cat:'def'},HP:{label:'HP',cat:'def'},PDMGRed:{label:'PDMGRed',cat:'def'},MDMGRed:{label:'MDMGRed',cat:'def'},
+  PvEDMG:{label:'PvEDMG',cat:'pve'},PvEDMGRed:{label:'PvEDMGRed',cat:'pve'},
+  PvPDMG:{label:'PvPDMG',cat:'pvp'},PvPDMGRed:{label:'PvPDMGRed',cat:'pvp'},
+  STR:{label:'STR',cat:'neu'},INT:{label:'INT',cat:'neu'},DEX:{label:'DEX',cat:'neu'},VIT:{label:'VIT',cat:'neu'},
+};
+function getStatAt(name,lv){
+  const cps=Object.keys(SD[name]).map(Number).sort((a,b)=>a-b);
+  let lo=cps[0],hi=cps[cps.length-1];
+  for(let i=0;i<cps.length-1;i++){if(lv>=cps[i]&&lv<=cps[i+1]){lo=cps[i];hi=cps[i+1];break;}}
+  if(lv<=lo)return SD[name][lo];if(lv>=hi)return SD[name][hi];
+  const t=(lv-lo)/(hi-lo);
+  return SD[name][lo].map((v,i)=>v+(SD[name][hi][i]-v)*t);
+}
+function statObj(name,lv){const a=getStatAt(name,lv);const o={};SK.forEach((k,i)=>{o[k]=a[i]||0});return o;}
+function scoreFromStats(s,w){return Object.keys(w).reduce((t,k)=>t+(s[k]||0)*(w[k]||0),0);}
+function featherScore(name,lv,w){return scoreFromStats(statObj(name,lv),w);}
+const DEF_SET={},ATK_SET={};
+for(let t=1;t<=20;t++){
+  const hp=[110,200,290,380,470,560,650,740,830,920,960,1000,1040,1080,1120,1160,1200,1240,1280,1320][t-1];
+  const dM=[.10,.11,.12,.13,.14,.15,.16,.17,.18,.20,.21,.22,.23,.24,.25,.26,.27,.28,.29,.30][t-1];
+  const pveM=[.30,.33,.36,.39,.42,.45,.48,.51,.54,.60,.62,.64,.66,.68,.70,.72,.74,.76,.78,.80][t-1];
+  DEF_SET[t]={hp,defMult:dM,pveMult:pveM,pvpMult:pveM};ATK_SET[t]={atkMult:dM,pveMult:pveM,pvpMult:pveM};
+}
+function applySetBonus(raw,type,tier){
+  const s={...raw};
+  if(type==='DEF'){const b=DEF_SET[tier];s.HP+=b.hp;s.PDEF=Math.floor(s.PDEF*(1+b.defMult));s.MDEF=Math.floor(s.MDEF*(1+b.defMult));s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));}
+  else{const b=ATK_SET[tier];s.PATK=Math.floor(s.PATK*(1+b.atkMult));s.MATK=Math.floor(s.MATK*(1+b.atkMult));s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));s.PDMG=Math.floor(s.PDMG*(1+b.atkMult));s.MDMG=Math.floor(s.MDMG*(1+b.atkMult));s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));}
+  return s;
+}
+function checkSet(slots){
+  const filled=slots.filter(s=>s.f);if(filled.length<5)return{valid:false,name:'Incomplete'};
+  const y=filled.filter(s=>FEATHERS.find(f=>f.name===s.f)?.r==='Yellow').length;
+  if(y===4)return{valid:true,name:"Raven's Hour"};return{valid:false,name:`${y}Y+${5-y}P`};
+}
+function calcStatueResult(slots,type){
+  const filled=slots.filter(s=>s.f);if(filled.length<5)return null;
+  const comp=checkSet(slots);const tier=Math.min(...filled.map(s=>s.lv));
+  const raw={};SK.forEach(k=>{raw[k]=0});filled.forEach(s=>{const o=statObj(s.f,s.lv);SK.forEach(k=>{raw[k]+=(o[k]||0)});});
+  return{stats:comp.valid?applySetBonus(raw,type,tier):{...raw},tier,comp};
+}
+const WEIGHT_META={
+  PATK:{label:'PATK'},MATK:{label:'MATK'},IgnorePDEF:{label:'Ignore PDEF'},IgnoreMDEF:{label:'Ignore MDEF'},PDMG:{label:'PDMG'},MDMG:{label:'MDMG'},
+  PDEF:{label:'PDEF'},MDEF:{label:'MDEF'},HP:{label:'HP'},PDMGRed:{label:'PDMG Reduction'},MDMGRed:{label:'MDMG Reduction'},
+  PvEDMG:{label:'PvE DMG Bonus'},PvEDMGRed:{label:'PvE DMG Reduction'},PvPDMG:{label:'PvP DMG Bonus'},PvPDMGRed:{label:'PvP DMG Reduction'},
+};
+const PRESETS={
+  'PvE DPS':{desc:'Maximize PvE damage. ATK statues: Ignore PDEF + PATK + PvE DMG Bonus. DEF statues: MIX feathers (Dark/Light) contribute PATK as surplus bonus.',w:{PATK:1.5,MATK:1.5,IgnorePDEF:2,IgnoreMDEF:1,PvEDMG:1.5,PDMG:0.5,MDMG:0.5,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
+  'PvP DPS':{desc:'Maximize PvP damage. Prioritizes Ignore PDEF, PATK, and PvP DMG Bonus. MIX feathers in DEF statues still add PATK.',w:{PATK:1.5,MATK:1.5,IgnorePDEF:2,IgnoreMDEF:1,PvPDMG:1.5,PDMG:0.5,MDMG:0.5,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMGRed:0}},
+  'Tank PvE':{desc:'Maximize PvE survivability. DEF statues: PDEF/MDEF + PvE DMG Reduction via Night/Nature. ATK statues: Justice/Grace contribute PATK.',w:{PDEF:2,MDEF:2,HP:1,PvEDMGRed:1.5,PDMGRed:0.5,MDMGRed:0.5,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvPDMGRed:0}},
+  'Tank PvP':{desc:'Maximize PvP survivability. DEF statues: PDEF/MDEF + PvP DMG Reduction. Best for arena defense.',w:{PDEF:2,MDEF:2,HP:1,PvPDMGRed:1.5,PDMGRed:0.5,MDMGRed:0.5,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvEDMGRed:0}},
+  'PvE ATK / PvP DEF':{desc:'ATK statues chase PvE damage (Ignore PDEF + PvE DMG). DEF statues chase PvP survivability (PDEF/MDEF + PvP DMG Reduction). Best of both worlds.',w:{PATK:1.2,MATK:1.2,IgnorePDEF:2,IgnoreMDEF:0.8,PvEDMG:1.5,PDMG:0.3,MDMG:0.3,PDEF:1.5,MDEF:1.5,HP:0.8,PDMGRed:0.3,MDMGRed:0.3,PvEDMGRed:0,PvPDMG:0.5,PvPDMGRed:1.5}},
+  'Balanced':{desc:'Equal weight across all stats. Good general-purpose build for players who do both PvE and PvP.',w:{PATK:1,MATK:1,IgnorePDEF:1,IgnoreMDEF:0.5,PDEF:1,MDEF:1,HP:0.5,PvEDMG:0.5,PvPDMG:0.5,PDMG:0.5,MDMG:0.5,PDMGRed:0.5,MDMGRed:0.5,PvEDMGRed:0.5,PvPDMGRed:0.5}},
+};
+const state={pools:{},weights:{},results:[],expanded:new Set(),activePreset:'',beStatues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:[{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1}]}))};
+POOLS.forEach(p=>{state.pools[p.name]=0;});Object.keys(WEIGHT_META).forEach(k=>{state.weights[k]=0;});
+function selectBestFeathers(type,floorLv,weights){
+  const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
+  const P=FEATHERS.filter(f=>f.r==='Purple'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
+  const yS=Y.map(f=>({...f,sc:featherScore(f.name,floorLv,weights)})).sort((a,b)=>b.sc-a.sc);
+  const pS=P.map(f=>({...f,sc:featherScore(f.name,floorLv,weights)})).sort((a,b)=>b.sc-a.sc);
+  if(yS.length<4||pS.length<1)return null;
+  return [...yS.slice(0,4),...pS.slice(0,1)];
+}
+function buildFromTiers(atkTiers,defTiers,poolBudgets,weights){
+  const allTypes=[...atkTiers.map(()=>'ATK'),...defTiers.map(()=>'DEF')];
+  const allTiers=[...atkTiers,...defTiers];
+  const slots=[];const floorCosts={};POOLS.forEach(p=>{floorCosts[p.name]=0;});
+  for(let si=0;si<10;si++){
+    const sel=selectBestFeathers(allTypes[si],allTiers[si],weights);
+    if(!sel)return null;
+    sel.forEach(f=>{floorCosts[f.pool]+=costAt(f.name,allTiers[si]);slots.push({si,name:f.name,pool:f.pool,lv:allTiers[si],floor:allTiers[si],type:allTypes[si]});});
+  }
+  if(!POOLS.every(p=>floorCosts[p.name]<=poolBudgets[p.name]))return null;
+  const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=floorCosts[p.name];});
+  let any=true;
+  while(any){
+    any=false;let bestR=-1,bestS=null;
+    for(const fs of slots){
+      if(fs.lv>=20)continue;
+      const cost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
+      if(cost<=0||cost>poolBudgets[fs.pool]-poolUsed[fs.pool])continue;
+      const gain=featherScore(fs.name,fs.lv+1,weights)-featherScore(fs.name,fs.lv,weights);
+      if(gain<=0)continue;
+      const r=gain/cost;if(r>bestR){bestR=r;bestS=fs;}
+    }
+    if(bestS){poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);bestS.lv++;any=true;}
+  }
+  const statues=[];
+  for(let si=0;si<10;si++){
+    const my=slots.filter(s=>s.si===si);
+    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si]});
+  }
+  const score=statues.reduce((sum,st)=>{const r=calcStatueResult(st.slots,st.type);return sum+(r?scoreFromStats(r.stats,weights):0);},0);
+  return{statues,score,atkTiers:[...atkTiers],defTiers:[...defTiers]};
+}
+function runOptimizer(){
+  const weights=state.weights;
+  if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
+  document.getElementById('run-btn').disabled=true;setStatus('Running…',false);showProg(true);setProg(5);
+  setTimeout(()=>{
+    try{
+      const cands=[];
+      function add(aT,dT){const r=buildFromTiers(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
+      for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);setProg(15);
+      for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);setProg(35);
+      for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
+        for(let dt=1;dt<=20;dt+=2){add([h,l,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,h,l,l],[dt,dt,dt,dt,dt]);}
+        for(let at=1;at<=20;at+=2){add([at,at,at,at,at],[h,l,l,l,l]);add([at,at,at,at,at],[h,h,l,l,l]);add([at,at,at,at,at],[h,h,h,l,l]);}
+        add([h,l,l,l,l],[h,l,l,l,l]);add([h,h,l,l,l],[h,h,l,l,l]);
+      }}setProg(60);
+      for(let top=20;top>=2;top--){
+        const step=Math.max(1,Math.floor(top/5));
+        const st=[top,Math.max(1,top-step),Math.max(1,top-2*step),Math.max(1,top-3*step),Math.max(1,top-4*step)];
+        add(st,st);for(let dt=1;dt<=20;dt+=2) add(st,[dt,dt,dt,dt,dt]);for(let at=1;at<=20;at+=2) add([at,at,at,at,at],st);
+        add(st,[...st].reverse());add([...st].reverse(),st);
+      }
+      add([1,1,1,1,1],[1,1,1,1,1]);setProg(80);
+      const seen=new Set();
+      const top20=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,20);
+      state.results=top20;state.expanded.clear();renderResults();setProg(100);setStatus(`Found ${top20.length} builds from ${cands.length} strategies.`,false);
+    }catch(e){setStatus('Error: '+e.message,true);console.error(e);}
+    document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
+  },30);
+}
+function fmtV(v){if(Math.abs(v)<0.1&&v!==0)return v.toFixed(4);return Math.round(v).toLocaleString();}
+function getTotals(build){const t={};SK.forEach(k=>{t[k]=0;});build.statues.forEach(st=>{const r=calcStatueResult(st.slots,st.type);if(r)SK.forEach(k=>{t[k]+=(r.stats[k]||0);});});return t;}
+function renderResults(){
+  const area=document.getElementById('results-area');
+  if(!state.results.length){area.innerHTML='<div class="empty-state"><div class="empty-icon">⚗</div><h3>No builds yet</h3><p>Enter pool inventory, set stat weights, then click Run Optimizer.</p></div>';return;}
+  const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+  let html='';
+  state.results.forEach((build,i)=>{
+    const exp=state.expanded.has(i);const tot=getTotals(build);
+    const chips=Object.entries(STAT_META).map(([k,m])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return null;return`<span class="b-chip b-chip-${m.cat}">${m.label} ${fmtV(v)}</span>`;}).filter(Boolean).join('');
+    html+=`<div class="build-card" id="bc-${i}"><div class="build-hdr"><span class="b-rank">#${i+1}</span><div class="b-score-block"><span class="b-score">${Math.round(build.score).toLocaleString()}</span><span class="b-score-lbl">score</span></div><div class="b-chips"><span class="b-chip b-chip-atk" style="font-weight:700">ATK T${build.atkTiers.join('-')}</span><span class="b-chip b-chip-def" style="font-weight:700">DEF T${build.defTiers.join('-')}</span>${chips}</div><button class="b-toggle" onclick="toggleBuild(${i})">${exp?'▲':'▼'}</button></div><div class="build-detail ${exp?'on':''}">`;
+    if(exp){
+      html+=`<div class="tier-dist">`;build.atkTiers.forEach((t,j)=>{html+=`<span class="td-pill td-atk">ATK${j+1} T${t}</span>`;});build.defTiers.forEach((t,j)=>{html+=`<span class="td-pill td-def">DEF${j+1} T${t}</span>`;});html+=`</div>`;
+      build.statues.forEach((st,si)=>{
+        const comp=checkSet(st.slots);const actualTier=Math.min(...st.slots.map(s=>s.lv));
+        html+=`<div class="st-row"><span class="st-lbl">${labels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
+        st.slots.forEach(sl=>{const f=FEATHERS.find(x=>x.name===sl.f);const above=sl.lv>(sl.floor||st.tier);html+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;});html+=`</div>`;
+      });
+      html+=`<div class="divider"></div><div class="stat-sum">`;
+      Object.entries(STAT_META).forEach(([k,m])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return;html+=`<div class="ss-row"><span class="ss-n">${m.label}</span><span class="ss-v">${fmtV(v)}</span></div>`;});
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  });
+  area.innerHTML=html;
+}
+function toggleBuild(i){if(state.expanded.has(i))state.expanded.delete(i);else state.expanded.add(i);renderResults();setTimeout(()=>{const el=document.getElementById('bc-'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}
+function renderPools(){document.getElementById('pool-grid').innerHTML=POOLS.map(p=>`<div class="pool-card"><div class="pool-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}">${p.r}</span></div><div class="pool-members">${p.members.join(' · ')}</div><div class="pool-inp-row"><span class="pool-inp-label">Total copies:</span><input class="pool-inp" type="number" min="0" max="9999" value="${state.pools[p.name]||0}" oninput="state.pools['${p.name}']=parseInt(this.value)||0"></div></div>`).join('');}
+function renderSliders(){
+  document.getElementById('presets').innerHTML=Object.keys(PRESETS).map(k=>`<div class="preset-btn ${state.activePreset===k?'on':''}" onclick="applyPreset('${k}')">${k}</div>`).join('');
+  const de=document.getElementById('preset-desc');
+  if(state.activePreset&&PRESETS[state.activePreset]){de.textContent=PRESETS[state.activePreset].desc;de.classList.add('on');}else{de.classList.remove('on');}
+  document.getElementById('slider-grid').innerHTML=Object.entries(WEIGHT_META).map(([k,m])=>{const v=state.weights[k]||0;const pct=v/2*100;return`<div class="sl-row"><span class="sl-name">${m.label}</span><div class="sl-wrap" id="sw-${k}" onclick="slClick(event,'${k}')"><div class="sl-track"><div class="sl-fill" style="width:${pct}%"></div></div><div class="sl-thumb" style="left:${pct}%"></div></div><span class="sl-val" id="sv-${k}">${v.toFixed(1)}</span></div>`;}).join('');
+}
+function slClick(e,k){
+  const wrap=document.getElementById('sw-'+k);const r=wrap.getBoundingClientRect();
+  const pct=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));const v=Math.round(pct*20)/10;
+  state.weights[k]=v;state.activePreset='';
+  wrap.querySelector('.sl-fill').style.width=(v/2*100)+'%';wrap.querySelector('.sl-thumb').style.left=(v/2*100)+'%';
+  document.getElementById('sv-'+k).textContent=v.toFixed(1);
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('on'));document.getElementById('preset-desc').classList.remove('on');
+}
+function applyPreset(name){state.activePreset=name;Object.keys(state.weights).forEach(k=>{state.weights[k]=PRESETS[name].w[k]||0;});renderSliders();}
+function renderEditor(){
+  const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+  document.getElementById('be-grid').innerHTML=state.beStatues.map((st,si)=>{
+    const elig=FEATHERS.filter(f=>st.type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX'));
+    const used=st.slots.map(s=>s.f).filter(Boolean);const filled=st.slots.filter(s=>s.f);
+    const tier=filled.length===5?Math.min(...filled.map(s=>s.lv)):null;
+    const res=tier?calcStatueResult(st.slots.map(s=>({f:s.f,lv:s.lv})),st.type):null;
+    const comp=filled.length===5?checkSet(st.slots):{valid:false,name:'Incomplete'};
+    let h=`<div class="be-st ${st.type==='ATK'?'be-atk':'be-def'}"><div class="be-hdr"><span>${st.type==='ATK'?'⚔':'🛡'} ${labels[si]}</span><span style="display:flex;gap:4px;align-items:center"><span class="be-res ${tier?'active':''}">T${tier||'—'}</span>${filled.length===5?`<span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span>`:''}</span></div>`;
+    st.slots.forEach((sl,sli)=>{
+      h+=`<div class="be-slot"><span class="be-sn">${sli+1}</span><select class="be-sel" onchange="beF(${si},${sli},this.value)"><option value="">— empty —</option>`;
+      elig.forEach(f=>{const dis=used.includes(f.name)&&sl.f!==f.name;h+=`<option value="${f.name}" ${sl.f===f.name?'selected':''} ${dis?'disabled':''}>${f.name} (${f.r==='Yellow'?'Y':'P'}·${f.t})</option>`;});
+      h+=`</select><input class="be-lv" type="number" min="1" max="20" value="${sl.lv}" onchange="beL(${si},${sli},this.value)"></div>`;
+    });
+    if(res){const showK=st.type==='ATK'?['PATK','MATK','IgnorePDEF','IgnoreMDEF','PvEDMG','PvPDMG']:['PDEF','MDEF','HP','PvEDMGRed','PvPDMGRed','PATK','MATK'];h+=`<div class="be-sp">${showK.filter(k=>res.stats[k]>0).map(k=>`<div class="be-spr"><span>${k}</span><span>${fmtV(res.stats[k])}</span></div>`).join('')}</div>`;}
+    return h+'</div>';
+  }).join('');
+  const errs=[],warns=[];
+  state.beStatues.forEach((st,si)=>{
+    const names=st.slots.map(s=>s.f).filter(Boolean);const seen=new Set();
+    names.forEach(n=>{if(seen.has(n))errs.push(`[${labels[si]}] Duplicate: ${n}`);seen.add(n);});
+    st.slots.forEach((sl,sli)=>{if(!sl.f)return;const f=FEATHERS.find(x=>x.name===sl.f);if(!f)return;if(st.type==='ATK'&&f.t==='DEF')errs.push(`[${labels[si]}] Slot ${sli+1}: DEF feather in ATK statue`);if(st.type==='DEF'&&f.t==='ATK')errs.push(`[${labels[si]}] Slot ${sli+1}: ATK feather in DEF statue`);});
+    if(names.length===5){const comp=checkSet(st.slots);if(!comp.valid)warns.push(`[${labels[si]}] ${comp.name} — no set bonus applied`);}
+  });
+  document.getElementById('val-bar').innerHTML=(errs.length?`<div class="vbox vbox-err">${errs.map(e=>`<div>✗ ${e}</div>`).join('')}</div>`:'')+(warns.length?`<div class="vbox vbox-warn">${warns.map(w=>`<div>⚠ ${w}</div>`).join('')}</div>`:'')+(!errs.length&&!warns.length?`<div class="vbox vbox-ok">✓ All builds legal — Raven's Hour active</div>`:'');
+}
+function beF(si,sli,v){state.beStatues[si].slots[sli].f=v;renderEditor();}
+function beL(si,sli,v){state.beStatues[si].slots[sli].lv=Math.min(20,Math.max(1,parseInt(v)||1));renderEditor();}
+function showTab(id){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['opt','editor'][i]===id));document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));document.getElementById('pane-'+id).classList.add('on');if(id==='editor')renderEditor();}
+function setStatus(t,warn){const el=document.getElementById('status-txt');el.textContent=t;el.style.color=warn?'#f59e0b':'var(--text3)';}
+function showProg(v){document.getElementById('prog-bar').style.display=v?'block':'none';}
+function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
+renderPools();renderSliders();
+</script>
+</body>
+</html>
