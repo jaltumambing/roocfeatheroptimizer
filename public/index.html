@@ -177,6 +177,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .spinner{width:13px;height:13px;border:2px solid var(--border);border-top-color:#c9a227;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .status{font-size:11px;margin-left:10px}
+
+.donate-btn{padding:4px 14px;background:transparent;border:1px solid #c9a227;border-radius:20px;color:#c9a227;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:12px}
+.donate-btn:hover{background:#c9a227;color:#000}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);cursor:pointer}
+.modal-overlay.on{display:flex}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px 18px;max-width:300px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:mIn .2s ease;cursor:default}
+@keyframes mIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.modal-close{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:4px 6px;border-radius:4px}
+.modal-close:hover{color:var(--text);background:var(--bg3)}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:2px}
+.modal-sub{font-size:11px;color:var(--text3);text-align:center;margin-bottom:14px;line-height:1.5}
+.modal-qr-wrap{background:#fff;border-radius:var(--radius-sm);padding:10px;display:flex;align-items:center;justify-content:center}
+.modal-qr{width:100%;max-width:240px;display:block;border-radius:4px}
+.modal-note{font-size:10px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
+.modal-gcash{color:#0075FF;font-weight:600}
 </style>
 </head>
 <body>
@@ -185,7 +200,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v1.0.5 · Raven's Hour</span>
+  <span class="version-badge">v1.0.6 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -243,6 +258,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div class="val-bar" id="val-bar"></div>
 </div>
 
+
+<!-- Donate Modal -->
+<div class="modal-overlay" id="donate-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box" id="donate-box">
+    <button class="modal-close" onclick="closeDonate()" title="Close">×</button>
+    <div class="modal-title">Support the Project</div>
+    <div class="modal-sub">If this tool helped you save resources,<br>consider buying me a coffee! ☕<br><span class="modal-gcash">GCash · InstaPay</span></div>
+    <div class="modal-qr-wrap">
+      <img class="modal-qr" src="gcash-qr.jpg" alt="GCash QR Code">
+    </div>
+    <div class="modal-note">Scan with GCash or any InstaPay-compatible app.<br>Transfer fees may apply. Thank you! 🙏</div>
+  </div>
+</div>
 </div>
 <script>
 const FEATHERS=[
@@ -540,6 +568,11 @@ function startTimer(){
 function showProg(v){document.getElementById('prog-bar').style.display=v?'block':'none';}
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
 renderPools();renderSliders();
+
+function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
+function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
+function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDonate();});
 </script>
 </body>
 </html>
