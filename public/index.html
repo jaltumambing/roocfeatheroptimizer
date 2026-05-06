@@ -320,12 +320,13 @@ for(let t=1;t<=20;t++){
   const hp=[110,200,290,380,470,560,650,740,830,920,960,1000,1040,1080,1120,1160,1200,1240,1280,1320][t-1];
   const dM=[.10,.11,.12,.13,.14,.15,.16,.17,.18,.20,.21,.22,.23,.24,.25,.26,.27,.28,.29,.30][t-1];
   const pveM=[.30,.33,.36,.39,.42,.45,.48,.51,.54,.60,.62,.64,.66,.68,.70,.72,.74,.76,.78,.80][t-1];
-  DEF_SET[t]={hp,defMult:dM,pveMult:pveM,pvpMult:pveM};ATK_SET[t]={atkMult:dM,pveMult:pveM,pvpMult:pveM};
+  const pvpFlat=[12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66,69][t-1];
+  DEF_SET[t]={hp,defMult:dM,pveMult:pveM,pvpMult:pveM,pvpDmgRed:pvpFlat};ATK_SET[t]={hp,atkMult:dM,pveMult:pveM,pvpMult:pveM,pvpDmgBonus:pvpFlat};
 }
 function applySetBonus(raw,type,tier){
   const s={...raw};
-  if(type==='DEF'){const b=DEF_SET[tier];s.HP+=b.hp;s.PDEF=Math.floor(s.PDEF*(1+b.defMult));s.MDEF=Math.floor(s.MDEF*(1+b.defMult));s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));}
-  else{const b=ATK_SET[tier];s.PATK=Math.floor(s.PATK*(1+b.atkMult));s.MATK=Math.floor(s.MATK*(1+b.atkMult));s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));s.PDMG=Math.floor(s.PDMG*(1+b.atkMult));s.MDMG=Math.floor(s.MDMG*(1+b.atkMult));s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));}
+  if(type==='DEF'){const b=DEF_SET[tier];s.HP+=b.hp;s.PDEF=Math.floor(s.PDEF*(1+b.defMult));s.MDEF=Math.floor(s.MDEF*(1+b.defMult));s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));s.PvPDMGRed+=b.pvpDmgRed;}
+  else{const b=ATK_SET[tier];s.PATK=Math.floor(s.PATK*(1+b.atkMult));s.MATK=Math.floor(s.MATK*(1+b.atkMult));s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));s.PDMG=Math.floor(s.PDMG*(1+b.atkMult));s.MDMG=Math.floor(s.MDMG*(1+b.atkMult));s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));s.HP+=b.hp;s.PvPDMG+=b.pvpDmgBonus;}
   return s;
 }
 function checkSet(slots){
