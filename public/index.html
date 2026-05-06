@@ -123,48 +123,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 /* Notice */
 .notice{font-size:11px;padding:8px 12px;border-radius:var(--radius-sm);background:#1a1400;border:1px solid var(--gold3);color:#c9a227;margin-bottom:14px}
 
-/* Results */
+/* Results table */
 .results-area{margin-top:4px}
-.build-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:border-color .15s}
-.build-card:hover{border-color:var(--blue)}
-.build-hdr{padding:10px 14px;display:flex;align-items:flex-start;gap:10px}
-.b-rank{font-size:11px;color:var(--text3);min-width:24px;flex-shrink:0;padding-top:3px}
-.b-score-block{flex-shrink:0;min-width:68px}
-.b-score{font-size:15px;font-weight:700;color:var(--gold)}
-.b-score-lbl{font-size:9px;color:var(--text3);display:block;margin-top:1px}
-.b-chips{display:flex;gap:4px;flex-wrap:wrap;flex:1}
-.b-chip{font-size:10px;padding:2px 7px;border-radius:4px;pointer-events:none;font-weight:500}
-.b-chip-atk{background:#2a0f0f;color:#e8705e;border:1px solid #5a1f1f}
-.b-chip-def{background:#0a1f12;color:#4fa06a;border:1px solid #1a4a28}
-.b-chip-pve{background:#0a1228;color:#7fb5d4;border:1px solid #1a3050}
-.b-chip-pvp{background:#1a0a2a;color:#9b7fd4;border:1px solid #3a1a5a}
-.b-chip-neu{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
-.b-toggle{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);font-size:11px;color:var(--text3);user-select:none;margin-top:1px;transition:all .15s}
-.b-toggle:hover{border-color:var(--blue);color:var(--blue2)}
-
-/* Build detail */
-.build-detail{display:none;border-top:1px solid var(--border);padding:12px 14px}
-.build-detail.on{display:block}
-.tier-dist{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;padding:7px 10px;background:var(--bg3);border-radius:var(--radius-sm)}
-.td-pill{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500}
+.res-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg2)}
+.res-toolbar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.res-toolbar-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-right:4px}
+.col-toggle{font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .12s;user-select:none}
+.col-toggle.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.col-toggle:hover{border-color:var(--blue2);color:var(--text)}
+.csv-btn{margin-left:auto;font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .12s}
+.csv-btn:hover{border-color:var(--green2);color:var(--green3)}
+.res-table{width:100%;border-collapse:collapse;font-size:11px}
+.res-table th{padding:6px 10px;text-align:right;font-weight:600;font-size:10px;color:var(--text3);background:var(--bg3);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0}
+.res-table th:first-child,.res-table th:nth-child(2),.res-table th:nth-child(3){text-align:left;cursor:default}
+.res-table th:hover:not(:first-child):not(:nth-child(2)):not(:nth-child(3)){color:var(--text);background:#222a36}
+.res-table th.sort-asc::after{content:' ↑';color:var(--gold)}
+.res-table th.sort-desc::after{content:' ↓';color:var(--gold)}
+.res-table td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border2);white-space:nowrap;color:var(--text)}
+.res-table td:first-child{text-align:left;color:var(--text3);font-size:10px;width:28px}
+.res-table td:nth-child(2){text-align:left;font-weight:700;color:var(--gold);min-width:70px}
+.res-table td:nth-child(3){text-align:left;min-width:160px}
+.res-table tr.data-row{cursor:pointer;transition:background .1s}
+.res-table tr.data-row:hover{background:var(--bg3)}
+.res-table tr.data-row.expanded{background:#1a2030}
+.res-table tr.detail-row td{padding:0;text-align:left}
+.res-table tr.detail-row{display:none}
+.res-table tr.detail-row.on{display:table-row}
+.tiers-cell{display:flex;gap:3px;flex-wrap:wrap}
+.td-pill{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600}
 .td-atk{background:#2a0f0f;color:#e8705e;border:1px solid #5a1f1f}
 .td-def{background:#0a1f12;color:#4fa06a;border:1px solid #1a4a28}
-.st-row{display:flex;gap:5px;margin-bottom:6px;align-items:flex-start;flex-wrap:wrap}
-.st-lbl{font-size:10px;font-weight:600;color:var(--text2);min-width:58px;padding-top:3px;flex-shrink:0}
+.col-grp-atk{color:#e8705e}
+.col-grp-def{color:#4fa06a}
+.col-grp-pve{color:#7fb5d4}
+.col-grp-pvp{color:#9b7fd4}
+/* Detail panel */
+.detail-panel{padding:12px 14px;background:#111827;border-top:1px solid var(--border)}
+.st-row{display:flex;gap:5px;margin-bottom:5px;align-items:flex-start;flex-wrap:wrap}
+.st-lbl{font-size:10px;font-weight:600;color:var(--text2);min-width:60px;padding-top:3px;flex-shrink:0}
 .f-chip{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
 .f-yellow{background:#1a1200;border-color:#6a4e10;color:#c9a227}
 .f-purple{background:#110a20;border-color:#4a3070;color:#9b7fd4}
 .f-yellow.above{font-weight:700;border-color:var(--gold)}
 .f-purple.above{font-weight:700;border-color:var(--purple2)}
+.f-unused{opacity:.35;border-style:dashed}
 .tier-b{font-size:9px;padding:1px 5px;border-radius:3px;background:#1a1200;color:var(--gold);font-weight:600;border:1px solid var(--gold3)}
 .set-b{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600;margin-left:2px}
 .set-valid{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
 .set-invalid{background:#1a0a0a;border:1px solid #6b1a1a;color:#e8705e}
-.divider{height:1px;background:var(--border);margin:10px 0}
-.stat-sum{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
-.ss-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border2)}
-.ss-row:last-child{border-bottom:none}
-.ss-n{color:var(--text2)}.ss-v{font-weight:600;color:var(--text)}
+.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px 12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.ds-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.ds-n{color:var(--text2)}.ds-v{font-weight:600;color:var(--text)}
 
 /* Empty state */
 .empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
@@ -224,7 +233,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v1.0.7 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.1 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -829,32 +838,124 @@ function renderFilterResults(){
   area.innerHTML=html;
 }
 function toggleFilterBuild(i){if(state.expandedF.has(i))state.expandedF.delete(i);else state.expandedF.add(i);renderFilterResults();}
+// Table state
+const tblState={sortCol:'score',sortDir:-1,groups:{atk:true,def:true,pve:false,pvp:false}};
+const COL_GROUPS={
+  atk:{label:'ATK',cols:['PATK','MATK','IgnorePDEF','IgnoreMDEF','PDMG','MDMG'],cls:'col-grp-atk'},
+  def:{label:'DEF',cols:['PDEF','MDEF','HP','PDMGRed','MDMGRed'],cls:'col-grp-def'},
+  pve:{label:'PvE',cols:['PvEDMG','PvEDMGRed'],cls:'col-grp-pve'},
+  pvp:{label:'PvP',cols:['PvPDMG','PvPDMGRed'],cls:'col-grp-pvp'},
+};
+const COL_LABELS={PATK:'PATK',MATK:'MATK',IgnorePDEF:'Ign.PDEF',IgnoreMDEF:'Ign.MDEF',PDMG:'PDMG',MDMG:'MDMG',PDEF:'PDEF',MDEF:'MDEF',HP:'HP',PDMGRed:'PDMGRed',MDMGRed:'MDMGRed',PvEDMG:'PvEDMG',PvEDMGRed:'PvEDMGRed',PvPDMG:'PvPDMG',PvPDMGRed:'PvPDMGRed'};
+function getVisibleCols(){const c=[];Object.entries(COL_GROUPS).forEach(([g,m])=>{if(tblState.groups[g])m.cols.forEach(k=>c.push({k,g,cls:m.cls}));});return c;}
 function renderResults(areaId,results,expandedSet,sfx){
   const area=document.getElementById(areaId);
-  if(!results.length){area.innerHTML=`<div class="empty-state"><div class="empty-icon">⚗</div><h3>No builds yet</h3><p>Enter pool inventory, set stat ${sfx?'priority':'weights'}, then click Run Optimizer.</p></div>`;return;}
-  const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
-  let html='';
-  results.forEach((build,i)=>{
-    const exp=expandedSet.has(i);const tot=getTotals(build);
-    const chips=Object.entries(STAT_META).map(([k,m])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return null;return`<span class="b-chip b-chip-${m.cat}">${m.label} ${fmtV(v)}</span>`;}).filter(Boolean).join('');
-    html+=`<div class="build-card" id="bc${sfx}-${i}"><div class="build-hdr"><span class="b-rank">#${i+1}</span><div class="b-score-block"><span class="b-score">${Math.round(build.score).toLocaleString()}</span><span class="b-score-lbl">score</span></div><div class="b-chips"><span class="b-chip b-chip-atk" style="font-weight:700">ATK T${build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span><span class="b-chip b-chip-def" style="font-weight:700">DEF T${build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span>${chips}</div><button class="b-toggle" onclick="toggleBuild${sfx}(${i})">${exp?'▲':'▼'}</button></div><div class="build-detail ${exp?'on':''}">`;
-    if(exp){
-      html+=`<div class="tier-dist">`;build.statues.slice(0,5).forEach((st,j)=>{const at=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-atk">ATK${j+1} T${at}</span>`;});build.statues.slice(5,10).forEach((st,j)=>{const dt=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-def">DEF${j+1} T${dt}</span>`;});html+=`</div>`;
-      build.statues.forEach((st,si)=>{
-        const comp=checkSet(st.slots);const actualTier=Math.min(...st.slots.map(s=>s.lv));
-        html+=`<div class="st-row"><span class="st-lbl">${labels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
-        st.slots.forEach(sl=>{const f=FEATHERS.find(x=>x.name===sl.f);const above=sl.lv>(sl.floor||st.tier);html+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;});html+=`</div>`;
-      });
-      html+=`<div class="divider"></div><div class="stat-sum">`;
-      Object.entries(STAT_META).forEach(([k,m])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return;html+=`<div class="ss-row"><span class="ss-n">${m.label}</span><span class="ss-v">${fmtV(v)}</span></div>`;});
-      html+=`</div>`;
-    }
-    html+=`</div></div>`;
+  if(!results.length){area.innerHTML=`<div class="empty-state"><div class="empty-icon">⚗</div><h3>No builds yet</h3><p>Enter pool inventory, set stat priority, then click Run Optimizer.</p></div>`;return;}
+  const visCols=getVisibleCols();
+  // toolbar
+  let toolbar=`<div class="res-toolbar"><span class="res-toolbar-lbl">Columns:</span>`;
+  Object.entries(COL_GROUPS).forEach(([g,m])=>{toolbar+=`<span class="col-toggle ${tblState.groups[g]?'on':''}" onclick="toggleColGroup('${g}','${areaId}','${sfx}')">${m.label}</span>`;});
+  toolbar+=`<button class="csv-btn" onclick="exportCSV(${sfx?'state.results2':'state.results'})">⬇ CSV</button></div>`;
+  // header
+  let thead=`<tr><th>#</th><th onclick="sortTable('score','${areaId}','${sfx}')">Score${tblState.sortCol==='score'?(tblState.sortDir<0?' ↓':' ↑'):''}</th><th>Tiers</th>`;
+  visCols.forEach(({k,cls})=>{thead+=`<th class="${cls}" onclick="sortTable('${k}','${areaId}','${sfx}')">${COL_LABELS[k]}${tblState.sortCol===k?(tblState.sortDir<0?' ↓':' ↑'):''}</th>`;});
+  thead+=`</tr>`;
+  // sort results
+  const sorted=[...results].sort((a,b)=>{
+    const ta=getTotals(a),tb=getTotals(b);
+    const va=tblState.sortCol==='score'?a.score:(ta[tblState.sortCol]||0);
+    const vb=tblState.sortCol==='score'?b.score:(tb[tblState.sortCol]||0);
+    return (vb-va)*tblState.sortDir*-1;
   });
-  area.innerHTML=html;
+  // rows
+  let tbody='';
+  sorted.forEach((build,i)=>{
+    const exp=expandedSet.has(i);
+    const tot=getTotals(build);
+    const atkT=build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+    const defT=build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+    const tiersHtml=`<div class="tiers-cell"><span class="td-pill td-atk">ATK ${atkT.join('-')}</span><span class="td-pill td-def">DEF ${defT.join('-')}</span></div>`;
+    let tr=`<tr class="data-row${exp?' expanded':''}" onclick="toggleBuildTbl(${i},'${areaId}','${sfx}')"><td>${i+1}</td><td>${Math.round(build.score).toLocaleString()}</td><td>${tiersHtml}</td>`;
+    visCols.forEach(({k})=>{const v=tot[k]||0;tr+=`<td>${v?fmtV(v):'—'}</td>`;});
+    tr+=`</tr>`;
+    // detail row
+    tr+=`<tr class="detail-row${exp?' on':''}"><td colspan="${3+visCols.length}" style="padding:0">`;
+    if(exp){
+      const statueLabels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+      // get all feathers used across build
+      const usedFeathers=new Set(build.statues.flatMap(st=>st.slots.map(s=>s.f)));
+      // per pool: which feathers are unused
+      const unusedByPool={};
+      POOLS.forEach(p=>{
+        unusedByPool[p.name]=p.members.filter(f=>{
+          const feat=FEATHERS.find(x=>x.name===f);
+          if(!feat)return false;
+          return !usedFeathers.has(f);
+        });
+      });
+      let detail=`<div class="detail-panel">`;
+      build.statues.forEach((st,si)=>{
+        const comp=checkSet(st.slots);
+        const actualTier=Math.min(...st.slots.map(s=>s.lv));
+        detail+=`<div class="st-row"><span class="st-lbl">${statueLabels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
+        st.slots.forEach(sl=>{
+          const f=FEATHERS.find(x=>x.name===sl.f);
+          const above=sl.lv>(sl.floor||st.tier);
+          detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;
+        });
+        detail+=`</div>`;
+      });
+      // unused feathers section
+      const unusedAll=FEATHERS.filter(f=>!usedFeathers.has(f.name));
+      if(unusedAll.length){
+        detail+=`<div class="st-row" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border2)"><span class="st-lbl" style="color:var(--text3)">Unused</span>`;
+        unusedAll.forEach(f=>{detail+=`<span class="f-chip ${f.r==='Yellow'?'f-yellow':'f-purple'} f-unused">${f.name}</span>`;});
+        detail+=`</div>`;
+      }
+      // stat summary
+      detail+=`<div class="detail-stats">`;
+      Object.entries(COL_LABELS).forEach(([k,lbl])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return;detail+=`<div class="ds-row"><span class="ds-n">${lbl}</span><span class="ds-v">${fmtV(v)}</span></div>`;});
+      detail+=`</div></div>`;
+      tr+=detail;
+    }
+    tr+=`</td></tr>`;
+    tbody+=tr;
+  });
+  area.innerHTML=toolbar+`<div class="res-table-wrap"><table class="res-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
 }
-function toggleBuild(i){if(state.expanded.has(i))state.expanded.delete(i);else state.expanded.add(i);renderResults('results-area',state.results,state.expanded,'');}
-function toggleBuild2(i){if(state.expanded2.has(i))state.expanded2.delete(i);else state.expanded2.add(i);renderResults('results-area2',state.results2,state.expanded2,'2');}
+function toggleBuildTbl(i,areaId,sfx){
+  const expandedSet=sfx==='2'?state.expanded2:state.expanded;
+  const results=sfx==='2'?state.results2:state.results;
+  if(expandedSet.has(i))expandedSet.delete(i);else expandedSet.add(i);
+  renderResults(areaId,results,expandedSet,sfx);
+}
+function toggleBuild(i){toggleBuildTbl(i,'results-area','');}
+function toggleBuild2(i){toggleBuildTbl(i,'results-area2','2');}
+function sortTable(col,areaId,sfx){
+  if(tblState.sortCol===col){tblState.sortDir*=-1;}else{tblState.sortCol=col;tblState.sortDir=-1;}
+  const results=sfx==='2'?state.results2:state.results;
+  const expandedSet=sfx==='2'?state.expanded2:state.expanded;
+  renderResults(areaId,results,expandedSet,sfx);
+}
+function toggleColGroup(g,areaId,sfx){
+  tblState.groups[g]=!tblState.groups[g];
+  const results=sfx==='2'?state.results2:state.results;
+  const expandedSet=sfx==='2'?state.expanded2:state.expanded;
+  renderResults(areaId,results,expandedSet,sfx);
+}
+function exportCSV(results){
+  if(!results||!results.length)return;
+  const cols=Object.keys(COL_LABELS);
+  const header=['Rank','Score','ATK Tiers','DEF Tiers',...cols.map(k=>COL_LABELS[k])];
+  const rows=results.map((b,i)=>{
+    const tot=getTotals(b);
+    const atkT=b.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-');
+    const defT=b.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-');
+    return[i+1,Math.round(b.score),atkT,defT,...cols.map(k=>fmtV(tot[k]||0))];
+  });
+  const csv=[header,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='feather-builds.csv';a.click();
+}
 function showTab(id){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['opt','opt2','filter'][i]===id));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
