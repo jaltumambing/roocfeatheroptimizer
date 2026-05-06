@@ -171,6 +171,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .vbox-ok{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
 .vbox-err{background:#1a0505;border:1px solid #6b1a1a;color:#e8705e}
 .vbox-warn{background:#1a1000;border:1px solid var(--gold3);color:var(--gold)}
+
+.spin-wrap{display:none;align-items:center;gap:8px;margin-left:10px}
+.spin-wrap.on{display:flex}
+.spinner{width:13px;height:13px;border:2px solid var(--border);border-top-color:#c9a227;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status{font-size:11px;margin-left:10px}
 </style>
 </head>
 <body>
@@ -179,7 +185,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v1.0.4 · Raven's Hour</span>
+  <span class="version-badge">v1.0.5 · Raven's Hour</span>
 </div>
 
 <div class="tabs">
@@ -219,7 +225,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
   <div class="run-row">
     <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
-    <span class="status" id="status-txt"></span>
+    <span class="status" id="status-txt"></span><div class="spin-wrap" id="spin-wrap"><div class="spinner"></div><span id="spin-msg" style="font-size:11px;color:var(--color-text-tertiary)"></span></div>
   </div>
   <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   <div class="results-area" id="results-area">
@@ -400,11 +406,19 @@ function runOptimizer(){
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
-  document.getElementById('run-btn').disabled=true;setStatus('Running…',false);showProg(true);setProg(5);
+  document.getElementById('run-btn').disabled=true;
+  setStatus('',false);showProg(true);setProg(5);
+  const _timer=startTimer();
   setTimeout(()=>{
     try{
-      const cands=[];
-      function add(aT,dT){const r=buildFromTiers(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
+      const cands=[];let _done=0;
+      const _total=(()=>{let n=20+400;for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/5))){n+=3*7+3*7+2;}}for(let top=20;top>=2;top--){n+=1+7+7;}return n+1;})();
+      function add(aT,dT){
+        _done++;
+        if(_done%8===0)_timer.update(_done,_total);
+        const r=buildFromTiers(aT,dT,poolBudgets,weights);
+        if(r)cands.push(r);
+      }
       for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);setProg(15);
       for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);setProg(35);
       for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
@@ -421,8 +435,8 @@ function runOptimizer(){
       add([1,1,1,1,1],[1,1,1,1,1]);setProg(80);
       const seen=new Set();
       const top20=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,20);
-      state.results=top20;state.expanded.clear();renderResults();setProg(100);setStatus(`Found ${top20.length} builds from ${cands.length} strategies.`,false);
-    }catch(e){setStatus('Error: '+e.message,true);console.error(e);}
+      state.results=top20;state.expanded.clear();renderResults();setProg(100);_timer.stop(`Found ${top20.length} builds in ${(()=>{const s=document.getElementById('spin-msg').textContent;const m=s.match(/([\d.]+)s$/);return m?m[1]:'?';})()}s`);
+    }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
   },30);
 }
@@ -498,7 +512,31 @@ function renderEditor(){
 function beF(si,sli,v){state.beStatues[si].slots[sli].f=v;renderEditor();}
 function beL(si,sli,v){state.beStatues[si].slots[sli].lv=Math.min(20,Math.max(1,parseInt(v)||1));renderEditor();}
 function showTab(id){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['opt','editor'][i]===id));document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));document.getElementById('pane-'+id).classList.add('on');if(id==='editor')renderEditor();}
-function setStatus(t,warn){const el=document.getElementById('status-txt');el.textContent=t;el.style.color=warn?'#f59e0b':'var(--text3)';}
+function setStatus(t,warn){
+  const el=document.getElementById('status-txt');
+  el.textContent=t;
+  el.style.color=warn?'#f59e0b':'var(--text3)';
+}
+function startTimer(){
+  const t0=Date.now();
+  const wrap=document.getElementById('spin-wrap');
+  const msg=document.getElementById('spin-msg');
+  wrap.classList.add('on');
+  msg.textContent='Strategy 0 / — · 0.0s';
+  return{
+    t0,
+    update(done,total){
+      const s=((Date.now()-t0)/1000).toFixed(1);
+      msg.textContent='Strategy '+done+' / '+total+' · '+s+'s';
+    },
+    stop(text){
+      wrap.classList.remove('on');
+      const el=document.getElementById('status-txt');
+      el.textContent=text;
+      el.style.color='var(--text3)';
+    }
+  };
+}
 function showProg(v){document.getElementById('prog-bar').style.display=v?'block':'none';}
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
 renderPools();renderSliders();
