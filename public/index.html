@@ -157,8 +157,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .col-grp-def{color:#4fa06a}
 .col-grp-pve{color:#7fb5d4}
 .col-grp-pvp{color:#9b7fd4}
-/* Detail panel */
-.detail-panel{padding:12px 14px;background:#111827;border-top:1px solid var(--border)}
+/* Pool utilization bars */
+.pool-util-section{margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:5px 12px}
+.pool-util-row{display:flex;flex-direction:column;gap:2px}
+.pool-util-hdr{display:flex;justify-content:space-between;font-size:10px}
+.pool-util-name{color:var(--text2);font-weight:600}
+.pool-util-nums{color:var(--text3)}
+.pool-util-nums.over{color:var(--red2)}
+.pool-bar-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.pool-bar-fill{height:100%;border-radius:2px;transition:width .2s}
+.pool-bar-fill.ok{background:var(--green2)}
+.pool-bar-fill.warn{background:var(--gold)}
+.pool-bar-fill.over{background:var(--red2)}
 .st-row{display:flex;gap:5px;margin-bottom:5px;align-items:flex-start;flex-wrap:wrap}
 .st-lbl{font-size:10px;font-weight:600;color:var(--text2);min-width:60px;padding-top:3px;flex-shrink:0}
 .f-chip{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
@@ -233,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.3 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.4 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -883,18 +893,17 @@ function renderResults(areaId,results,expandedSet,sfx){
     tr+=`<tr class="detail-row${exp?' on':''}"><td colspan="${3+visCols.length}" style="padding:0">`;
     if(exp){
       const statueLabels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
-      // get all feathers used across build
+      // compute copies used per pool for this build
+      const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=0;});
+      build.statues.forEach(st=>st.slots.forEach(sl=>{
+        if(!sl.f)return;
+        const f=FEATHERS.find(x=>x.name===sl.f);
+        if(f)poolUsed[f.pool]=(poolUsed[f.pool]||0)+costAt(sl.f,sl.lv);
+      }));
+      // which feathers used/unused per pool
       const usedFeathers=new Set(build.statues.flatMap(st=>st.slots.map(s=>s.f)));
-      // per pool: which feathers are unused
-      const unusedByPool={};
-      POOLS.forEach(p=>{
-        unusedByPool[p.name]=p.members.filter(f=>{
-          const feat=FEATHERS.find(x=>x.name===f);
-          if(!feat)return false;
-          return !usedFeathers.has(f);
-        });
-      });
       let detail=`<div class="detail-panel">`;
+      // per-statue rows
       build.statues.forEach((st,si)=>{
         const comp=checkSet(st.slots);
         const actualTier=Math.min(...st.slots.map(s=>s.lv));
@@ -902,17 +911,31 @@ function renderResults(areaId,results,expandedSet,sfx){
         st.slots.forEach(sl=>{
           const f=FEATHERS.find(x=>x.name===sl.f);
           const above=sl.lv>(sl.floor||st.tier);
-          detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;
+          detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;
         });
         detail+=`</div>`;
       });
-      // unused feathers section
-      const unusedAll=FEATHERS.filter(f=>!usedFeathers.has(f.name));
-      if(unusedAll.length){
-        detail+=`<div class="st-row" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border2)"><span class="st-lbl" style="color:var(--text3)">Unused</span>`;
-        unusedAll.forEach(f=>{detail+=`<span class="f-chip ${f.r==='Yellow'?'f-yellow':'f-purple'} f-unused">${f.name}</span>`;});
-        detail+=`</div>`;
-      }
+      // pool utilization section
+      detail+=`<div class="pool-util-section">`;
+      POOLS.forEach(p=>{
+        const budget=state.pools[p.name]||0;
+        const used=poolUsed[p.name]||0;
+        const pct=budget>0?Math.min(100,Math.round(used/budget*100)):0;
+        const cls=pct>=100?'over':pct>=80?'warn':'ok';
+        const usedNames=p.members.filter(f=>usedFeathers.has(f));
+        const unusedNames=p.members.filter(f=>!usedFeathers.has(f));
+        detail+=`<div class="pool-util-row">
+          <div class="pool-util-hdr">
+            <span class="pool-util-name">${p.name}</span>
+            <span class="pool-util-nums ${cls}">${used} / ${budget} copies</span>
+          </div>
+          <div class="pool-bar-track"><div class="pool-bar-fill ${cls}" style="width:${pct}%"></div></div>
+          <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">`;
+        usedNames.forEach(n=>{const f=FEATHERS.find(x=>x.name===n);detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}" style="font-size:9px;padding:1px 5px">${n}</span>`;});
+        unusedNames.forEach(n=>{const f=FEATHERS.find(x=>x.name===n);detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'} f-unused" style="font-size:9px;padding:1px 5px">${n}</span>`;});
+        detail+=`</div></div>`;
+      });
+      detail+=`</div>`;
       // stat summary
       detail+=`<div class="detail-stats">`;
       Object.entries(COL_LABELS).forEach(([k,lbl])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return;detail+=`<div class="ds-row"><span class="ds-n">${lbl}</span><span class="ds-v">${fmtV(v)}</span></div>`;});
