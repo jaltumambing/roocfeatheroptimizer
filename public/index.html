@@ -82,16 +82,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .preset-desc{font-size:11px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border);display:none;line-height:1.6}
 .preset-desc.on{display:block}
 
-/* Sliders */
-.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 24px;margin-bottom:16px}
+/* Sliders - 5 step priority */
+.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:16px}
+.sl-group{grid-column:1/-1;margin-top:10px;margin-bottom:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:4px;border-bottom:1px solid var(--border2)}
+.sl-group:first-child{margin-top:0}
 .sl-row{display:flex;align-items:center;gap:8px}
 .sl-name{font-size:11px;color:var(--text2);min-width:115px}
-.sl-wrap{flex:1;position:relative;height:18px;cursor:pointer}
-.sl-track{position:absolute;top:7px;left:0;right:0;height:3px;border-radius:2px;background:var(--border)}
-.sl-fill{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--blue)}
-.sl-thumb{position:absolute;top:-6px;width:15px;height:15px;border-radius:50%;background:var(--text);border:2px solid var(--blue);transform:translateX(-50%);transition:border-color .15s}
-.sl-wrap:hover .sl-thumb{border-color:var(--blue2)}
-.sl-val{font-size:11px;font-weight:600;min-width:28px;text-align:right;color:var(--text)}
+.sl-steps{display:flex;flex:1;border:1px solid var(--border);border-radius:6px;overflow:hidden;cursor:pointer;height:24px}
+.sl-step{flex:1;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text3);border-right:1px solid var(--border2);transition:background .1s,color .1s;user-select:none}
+.sl-step:last-child{border-right:none}
+.sl-step:hover{background:var(--bg3);color:var(--text)}
+.sl-step.s0.on{background:#1c2330;color:var(--text3)}
+.sl-step.s1.on{background:#1a3a2a;color:#4fa06a}
+.sl-step.s2.on{background:#1a2e4a;color:#7fb5d4}
+.sl-step.s3.on{background:#3a2a00;color:#c9a227}
+.sl-step.s4.on{background:#3a1a1a;color:#e8705e}
+/* Filter grid */
+.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:16px}
+.fl-group{grid-column:1/-1;margin-top:10px;margin-bottom:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:4px;border-bottom:1px solid var(--border2)}
+.fl-group:first-child{margin-top:0}
+.fl-row{display:flex;align-items:center;gap:8px}
+.fl-name{font-size:11px;color:var(--text2);min-width:115px}
+.fl-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;color:var(--text);font-size:11px;outline:none;transition:border-color .15s}
+.fl-inp:focus{border-color:var(--blue)}
+.fl-inp::placeholder{color:var(--text3)}
+.fl-unit{font-size:10px;color:var(--text3);min-width:32px}
+.filter-zero-msg span{font-weight:600}
 
 /* Run button */
 .run-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
@@ -213,7 +229,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 <div class="tabs">
   <div class="tab on" onclick="showTab('opt')">Optimizer</div>
-  <div class="tab" onclick="showTab('editor')">Build Editor</div>
+  <div class="tab" onclick="showTab('opt2')">Optimizer 2</div>
+  <div class="tab" onclick="showTab('filter')">Filter Builder</div>
 </div>
 
 <div id="pane-opt" class="pane on">
@@ -221,22 +238,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div class="pool-grid" id="pool-grid"></div>
 
   <div class="sec-row">
-    <span class="sec">Stat Weights</span>
+    <span class="sec">Stat Priority</span>
     <div class="tooltip-wrap">
       <div class="tooltip-btn" tabindex="0">?</div>
       <div class="tooltip-box">
-        <b>How stat weights work</b>
-        Each slider sets a multiplier (0.0–2.0) for that stat. The optimizer scores every build using:<br><br>
-        <code style="background:var(--bg);padding:2px 6px;border-radius:3px;font-size:10px">Score = Σ (stat_value × weight)</code><br><br>
+        <b>How stat priority works</b>
+        Assign a priority level to each stat. The optimizer scores builds using normalized stat values × your priority.<br><br>
         <table class="tooltip-table">
-          <tr><td>0.0</td><td>Ignore completely — copies spent here are wasted</td></tr>
-          <tr><td>0.5</td><td>Nice to have, low priority</td></tr>
-          <tr><td>1.0</td><td>Equal importance to other 1.0 stats</td></tr>
-          <tr><td>1.5</td><td>Important — optimizer favors feathers that gain this</td></tr>
-          <tr><td>2.0</td><td>Top priority — aggressively chased</td></tr>
+          <tr><td>0</td><td>Ignore — don't factor this stat</td></tr>
+          <tr><td>1</td><td>Nice to have — low priority</td></tr>
+          <tr><td>2</td><td>Important — optimizer favors this</td></tr>
+          <tr><td>3</td><td>Priority — strongly chased</td></tr>
+          <tr><td>4</td><td>Must maximize — top priority</td></tr>
         </table>
-        <br>
-        <span style="color:var(--text3)">⚠ Stats have different raw scales — IgnorePDEF reaches ~164 at Lv20 while PATK reaches ~56. Higher weight partly compensates for smaller raw values.</span>
       </div>
     </div>
   </div>
@@ -260,10 +274,83 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
-<div id="pane-editor" class="pane">
-  <div class="sec-row"><span class="sec">Manual Build Editor</span></div>
-  <div class="be-grid" id="be-grid"></div>
-  <div class="val-bar" id="val-bar"></div>
+<div id="pane-opt2" class="pane">
+  <div class="sec-row"><span class="sec">Pool Inventory</span></div>
+  <div class="pool-grid" id="pool-grid2"></div>
+
+  <div class="sec-row">
+    <span class="sec">Stat Priority</span>
+    <div class="tooltip-wrap">
+      <div class="tooltip-btn" tabindex="0">?</div>
+      <div class="tooltip-box">
+        <b>How stat priority works</b>
+        Assign a priority level to each stat you care about. The optimizer scores builds by summing normalized stat values multiplied by your priority.<br><br>
+        <table class="tooltip-table">
+          <tr><td>0</td><td>Ignore — don't factor this stat at all</td></tr>
+          <tr><td>1</td><td>Nice to have — low priority</td></tr>
+          <tr><td>2</td><td>Important — optimizer favors this stat</td></tr>
+          <tr><td>3</td><td>Priority — strongly chased</td></tr>
+          <tr><td>4</td><td>Must maximize — top priority</td></tr>
+        </table>
+        <br>
+        <span style="color:var(--text3)">Stats are normalized before weighting so different stat scales don't bias results.</span>
+      </div>
+    </div>
+  </div>
+  <div class="preset-row" id="presets2"></div>
+  <div id="preset-desc2" class="preset-desc"></div>
+  <div class="slider-grid" id="slider-grid2"></div>
+
+  <div class="notice">⚠ Only <strong>Raven's Hour</strong> set data loaded (4 Yellow + 1 Purple per statue). Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
+
+  <div class="run-row">
+    <button class="run-btn" id="run-btn2" onclick="runOptimizer2()">Run Optimizer</button>
+    <span class="status" id="status-txt2"></span><div class="spin-wrap" id="spin-wrap2"><div class="spinner"></div><span id="spin-msg2" style="font-size:11px;color:var(--color-text-tertiary)"></span></div>
+  </div>
+  <div class="prog-bar" id="prog-bar2"><div class="prog-fill" id="prog-fill2" style="width:0%"></div></div>
+  <div class="results-area" id="results-area2">
+    <div class="empty-state">
+      <div class="empty-icon">⚗</div>
+      <h3>No builds yet</h3>
+      <p>Enter pool inventory, set stat priority, then click Run Optimizer.</p>
+    </div>
+  </div>
+</div>
+
+<div id="pane-filter" class="pane">
+  <div class="sec-row"><span class="sec">Pool Inventory</span></div>
+  <div class="pool-grid" id="pool-grid3"></div>
+
+  <div class="sec-row">
+    <span class="sec">Stat Filters</span>
+    <div class="tooltip-wrap">
+      <div class="tooltip-btn" tabindex="0">?</div>
+      <div class="tooltip-box">
+        <b>How Filter Builder works</b>
+        Set minimum values for the stats you need. Only builds that meet <em>all</em> your filters are shown.<br><br>
+        Leave a field blank to ignore that stat entirely.<br><br>
+        Results are ranked by <strong>feather efficiency</strong> — how much stat you get per copy spent. Secondary rank: total surplus beyond your minimums.<br><br>
+        <span style="color:var(--text3)">If no builds pass all filters, you'll see which filters had zero qualifying builds.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-grid" id="filter-grid"></div>
+
+  <div class="notice">⚠ Only <strong>Raven's Hour</strong> set data loaded. Builds failing any filter are excluded entirely — no partial matches.</div>
+
+  <div class="run-row">
+    <button class="run-btn" id="filter-run-btn" onclick="runFilterOptimizer()">Find Builds</button>
+    <span class="status" id="filter-status-txt"></span><div class="spin-wrap" id="filter-spin-wrap"><div class="spinner"></div><span id="filter-spin-msg" style="font-size:11px;color:var(--color-text-tertiary)"></span></div>
+  </div>
+  <div class="prog-bar" id="filter-prog-bar"><div class="prog-fill" id="filter-prog-fill" style="width:0%"></div></div>
+  <div class="results-area" id="filter-results-area">
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No filters set</h3>
+      <p>Set minimum stat values, enter pool inventory, then click Find Builds.</p>
+    </div>
+  </div>
 </div>
 
 
@@ -356,6 +443,7 @@ function getStatAt(name,lv){
 }
 function statObj(name,lv){const a=getStatAt(name,lv);const o={};SK.forEach((k,i)=>{o[k]=a[i]||0});return o;}
 function scoreFromStats(s,w){return Object.keys(w).reduce((t,k)=>t+(s[k]||0)*(w[k]||0),0);}
+function scoreFromStatsNorm(s,w){return Object.keys(w).reduce((t,k)=>{const mx=STAT_MAX[k]||1;return t+((s[k]||0)/mx)*(w[k]||0);},0);}
 function featherScore(name,lv,w){return scoreFromStats(statObj(name,lv),w);}
 const DEF_SET={},ATK_SET={};
 for(let t=1;t<=20;t++){
@@ -383,20 +471,35 @@ function calcStatueResult(slots,type){
   return{stats:comp.valid?applySetBonus(raw,type,tier):{...raw},tier,comp};
 }
 const WEIGHT_META={
+  _atkGroup:{group:'ATK Stats'},
   PATK:{label:'PATK'},MATK:{label:'MATK'},IgnorePDEF:{label:'Ignore PDEF'},IgnoreMDEF:{label:'Ignore MDEF'},PDMG:{label:'PDMG'},MDMG:{label:'MDMG'},
+  _defGroup:{group:'DEF Stats'},
   PDEF:{label:'PDEF'},MDEF:{label:'MDEF'},HP:{label:'HP'},PDMGRed:{label:'PDMG Reduction'},MDMGRed:{label:'MDMG Reduction'},
-  PvEDMG:{label:'PvE DMG Bonus'},PvEDMGRed:{label:'PvE DMG Reduction'},PvPDMG:{label:'PvP DMG Bonus'},PvPDMGRed:{label:'PvP DMG Reduction'},
+  _pveGroup:{group:'PvE'},
+  PvEDMG:{label:'PvE DMG Bonus'},PvEDMGRed:{label:'PvE DMG Reduction'},
+  _pvpGroup:{group:'PvP'},
+  PvPDMG:{label:'PvP DMG Bonus'},PvPDMGRed:{label:'PvP DMG Reduction'},
 };
+// 0=Ignore 1=Nice to have 2=Important 3=Priority 4=Must maximize
 const PRESETS={
-  'PvE DPS':{desc:'Maximize PvE damage. ATK statues: Ignore PDEF + PATK + PvE DMG Bonus. DEF statues: MIX feathers (Dark/Light) contribute PATK as surplus bonus.',w:{PATK:1.5,MATK:1.5,IgnorePDEF:2,IgnoreMDEF:1,PvEDMG:1.5,PDMG:0.5,MDMG:0.5,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
-  'PvP DPS':{desc:'Maximize PvP damage. Prioritizes Ignore PDEF, PATK, and PvP DMG Bonus. MIX feathers in DEF statues still add PATK.',w:{PATK:1.5,MATK:1.5,IgnorePDEF:2,IgnoreMDEF:1,PvPDMG:1.5,PDMG:0.5,MDMG:0.5,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMGRed:0}},
-  'Tank PvE':{desc:'Maximize PvE survivability. DEF statues: PDEF/MDEF + PvE DMG Reduction via Night/Nature. ATK statues: Justice/Grace contribute PATK.',w:{PDEF:2,MDEF:2,HP:1,PvEDMGRed:1.5,PDMGRed:0.5,MDMGRed:0.5,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvPDMGRed:0}},
-  'Tank PvP':{desc:'Maximize PvP survivability. DEF statues: PDEF/MDEF + PvP DMG Reduction. Best for arena defense.',w:{PDEF:2,MDEF:2,HP:1,PvPDMGRed:1.5,PDMGRed:0.5,MDMGRed:0.5,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvEDMGRed:0}},
-  'PvE ATK / PvP DEF':{desc:'ATK statues chase PvE damage (Ignore PDEF + PvE DMG). DEF statues chase PvP survivability (PDEF/MDEF + PvP DMG Reduction). Best of both worlds.',w:{PATK:1.2,MATK:1.2,IgnorePDEF:2,IgnoreMDEF:0.8,PvEDMG:1.5,PDMG:0.3,MDMG:0.3,PDEF:1.5,MDEF:1.5,HP:0.8,PDMGRed:0.3,MDMGRed:0.3,PvEDMGRed:0,PvPDMG:0.5,PvPDMGRed:1.5}},
-  'Balanced':{desc:'Equal weight across all stats. Good general-purpose build for players who do both PvE and PvP.',w:{PATK:1,MATK:1,IgnorePDEF:1,IgnoreMDEF:0.5,PDEF:1,MDEF:1,HP:0.5,PvEDMG:0.5,PvPDMG:0.5,PDMG:0.5,MDMG:0.5,PDMGRed:0.5,MDMGRed:0.5,PvEDMGRed:0.5,PvPDMGRed:0.5}},
+  'PvE DPS':{desc:'Maximize PvE damage. ATK statues: Ignore PDEF + PATK + PvE DMG. DEF statues: MIX feathers contribute PATK as surplus.',w:{PATK:3,MATK:2,IgnorePDEF:4,IgnoreMDEF:2,PvEDMG:3,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
+  'PvP DPS':{desc:'Maximize PvP damage. Prioritizes Ignore PDEF, PATK, and PvP DMG Bonus.',w:{PATK:3,MATK:2,IgnorePDEF:4,IgnoreMDEF:2,PvPDMG:3,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMGRed:0}},
+  'Tank PvE':{desc:'Maximize PvE survivability. PDEF/MDEF + PvE DMG Reduction.',w:{PDEF:4,MDEF:4,HP:2,PvEDMGRed:3,PDMGRed:1,MDMGRed:1,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvPDMGRed:0}},
+  'Tank PvP':{desc:'Maximize PvP survivability. PDEF/MDEF + PvP DMG Reduction.',w:{PDEF:4,MDEF:4,HP:2,PvPDMGRed:3,PDMGRed:1,MDMGRed:1,PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PvEDMG:0,PvPDMG:0,PvEDMGRed:0}},
+  'PvE ATK / PvP DEF':{desc:'ATK statues chase PvE damage. DEF statues chase PvP survivability.',w:{PATK:2,MATK:2,IgnorePDEF:4,IgnoreMDEF:2,PvEDMG:3,PDMG:1,MDMG:1,PDEF:3,MDEF:3,HP:2,PDMGRed:1,MDMGRed:1,PvEDMGRed:0,PvPDMG:1,PvPDMGRed:3}},
+  'Balanced':{desc:'Equal priority across all stats. Good general-purpose build.',w:{PATK:2,MATK:2,IgnorePDEF:2,IgnoreMDEF:1,PDEF:2,MDEF:2,HP:1,PvEDMG:1,PvPDMG:1,PDMG:1,MDMG:1,PDMGRed:1,MDMGRed:1,PvEDMGRed:1,PvPDMGRed:1}},
 };
-const state={pools:{},weights:{},results:[],expanded:new Set(),activePreset:'',beStatues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:[{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1}]}))};
-POOLS.forEach(p=>{state.pools[p.name]=0;});Object.keys(WEIGHT_META).forEach(k=>{state.weights[k]=0;});
+// Stat max values at Lv20 for normalization
+const STAT_MAX={PATK:56,MATK:56,IgnorePDEF:164,IgnoreMDEF:164,PDMG:56,MDMG:56,PDEF:56,MDEF:56,HP:1320,PDMGRed:56,MDMGRed:56,PvEDMG:80,PvEDMGRed:80,PvPDMG:69,PvPDMGRed:69};
+const STAT_LABELS_FILTER=[
+  {group:'ATK Stats',stats:['PATK','MATK','IgnorePDEF','IgnoreMDEF','PDMG','MDMG']},
+  {group:'DEF Stats',stats:['PDEF','MDEF','HP','PDMGRed','MDMGRed']},
+  {group:'PvE',stats:['PvEDMG','PvEDMGRed']},
+  {group:'PvP',stats:['PvPDMG','PvPDMGRed']},
+];
+const state={pools:{},weights:{},weights2:{},filters:{},results:[],results2:[],filterResults:[],expanded:new Set(),expanded2:new Set(),expandedF:new Set(),activePreset:'',activePreset2:'',beStatues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:[{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1}]}))};
+POOLS.forEach(p=>{state.pools[p.name]=0;});
+Object.keys(STAT_MAX).forEach(k=>{state.weights[k]=0;state.weights2[k]=0;state.filters[k]='';});
 function selectBestFeathers(type,floorLv,weights){
   const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
   const P=FEATHERS.filter(f=>f.r==='Purple'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
@@ -439,7 +542,7 @@ function buildFromTiers(atkTiers,defTiers,poolBudgets,weights){
 }
 function runOptimizer(){
   const weights=state.weights;
-  if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
+  if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat priority > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   document.getElementById('run-btn').disabled=true;
@@ -449,12 +552,7 @@ function runOptimizer(){
     try{
       const cands=[];let _done=0;
       const _total=(()=>{let n=20+400;for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/5))){n+=3*7+3*7+2;}}for(let top=20;top>=2;top--){n+=1+7+7;}return n+1;})();
-      function add(aT,dT){
-        _done++;
-        if(_done%8===0)_timer.update(_done,_total);
-        const r=buildFromTiers(aT,dT,poolBudgets,weights);
-        if(r)cands.push(r);
-      }
+      function add(aT,dT){_done++;if(_done%8===0)_timer.update(_done,_total);const r=buildFromTiersNorm(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
       for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);setProg(15);
       for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);setProg(35);
       for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
@@ -471,22 +569,275 @@ function runOptimizer(){
       add([1,1,1,1,1],[1,1,1,1,1]);setProg(80);
       const seen=new Set();
       const top20=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,20);
-      state.results=top20;state.expanded.clear();renderResults();setProg(100);_timer.stop(`Found ${top20.length} builds in ${(()=>{const s=document.getElementById('spin-msg').textContent;const m=s.match(/([\d.]+)s$/);return m?m[1]:'?';})()}s`);
+      state.results=top20;state.expanded.clear();renderResults('results-area',state.results,state.expanded,'');setProg(100);
+      _timer.stop(`Found ${top20.length} builds`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
   },30);
 }
 function fmtV(v){if(Math.abs(v)<0.1&&v!==0)return v.toFixed(4);return Math.round(v).toLocaleString();}
 function getTotals(build){const t={};SK.forEach(k=>{t[k]=0;});build.statues.forEach(st=>{const r=calcStatueResult(st.slots,st.type);if(r)SK.forEach(k=>{t[k]+=(r.stats[k]||0);});});return t;}
-function renderResults(){
-  const area=document.getElementById('results-area');
-  if(!state.results.length){area.innerHTML='<div class="empty-state"><div class="empty-icon">⚗</div><h3>No builds yet</h3><p>Enter pool inventory, set stat weights, then click Run Optimizer.</p></div>';return;}
+function renderPools(){
+  const html=POOLS.map(p=>`<div class="pool-card"><div class="pool-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}">${p.r}</span></div><div class="pool-members">${p.members.join(' · ')}</div><div class="pool-inp-row"><span class="pool-inp-label">Total copies:</span><input class="pool-inp" type="number" min="0" max="9999" value="${state.pools[p.name]||0}" oninput="state.pools['${p.name}']=parseInt(this.value)||0"></div></div>`).join('');
+  ['pool-grid','pool-grid2','pool-grid3'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
+}
+const STEP_LABELS=['Ignore','Nice','Important','Priority','Must'];
+function renderSliders(gridId,presetsId,descId,weightsKey,presetKey){
+  const wm=Object.entries(WEIGHT_META);
+  document.getElementById(presetsId).innerHTML=Object.keys(PRESETS).map(k=>`<div class="preset-btn ${state[presetKey]===k?'on':''}" onclick="applyPreset('${k}','${weightsKey}','${presetKey}','${gridId}','${presetsId}','${descId}')">${k}</div>`).join('');
+  const de=document.getElementById(descId);
+  if(state[presetKey]&&PRESETS[state[presetKey]]){de.textContent=PRESETS[state[presetKey]].desc;de.classList.add('on');}else{de.classList.remove('on');}
+  let html='';
+  wm.forEach(([k,m])=>{
+    if(m.group){html+=`<div class="sl-group" style="grid-column:1/-1">${m.group}</div>`;return;}
+    const v=state[weightsKey][k]||0;
+    const steps=[0,1,2,3,4].map(s=>`<div class="sl-step s${s}${v===s?' on':''}" onclick="slSet('${k}',${s},'${weightsKey}','${gridId}','${presetsId}','${descId}')" title="${STEP_LABELS[s]}">${s===0?'—':s}</div>`).join('');
+    html+=`<div class="sl-row"><span class="sl-name">${m.label}</span><div class="sl-steps">${steps}</div></div>`;
+  });
+  document.getElementById(gridId).innerHTML=html;
+}
+function slSet(k,v,weightsKey,gridId,presetsId,descId){
+  state[weightsKey][k]=v;state.activePreset='';state.activePreset2='';
+  renderSliders(gridId,presetsId,descId,weightsKey,weightsKey==='weights'?'activePreset':'activePreset2');
+}
+function applyPreset(name,weightsKey,presetKey,gridId,presetsId,descId){
+  state[presetKey]=name;
+  Object.keys(state[weightsKey]).forEach(k=>{state[weightsKey][k]=PRESETS[name].w[k]||0;});
+  renderSliders(gridId,presetsId,descId,weightsKey,presetKey);
+}
+function renderFilterGrid(){
+  let html='';
+  STAT_LABELS_FILTER.forEach(g=>{
+    html+=`<div class="fl-group" style="grid-column:1/-1">${g.group}</div>`;
+    g.stats.forEach(k=>{
+      const lbl=WEIGHT_META[k]?.label||k;
+      html+=`<div class="fl-row"><span class="fl-name">${lbl}</span><input class="fl-inp" type="number" min="0" placeholder="min..." id="fl-${k}" value="${state.filters[k]||''}" oninput="state.filters['${k}']=this.value"><span class="fl-unit">${k==='HP'?'flat':k.includes('Red')||k.includes('DMG')?'':'flat'}</span></div>`;
+    });
+  });
+  document.getElementById('filter-grid').innerHTML=html;
+}
+function runOptimizer(){
+  const weights=state.weights;
+  if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
+  document.getElementById('run-btn').disabled=true;
+  setStatus('',false);showProg(true);setProg(5);
+  const _timer=startTimer();
+  setTimeout(()=>{
+    try{
+      const cands=[];let _done=0;
+      const _total=(()=>{let n=20+400;for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/5))){n+=3*7+3*7+2;}}for(let top=20;top>=2;top--){n+=1+7+7;}return n+1;})();
+      function add(aT,dT){_done++;if(_done%8===0)_timer.update(_done,_total);const r=buildFromTiers(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
+      for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);setProg(15);
+      for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);setProg(35);
+      for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
+        for(let dt=1;dt<=20;dt+=2){add([h,l,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,h,l,l],[dt,dt,dt,dt,dt]);}
+        for(let at=1;at<=20;at+=2){add([at,at,at,at,at],[h,l,l,l,l]);add([at,at,at,at,at],[h,h,l,l,l]);add([at,at,at,at,at],[h,h,h,l,l]);}
+        add([h,l,l,l,l],[h,l,l,l,l]);add([h,h,l,l,l],[h,h,l,l,l]);
+      }}setProg(60);
+      for(let top=20;top>=2;top--){
+        const step=Math.max(1,Math.floor(top/5));
+        const st=[top,Math.max(1,top-step),Math.max(1,top-2*step),Math.max(1,top-3*step),Math.max(1,top-4*step)];
+        add(st,st);for(let dt=1;dt<=20;dt+=2) add(st,[dt,dt,dt,dt,dt]);for(let at=1;at<=20;at+=2) add([at,at,at,at,at],st);
+        add(st,[...st].reverse());add([...st].reverse(),st);
+      }
+      add([1,1,1,1,1],[1,1,1,1,1]);setProg(80);
+      const seen=new Set();
+      const top20=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,20);
+      state.results=top20;state.expanded.clear();renderResults('results-area',state.results,state.expanded,'');setProg(100);
+      _timer.stop(`Found ${top20.length} builds`);
+    }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
+    document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
+  },30);
+}
+function buildFromTiersNorm(atkTiers,defTiers,poolBudgets,weights){
+  const allTypes=[...atkTiers.map(()=>'ATK'),...defTiers.map(()=>'DEF')];
+  const allTiers=[...atkTiers,...defTiers];
+  const slots=[];const floorCosts={};POOLS.forEach(p=>{floorCosts[p.name]=0;});
+  for(let si=0;si<10;si++){
+    const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(allTypes[si]==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
+    const P=FEATHERS.filter(f=>f.r==='Purple'&&(allTypes[si]==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
+    const yS=Y.map(f=>({...f,sc:scoreFromStatsNorm(statObj(f.name,allTiers[si]),weights)})).sort((a,b)=>b.sc-a.sc);
+    const pS=P.map(f=>({...f,sc:scoreFromStatsNorm(statObj(f.name,allTiers[si]),weights)})).sort((a,b)=>b.sc-a.sc);
+    if(yS.length<4||pS.length<1)return null;
+    const sel=[...yS.slice(0,4),...pS.slice(0,1)];
+    sel.forEach(f=>{floorCosts[f.pool]+=costAt(f.name,allTiers[si]);slots.push({si,name:f.name,pool:f.pool,lv:allTiers[si],floor:allTiers[si],type:allTypes[si]});});
+  }
+  if(!POOLS.every(p=>floorCosts[p.name]<=poolBudgets[p.name]))return null;
+  const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=floorCosts[p.name];});
+  let any=true;
+  while(any){
+    any=false;let bestR=-1,bestS=null;
+    for(const fs of slots){
+      if(fs.lv>=20)continue;
+      const cost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
+      if(cost<=0||cost>poolBudgets[fs.pool]-poolUsed[fs.pool])continue;
+      const gain=scoreFromStatsNorm(statObj(fs.name,fs.lv+1),weights)-scoreFromStatsNorm(statObj(fs.name,fs.lv),weights);
+      if(gain<=0)continue;
+      const r=gain/cost;if(r>bestR){bestR=r;bestS=fs;}
+    }
+    if(bestS){poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);bestS.lv++;any=true;}
+  }
+  const statues=[];
+  for(let si=0;si<10;si++){
+    const my=slots.filter(s=>s.si===si);
+    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si]});
+  }
+  const score=statues.reduce((sum,st)=>{const r=calcStatueResult(st.slots,st.type);return sum+(r?scoreFromStatsNorm(r.stats,weights):0);},0);
+  return{statues,score,atkTiers:[...atkTiers],defTiers:[...defTiers]};
+}
+function runOptimizer2(){
+  const weights=state.weights2;
+  if(!Object.values(weights).some(v=>v>0)){setStatus2('Set at least one stat priority > 0.',true);return;}
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){setStatus2('Enter pool inventory first.',true);return;}
+  document.getElementById('run-btn2').disabled=true;
+  setStatus2('',false);
+  document.getElementById('prog-bar2').style.display='block';
+  document.getElementById('prog-fill2').style.width='5%';
+  const wrap=document.getElementById('spin-wrap2');const msg=document.getElementById('spin-msg2');
+  wrap.classList.add('on');msg.textContent='Running...';
+  const t0=Date.now();
+  setTimeout(()=>{
+    try{
+      const cands=[];
+      function add(aT,dT){const r=buildFromTiersNorm(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
+      for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);
+      for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);
+      for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
+        for(let dt=1;dt<=20;dt+=2){add([h,l,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,h,l,l],[dt,dt,dt,dt,dt]);}
+        for(let at=1;at<=20;at+=2){add([at,at,at,at,at],[h,l,l,l,l]);add([at,at,at,at,at],[h,h,l,l,l]);add([at,at,at,at,at],[h,h,h,l,l]);}
+        add([h,l,l,l,l],[h,l,l,l,l]);add([h,h,l,l,l],[h,h,l,l,l]);
+      }}
+      for(let top=20;top>=2;top--){
+        const step=Math.max(1,Math.floor(top/5));
+        const st=[top,Math.max(1,top-step),Math.max(1,top-2*step),Math.max(1,top-3*step),Math.max(1,top-4*step)];
+        add(st,st);for(let dt=1;dt<=20;dt+=2) add(st,[dt,dt,dt,dt,dt]);for(let at=1;at<=20;at+=2) add([at,at,at,at,at],st);
+        add(st,[...st].reverse());add([...st].reverse(),st);
+      }
+      add([1,1,1,1,1],[1,1,1,1,1]);
+      document.getElementById('prog-fill2').style.width='80%';
+      const seen=new Set();
+      const top20=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,20);
+      state.results2=top20;state.expanded2.clear();
+      renderResults('results-area2',state.results2,state.expanded2,'2');
+      document.getElementById('prog-fill2').style.width='100%';
+      const elapsed=((Date.now()-t0)/1000).toFixed(1);
+      setStatus2(`Found ${top20.length} builds in ${elapsed}s`,false);
+    }catch(e){setStatus2('Error: '+e.message,true);console.error(e);}
+    document.getElementById('run-btn2').disabled=false;
+    wrap.classList.remove('on');
+    setTimeout(()=>{document.getElementById('prog-bar2').style.display='none';},600);
+  },30);
+}
+function setStatus2(t,warn){const el=document.getElementById('status-txt2');el.textContent=t;el.style.color=warn?'#f59e0b':'var(--text3)';}
+function runFilterOptimizer(){
+  const filters={};
+  Object.keys(state.filters).forEach(k=>{const v=parseFloat(state.filters[k]);if(!isNaN(v)&&v>0)filters[k]=v;});
+  if(!Object.keys(filters).length){document.getElementById('filter-status-txt').textContent='Set at least one minimum filter.';document.getElementById('filter-status-txt').style.color='#f59e0b';return;}
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){document.getElementById('filter-status-txt').textContent='Enter pool inventory first.';document.getElementById('filter-status-txt').style.color='#f59e0b';return;}
+  document.getElementById('filter-run-btn').disabled=true;
+  document.getElementById('filter-status-txt').textContent='';
+  document.getElementById('filter-prog-bar').style.display='block';
+  document.getElementById('filter-prog-fill').style.width='5%';
+  const t0=Date.now();
+  setTimeout(()=>{
+    try{
+      const cands=[];
+      // Use equal weights across all filter stats for feather selection
+      const selWeights={};Object.keys(STAT_MAX).forEach(k=>{selWeights[k]=filters[k]?1:0;});
+      function add(aT,dT){const r=buildFromTiersNorm(aT,dT,poolBudgets,selWeights);if(r)cands.push(r);}
+      for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);
+      for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);
+      for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
+        for(let dt=1;dt<=20;dt+=2){add([h,l,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,l,l,l],[dt,dt,dt,dt,dt]);add([h,h,h,l,l],[dt,dt,dt,dt,dt]);}
+        for(let at=1;at<=20;at+=2){add([at,at,at,at,at],[h,l,l,l,l]);add([at,at,at,at,at],[h,h,l,l,l]);add([at,at,at,at,at],[h,h,h,l,l]);}
+        add([h,l,l,l,l],[h,l,l,l,l]);add([h,h,l,l,l],[h,h,l,l,l]);
+      }}
+      for(let top=20;top>=2;top--){
+        const step=Math.max(1,Math.floor(top/5));
+        const st=[top,Math.max(1,top-step),Math.max(1,top-2*step),Math.max(1,top-3*step),Math.max(1,top-4*step)];
+        add(st,st);for(let dt=1;dt<=20;dt+=2) add(st,[dt,dt,dt,dt,dt]);for(let at=1;at<=20;at+=2) add([at,at,at,at,at],st);
+      }
+      add([1,1,1,1,1],[1,1,1,1,1]);
+      document.getElementById('filter-prog-fill').style.width='70%';
+      // Deduplicate
+      const seen=new Set();
+      const deduped=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;});
+      // Apply filters strictly
+      const passing=deduped.filter(c=>{
+        const tot=getTotals(c);
+        return Object.keys(filters).every(k=>(tot[k]||0)>=filters[k]);
+      });
+      // Track which filters had zero passing builds
+      if(!passing.length){
+        const failInfo=Object.keys(filters).map(k=>{
+          const best=Math.max(...deduped.map(c=>getTotals(c)[k]||0));
+          return{k,min:filters[k],best};
+        }).filter(f=>f.best<f.min);
+        document.getElementById('filter-results-area').innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><h3>No builds match all filters</h3>${failInfo.length?'<p>These filters had no qualifying builds:</p><div style="margin-top:8px">'+failInfo.map(f=>`<div style="font-size:11px;color:var(--red2);padding:2px 0"><strong>${f.k}</strong>: you need ${Math.round(f.min)}, best available is ${Math.round(f.best)}</div>`).join('')+'</div>':'<p>Try relaxing one or more minimum values.</p>'}</div>`;
+        document.getElementById('filter-status-txt').textContent='No builds found.';
+        document.getElementById('filter-status-txt').style.color='#f59e0b';
+      } else {
+        // Rank by efficiency: total normalized stats / total copies spent
+        const ranked=passing.map(c=>{
+          const tot=getTotals(c);
+          const normScore=Object.keys(filters).reduce((s,k)=>{const mx=STAT_MAX[k]||1;return s+(tot[k]||0)/mx;},0);
+          const copies=c.statues.reduce((s,st)=>s+st.slots.reduce((ss,sl)=>ss+(sl.f?costAt(sl.f,sl.lv):0),0),0);
+          const efficiency=copies>0?normScore/copies:0;
+          return{...c,efficiency,filterTotals:tot};
+        }).sort((a,b)=>b.efficiency-a.efficiency).slice(0,20);
+        state.filterResults=ranked;state.expandedF.clear();
+        renderFilterResults();
+        const elapsed=((Date.now()-t0)/1000).toFixed(1);
+        document.getElementById('filter-status-txt').textContent=`Found ${ranked.length} of ${passing.length} builds in ${elapsed}s`;
+        document.getElementById('filter-status-txt').style.color='var(--text3)';
+      }
+      document.getElementById('filter-prog-fill').style.width='100%';
+    }catch(e){document.getElementById('filter-status-txt').textContent='Error: '+e.message;document.getElementById('filter-status-txt').style.color='#f59e0b';console.error(e);}
+    document.getElementById('filter-run-btn').disabled=false;
+    setTimeout(()=>{document.getElementById('filter-prog-bar').style.display='none';},600);
+  },30);
+}
+function renderFilterResults(){
+  const area=document.getElementById('filter-results-area');
+  if(!state.filterResults.length){area.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><h3>No filters set</h3><p>Set minimum stat values, enter pool inventory, then click Find Builds.</p></div>';return;}
+  const filters={};Object.keys(state.filters).forEach(k=>{const v=parseFloat(state.filters[k]);if(!isNaN(v)&&v>0)filters[k]=v;});
   const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
   let html='';
-  state.results.forEach((build,i)=>{
-    const exp=state.expanded.has(i);const tot=getTotals(build);
+  state.filterResults.forEach((build,i)=>{
+    const exp=state.expandedF.has(i);
+    const tot=build.filterTotals||getTotals(build);
+    const effPct=Math.round(build.efficiency*1000)/10;
+    const chips=Object.keys(filters).map(k=>{const v=tot[k]||0;const pass=v>=filters[k];return`<span class="b-chip b-chip-${STAT_META[k]?.cat||'atk'}" style="border-color:${pass?'var(--green2)':'var(--red2)'}">${WEIGHT_META[k]?.label||k} ${fmtV(v)}${pass?' ✓':' ✗'}</span>`;}).join('');
+    html+=`<div class="build-card" id="fbc-${i}"><div class="build-hdr"><span class="b-rank">#${i+1}</span><div class="b-score-block"><span class="b-score">${effPct}</span><span class="b-score-lbl">effcy</span></div><div class="b-chips"><span class="b-chip b-chip-atk" style="font-weight:700">ATK T${build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span><span class="b-chip b-chip-def" style="font-weight:700">DEF T${build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span>${chips}</div><button class="b-toggle" onclick="toggleFilterBuild(${i})">${exp?'▲':'▼'}</button></div><div class="build-detail ${exp?'on':''}">`;
+    if(exp){
+      html+=`<div class="tier-dist">`;build.statues.slice(0,5).forEach((st,j)=>{const at=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-atk">ATK${j+1} T${at}</span>`;});build.statues.slice(5,10).forEach((st,j)=>{const dt=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-def">DEF${j+1} T${dt}</span>`;});html+=`</div>`;
+      build.statues.forEach((st,si)=>{
+        const comp=checkSet(st.slots);const actualTier=Math.min(...st.slots.map(s=>s.lv));
+        html+=`<div class="st-row"><span class="st-lbl">${labels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
+        st.slots.forEach(sl=>{const f=FEATHERS.find(x=>x.name===sl.f);const above=sl.lv>(sl.floor||st.tier);html+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;});html+=`</div>`;
+      });
+      html+=`<div class="divider"></div><div class="stat-sum">`;
+      Object.keys(filters).forEach(k=>{const v=tot[k]||0;const pass=v>=filters[k];html+=`<div class="ss-row"><span class="ss-n" style="color:${pass?'var(--green3)':'var(--red3)'}">${WEIGHT_META[k]?.label||k}</span><span class="ss-v">${fmtV(v)} <span style="font-size:9px;color:var(--text3)">/ ${filters[k]}</span></span></div>`;});
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  });
+  area.innerHTML=html;
+}
+function toggleFilterBuild(i){if(state.expandedF.has(i))state.expandedF.delete(i);else state.expandedF.add(i);renderFilterResults();}
+function renderResults(areaId,results,expandedSet,sfx){
+  const area=document.getElementById(areaId);
+  if(!results.length){area.innerHTML=`<div class="empty-state"><div class="empty-icon">⚗</div><h3>No builds yet</h3><p>Enter pool inventory, set stat ${sfx?'priority':'weights'}, then click Run Optimizer.</p></div>`;return;}
+  const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+  let html='';
+  results.forEach((build,i)=>{
+    const exp=expandedSet.has(i);const tot=getTotals(build);
     const chips=Object.entries(STAT_META).map(([k,m])=>{const v=tot[k];if(!v||Math.round(Math.abs(v)*10000)===0)return null;return`<span class="b-chip b-chip-${m.cat}">${m.label} ${fmtV(v)}</span>`;}).filter(Boolean).join('');
-    html+=`<div class="build-card" id="bc-${i}"><div class="build-hdr"><span class="b-rank">#${i+1}</span><div class="b-score-block"><span class="b-score">${Math.round(build.score).toLocaleString()}</span><span class="b-score-lbl">score</span></div><div class="b-chips"><span class="b-chip b-chip-atk" style="font-weight:700">ATK T${build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span><span class="b-chip b-chip-def" style="font-weight:700">DEF T${build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span>${chips}</div><button class="b-toggle" onclick="toggleBuild(${i})">${exp?'▲':'▼'}</button></div><div class="build-detail ${exp?'on':''}">`;
+    html+=`<div class="build-card" id="bc${sfx}-${i}"><div class="build-hdr"><span class="b-rank">#${i+1}</span><div class="b-score-block"><span class="b-score">${Math.round(build.score).toLocaleString()}</span><span class="b-score-lbl">score</span></div><div class="b-chips"><span class="b-chip b-chip-atk" style="font-weight:700">ATK T${build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span><span class="b-chip b-chip-def" style="font-weight:700">DEF T${build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv))).join('-')}</span>${chips}</div><button class="b-toggle" onclick="toggleBuild${sfx}(${i})">${exp?'▲':'▼'}</button></div><div class="build-detail ${exp?'on':''}">`;
     if(exp){
       html+=`<div class="tier-dist">`;build.statues.slice(0,5).forEach((st,j)=>{const at=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-atk">ATK${j+1} T${at}</span>`;});build.statues.slice(5,10).forEach((st,j)=>{const dt=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-def">DEF${j+1} T${dt}</span>`;});html+=`</div>`;
       build.statues.forEach((st,si)=>{
@@ -502,52 +853,15 @@ function renderResults(){
   });
   area.innerHTML=html;
 }
-function toggleBuild(i){if(state.expanded.has(i))state.expanded.delete(i);else state.expanded.add(i);renderResults();setTimeout(()=>{const el=document.getElementById('bc-'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}
-function renderPools(){document.getElementById('pool-grid').innerHTML=POOLS.map(p=>`<div class="pool-card"><div class="pool-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}">${p.r}</span></div><div class="pool-members">${p.members.join(' · ')}</div><div class="pool-inp-row"><span class="pool-inp-label">Total copies:</span><input class="pool-inp" type="number" min="0" max="9999" value="${state.pools[p.name]||0}" oninput="state.pools['${p.name}']=parseInt(this.value)||0"></div></div>`).join('');}
-function renderSliders(){
-  document.getElementById('presets').innerHTML=Object.keys(PRESETS).map(k=>`<div class="preset-btn ${state.activePreset===k?'on':''}" onclick="applyPreset('${k}')">${k}</div>`).join('');
-  const de=document.getElementById('preset-desc');
-  if(state.activePreset&&PRESETS[state.activePreset]){de.textContent=PRESETS[state.activePreset].desc;de.classList.add('on');}else{de.classList.remove('on');}
-  document.getElementById('slider-grid').innerHTML=Object.entries(WEIGHT_META).map(([k,m])=>{const v=state.weights[k]||0;const pct=v/2*100;return`<div class="sl-row"><span class="sl-name">${m.label}</span><div class="sl-wrap" id="sw-${k}" onclick="slClick(event,'${k}')"><div class="sl-track"><div class="sl-fill" style="width:${pct}%"></div></div><div class="sl-thumb" style="left:${pct}%"></div></div><span class="sl-val" id="sv-${k}">${v.toFixed(1)}</span></div>`;}).join('');
+function toggleBuild(i){if(state.expanded.has(i))state.expanded.delete(i);else state.expanded.add(i);renderResults('results-area',state.results,state.expanded,'');}
+function toggleBuild2(i){if(state.expanded2.has(i))state.expanded2.delete(i);else state.expanded2.add(i);renderResults('results-area2',state.results2,state.expanded2,'2');}
+function showTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['opt','opt2','filter'][i]===id));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pane-'+id).classList.add('on');
+  if(id==='opt2')renderSliders('slider-grid2','presets2','preset-desc2','weights2','activePreset2');
+  if(id==='filter')renderFilterGrid();
 }
-function slClick(e,k){
-  const wrap=document.getElementById('sw-'+k);const r=wrap.getBoundingClientRect();
-  const pct=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));const v=Math.round(pct*20)/10;
-  state.weights[k]=v;state.activePreset='';
-  wrap.querySelector('.sl-fill').style.width=(v/2*100)+'%';wrap.querySelector('.sl-thumb').style.left=(v/2*100)+'%';
-  document.getElementById('sv-'+k).textContent=v.toFixed(1);
-  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('on'));document.getElementById('preset-desc').classList.remove('on');
-}
-function applyPreset(name){state.activePreset=name;Object.keys(state.weights).forEach(k=>{state.weights[k]=PRESETS[name].w[k]||0;});renderSliders();}
-function renderEditor(){
-  const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
-  document.getElementById('be-grid').innerHTML=state.beStatues.map((st,si)=>{
-    const elig=FEATHERS.filter(f=>st.type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX'));
-    const used=st.slots.map(s=>s.f).filter(Boolean);const filled=st.slots.filter(s=>s.f);
-    const tier=filled.length===5?Math.min(...filled.map(s=>s.lv)):null;
-    const res=tier?calcStatueResult(st.slots.map(s=>({f:s.f,lv:s.lv})),st.type):null;
-    const comp=filled.length===5?checkSet(st.slots):{valid:false,name:'Incomplete'};
-    let h=`<div class="be-st ${st.type==='ATK'?'be-atk':'be-def'}"><div class="be-hdr"><span>${st.type==='ATK'?'⚔':'🛡'} ${labels[si]}</span><span style="display:flex;gap:4px;align-items:center"><span class="be-res ${tier?'active':''}">T${tier||'—'}</span>${filled.length===5?`<span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span>`:''}</span></div>`;
-    st.slots.forEach((sl,sli)=>{
-      h+=`<div class="be-slot"><span class="be-sn">${sli+1}</span><select class="be-sel" onchange="beF(${si},${sli},this.value)"><option value="">— empty —</option>`;
-      elig.forEach(f=>{const dis=used.includes(f.name)&&sl.f!==f.name;h+=`<option value="${f.name}" ${sl.f===f.name?'selected':''} ${dis?'disabled':''}>${f.name} (${f.r==='Yellow'?'Y':'P'}·${f.t})</option>`;});
-      h+=`</select><input class="be-lv" type="number" min="1" max="20" value="${sl.lv}" onchange="beL(${si},${sli},this.value)"></div>`;
-    });
-    if(res){const showK=st.type==='ATK'?['PATK','MATK','IgnorePDEF','IgnoreMDEF','PvEDMG','PvPDMG']:['PDEF','MDEF','HP','PvEDMGRed','PvPDMGRed','PATK','MATK'];h+=`<div class="be-sp">${showK.filter(k=>res.stats[k]>0).map(k=>`<div class="be-spr"><span>${k}</span><span>${fmtV(res.stats[k])}</span></div>`).join('')}</div>`;}
-    return h+'</div>';
-  }).join('');
-  const errs=[],warns=[];
-  state.beStatues.forEach((st,si)=>{
-    const names=st.slots.map(s=>s.f).filter(Boolean);const seen=new Set();
-    names.forEach(n=>{if(seen.has(n))errs.push(`[${labels[si]}] Duplicate: ${n}`);seen.add(n);});
-    st.slots.forEach((sl,sli)=>{if(!sl.f)return;const f=FEATHERS.find(x=>x.name===sl.f);if(!f)return;if(st.type==='ATK'&&f.t==='DEF')errs.push(`[${labels[si]}] Slot ${sli+1}: DEF feather in ATK statue`);if(st.type==='DEF'&&f.t==='ATK')errs.push(`[${labels[si]}] Slot ${sli+1}: ATK feather in DEF statue`);});
-    if(names.length===5){const comp=checkSet(st.slots);if(!comp.valid)warns.push(`[${labels[si]}] ${comp.name} — no set bonus applied`);}
-  });
-  document.getElementById('val-bar').innerHTML=(errs.length?`<div class="vbox vbox-err">${errs.map(e=>`<div>✗ ${e}</div>`).join('')}</div>`:'')+(warns.length?`<div class="vbox vbox-warn">${warns.map(w=>`<div>⚠ ${w}</div>`).join('')}</div>`:'')+(!errs.length&&!warns.length?`<div class="vbox vbox-ok">✓ All builds legal — Raven's Hour active</div>`:'');
-}
-function beF(si,sli,v){state.beStatues[si].slots[sli].f=v;renderEditor();}
-function beL(si,sli,v){state.beStatues[si].slots[sli].lv=Math.min(20,Math.max(1,parseInt(v)||1));renderEditor();}
-function showTab(id){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['opt','editor'][i]===id));document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));document.getElementById('pane-'+id).classList.add('on');if(id==='editor')renderEditor();}
 function setStatus(t,warn){
   const el=document.getElementById('status-txt');
   el.textContent=t;
@@ -575,7 +889,7 @@ function startTimer(){
 }
 function showProg(v){document.getElementById('prog-bar').style.display=v?'block':'none';}
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
-renderPools();renderSliders();
+renderPools();renderSliders('slider-grid','presets','preset-desc','weights','activePreset');
 
 function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
