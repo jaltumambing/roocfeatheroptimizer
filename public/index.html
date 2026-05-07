@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.7 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.9 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -497,16 +497,16 @@ const RH_DEF={};
 .forEach(([t,hp,pveM,pvpRed,defM,pvpM])=>{RH_DEF[t]={hpFlat:hp,pveMult:pveM,pvpDmgRed:pvpRed,defMult:defM,pvpMult:pvpM};});
 
 // Raven's Prestige (3Y+2P) - ATK statue
-// Cols: pvpDmgBonus(flat), atkMult%, pveMult%, patkFlat, pvpMult%
+// Cols: pvpDmgBonus(flat), pveMult%, patkFlat, defMult%  — NO atkMult
 const RP_ATK={};
-[[1,9,0.10,0.30,12],[2,12,0.11,0.33,16],[3,15,0.12,0.36,20],[4,18,0.13,0.39,24],[5,21,0.14,0.42,28],[6,24,0.15,0.45,32],[7,27,0.16,0.48,36],[8,30,0.17,0.51,40],[9,33,0.18,0.54,44],[10,36,0.20,0.60,48],[11,39,0.21,0.62,50],[12,42,0.22,0.64,52],[13,45,0.23,0.66,54],[14,48,0.24,0.68,56],[15,51,0.25,0.70,58],[16,54,0.26,0.72,60],[17,57,0.27,0.74,62],[18,60,0.28,0.76,64],[19,63,0.29,0.78,66],[20,66,0.30,0.80,68]]
-.forEach(([t,pvpBonus,atkM,pveM,patkFlat])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,atkMult:atkM,pveMult:pveM,patkFlat,pvpMult:pveM};});
+[[1,9,0.30,12,0.10],[2,12,0.33,16,0.11],[3,15,0.36,20,0.12],[4,18,0.39,24,0.13],[5,21,0.42,28,0.14],[6,24,0.45,32,0.15],[7,27,0.48,36,0.16],[8,30,0.51,40,0.17],[9,33,0.54,44,0.18],[10,36,0.60,48,0.20],[11,39,0.62,50,0.21],[12,42,0.64,52,0.22],[13,45,0.66,54,0.23],[14,48,0.68,56,0.24],[15,51,0.70,58,0.25],[16,54,0.72,60,0.26],[17,57,0.74,62,0.27],[18,60,0.76,64,0.28],[19,63,0.78,66,0.29],[20,66,0.80,68,0.30]]
+.forEach(([t,pvpBonus,pveM,patkFlat,defM])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,pveMult:pveM,patkFlat,defMult:defM};});
 
 // Raven's Prestige (3Y+2P) - DEF statue
-// Cols: hpFlat, pvpDmgBonus(flat), atkMult%, pveMult%
+// Cols: hpFlat, pvpDmgBonus(flat), pveMult%, defMult%  — NO atkMult
 const RP_DEF={};
-[[1,100,9,0.10,0.30],[2,180,12,0.11,0.33],[3,260,15,0.12,0.36],[4,340,18,0.13,0.39],[5,420,21,0.14,0.42],[6,500,24,0.15,0.45],[7,580,27,0.16,0.48],[8,660,30,0.17,0.51],[9,740,33,0.18,0.54],[10,820,36,0.20,0.60],[11,860,39,0.21,0.62],[12,900,42,0.22,0.64],[13,940,45,0.23,0.66],[14,980,48,0.24,0.68],[15,1020,51,0.25,0.70],[16,1060,54,0.26,0.72],[17,1100,57,0.27,0.74],[18,1140,60,0.28,0.76],[19,1180,63,0.29,0.78],[20,1220,66,0.30,0.80]]
-.forEach(([t,hp,pvpBonus,atkM,pveM])=>{RP_DEF[t]={hpFlat:hp,pvpDmgBonus:pvpBonus,atkMult:atkM,pveMult:pveM,pvpMult:pveM};});
+[[1,100,9,0.30,0.10],[2,180,12,0.33,0.11],[3,260,15,0.36,0.12],[4,340,18,0.39,0.13],[5,420,21,0.42,0.14],[6,500,24,0.45,0.15],[7,580,27,0.48,0.16],[8,660,30,0.51,0.17],[9,740,33,0.54,0.18],[10,820,36,0.60,0.20],[11,860,39,0.62,0.21],[12,900,42,0.64,0.22],[13,940,45,0.66,0.23],[14,980,48,0.68,0.24],[15,1020,51,0.70,0.25],[16,1060,54,0.72,0.26],[17,1100,57,0.74,0.27],[18,1140,60,0.76,0.28],[19,1180,63,0.78,0.29],[20,1220,66,0.80,0.30]]
+.forEach(([t,hp,pvpBonus,pveM,defM])=>{RP_DEF[t]={hpFlat:hp,pvpDmgBonus:pvpBonus,pveMult:pveM,defMult:defM};});
 
 function checkSet(slots){
   const names=slots.map(s=>s.f).filter(Boolean);
@@ -534,31 +534,42 @@ function applySetBonus(raw,type,tier,setName){
       s.PvPDMGRed+=b.pvpDmgRed;
       s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
     } else {
-      // RP DEF: pvpDmgBonus flat, atkMult on ATK stats, pveMult on PvE, pvpMult on PvP
+      // RP DEF: hpFlat + pvpDmgBonus(flat) + pveMult on PvEDMGRed + defMult on PDEF/MDEF/PDMGRed/MDMGRed
       s.PvPDMG+=b.pvpDmgBonus;
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+    }
+  } else {
+    // ATK statue
+    const b=isRP?RP_ATK[tier]:RH_ATK[tier];
+    if(!b)return s;
+    if(!isRP){
+      // RH ATK: atkMult on ATK stats, pveMult on PvEDMG, pvpMult on PvPDMG, pvpDmgBonus+patkFlat flat
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
       s.MATK=Math.floor(s.MATK*(1+b.atkMult));
       s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
       s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
-      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
-      s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
+      s.PDMG=s.PDMG*(1+b.atkMult);
+      s.MDMG=s.MDMG*(1+b.atkMult);
+      s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+      s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
+      s.PvPDMG+=b.pvpDmgBonus;
+      s.PATK+=b.patkFlat;
+      s.MATK+=b.patkFlat;
+    } else {
+      // RP ATK: pvpDmgBonus(flat) + pveMult on PvEDMG + patkFlat + defMult on DEF stats — NO atkMult
+      s.PvPDMG+=b.pvpDmgBonus;
+      s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+      s.PATK+=b.patkFlat;
+      s.MATK+=b.patkFlat;
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
     }
-  } else {
-    // ATK statue — both RH and RP have similar structure
-    const b=isRP?RP_ATK[tier]:RH_ATK[tier];
-    if(!b)return s;
-    s.PATK=Math.floor(s.PATK*(1+b.atkMult));
-    s.MATK=Math.floor(s.MATK*(1+b.atkMult));
-    s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
-    s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
-    s.PDMG=s.PDMG*(1+b.atkMult);
-    s.MDMG=s.MDMG*(1+b.atkMult);
-    s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
-    s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
-    s.PvPDMG+=b.pvpDmgBonus;
-    s.PATK+=b.patkFlat;
-    s.MATK+=b.patkFlat;
-    s.HP+=b.hpFlat||0;
   }
   s.ATK=(s.PATK||0)+(s.MATK||0);
   return s;
