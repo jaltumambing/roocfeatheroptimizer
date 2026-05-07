@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.1.1 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.1.3 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -668,24 +668,36 @@ function comboCost(combo,floorLv){
   return cost;
 }
 
+// Pre-cache combo scores per floor level to avoid recomputing
+const _comboScoreCache=new Map();
+function scoreComboFast(combo,type,floorLv,weights){
+  const key=combo.yellows.join(',')+'/'+combo.purples.join(',')+'/'+type+'/'+floorLv;
+  if(_comboScoreCache.has(key))return _comboScoreCache.get(key);
+  const sc=scoreCombo(combo,type,floorLv,weights);
+  _comboScoreCache.set(key,sc);
+  return sc;
+}
+
 function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   const allTypes=[...atkTiers.map(()=>'ATK'),...defTiers.map(()=>'DEF')];
   const allTiers=[...atkTiers,...defTiers];
   const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=0;});
 
-  // Phase 1: for each statue, pick best scoring combo within remaining budget
+  // Phase 1: per statue, score all combos via cache, sort, pick best feasible
   const chosen=[];
   for(let si=0;si<10;si++){
     const type=allTypes[si];
     const floorLv=allTiers[si];
     const combos=type==='ATK'?COMBOS_ATK:COMBOS_DEF;
-    let bestScore=-Infinity,bestCombo=null;
-    for(const combo of combos){
+    const sorted=combos.map(c=>({combo:c,sc:scoreComboFast(c,type,floorLv,weights)}))
+      .sort((a,b)=>b.sc-a.sc);
+    let bestCombo=null;
+    for(let i=0;i<sorted.length;i++){
+      const {combo}=sorted[i];
       const cost=comboCost(combo,floorLv);
-      // Check budget feasibility
-      if(!POOLS.every(p=>poolUsed[p.name]+(cost[p.name]||0)<=poolBudgets[p.name]))continue;
-      const sc=scoreCombo(combo,type,floorLv,weights);
-      if(sc>bestScore){bestScore=sc;bestCombo=combo;}
+      if(POOLS.every(p=>poolUsed[p.name]+(cost[p.name]||0)<=poolBudgets[p.name])){
+        bestCombo=combo;break;
+      }
     }
     if(!bestCombo)return null;
     const cost=comboCost(bestCombo,floorLv);
@@ -698,35 +710,22 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   chosen.forEach(({si,type,floorLv,combo})=>{
     combo.yellows.concat(combo.purples).forEach(name=>{
       const f=FEATHERS.find(x=>x.name===name);
-      slots.push({si,name,pool:f.pool,lv:floorLv,floor:floorLv,type,set:combo.set});
+      slots.push({si,name,pool:f.pool,lv:floorLv,floor:floorLv,type});
     });
   });
 
-  // Phase 2: greedy surplus — score gain uses full statue score delta
-  // Build a lookup: si → slots for that statue
-  const statueSlots=Array.from({length:10},(_,i)=>slots.filter(s=>s.si===i));
-  const statueSets=chosen.map(c=>c.combo.set);
-  function statueScore(si){
-    const st=statueSlots[si];
-    const slotObjs=st.map(s=>({f:s.name,lv:s.lv}));
-    const r=calcStatueResult(slotObjs,allTypes[si]);
-    return r?scoreFromStatsNorm(r.stats,weights):0;
-  }
+  // Phase 2: greedy surplus — per-feather score delta
   let any=true;
   while(any){
-    any=false;let bestR=-1,bestS=null,bestGain=0;
+    any=false;let bestR=-1,bestS=null;
     for(const fs of slots){
       if(fs.lv>=20)continue;
       const stepCost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
       if(stepCost<=0||poolUsed[fs.pool]+stepCost>poolBudgets[fs.pool])continue;
-      const before=statueScore(fs.si);
-      fs.lv++;
-      const after=statueScore(fs.si);
-      fs.lv--;
-      const gain=after-before;
+      const gain=scoreFromStatsNorm(statObj(fs.name,fs.lv+1),weights)-scoreFromStatsNorm(statObj(fs.name,fs.lv),weights);
       if(gain<=0)continue;
       const r=gain/stepCost;
-      if(r>bestR){bestR=r;bestS=fs;bestGain=gain;}
+      if(r>bestR){bestR=r;bestS=fs;}
     }
     if(bestS){
       poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);
@@ -735,10 +734,11 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   }
 
   // Assemble statues
+  const statueSlots=Array.from({length:10},(_,i)=>slots.filter(s=>s.si===i));
   const statues=[];
   for(let si=0;si<10;si++){
     const my=statueSlots[si];
-    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si],set:statueSets[si]});
+    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si]});
   }
   const score=statues.reduce((sum,st)=>{
     const r=calcStatueResult(st.slots,st.type);
@@ -754,6 +754,7 @@ function runOptimizer(){
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   document.getElementById('run-btn').disabled=true;
+  _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
   const _timer=startTimer();
   setTimeout(()=>{
