@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.5 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.6 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -460,10 +460,30 @@ function getStatAt(name,lv){
   const t=(lv-lo)/(hi-lo);
   return SD[name][lo].map((v,i)=>v+(SD[name][hi][i]-v)*t);
 }
-function statObj(name,lv){const a=getStatAt(name,lv);const o={};SK.forEach((k,i)=>{o[k]=a[i]||0});return o;}
-function scoreFromStats(s,w){return Object.keys(w).reduce((t,k)=>t+(s[k]||0)*(w[k]||0),0);}
-function scoreFromStatsNorm(s,w){return Object.keys(w).reduce((t,k)=>{const mx=STAT_MAX[k]||1;return t+((s[k]||0)/mx)*(w[k]||0);},0);}
-function featherScore(name,lv,w){return scoreFromStats(statObj(name,lv),w);}
+function statObj(name,lv){
+  const a=getStatAt(name,lv);
+  const o={};
+  SK.forEach((k,i)=>{o[k]=a[i]||0});
+  // Combine PATK+MATK into ATK for scoring (they always appear equally)
+  o.ATK=(o.PATK||0)+(o.MATK||0);
+  return o;
+}
+function featherScore(name,lv,w){
+  const s=statObj(name,lv);
+  return Object.keys(w).reduce((t,k)=>{
+    const scale=STAT_SCALE[k]||1;
+    return t+(s[k]||0)*scale*(w[k]||0);
+  },0);
+}function scoreFromStats(s,w){return Object.keys(w).reduce((t,k)=>t+(s[k]||0)*(w[k]||0),0);}
+function scoreFromStatsNorm(s,w){
+  // Use STAT_SCALE as the normalizer — each stat divided by its scale value
+  // gives a dimensionless score, then multiplied by user priority (0-4)
+  return Object.keys(w).reduce((t,k)=>{
+    const scale=STAT_SCALE[k]||1;
+    return t+((s[k]||0)*scale)*(w[k]||0);
+  },0);
+}
+
 const DEF_SET={},ATK_SET={};
 for(let t=1;t<=20;t++){
   const hp=[110,200,290,380,470,560,650,740,830,920,960,1000,1040,1080,1120,1160,1200,1240,1280,1320][t-1];
@@ -491,7 +511,7 @@ function calcStatueResult(slots,type){
 }
 const WEIGHT_META={
   _atkGroup:{group:'ATK Stats'},
-  PATK:{label:'PATK'},MATK:{label:'MATK'},IgnorePDEF:{label:'Ignore PDEF'},IgnoreMDEF:{label:'Ignore MDEF'},PDMG:{label:'PDMG'},MDMG:{label:'MDMG'},
+  ATK:{label:'ATK (PATK+MATK)'},IgnorePDEF:{label:'Ignore PDEF'},IgnoreMDEF:{label:'Ignore MDEF'},PDMG:{label:'PDMG'},MDMG:{label:'MDMG'},
   _defGroup:{group:'DEF Stats'},
   PDEF:{label:'PDEF'},MDEF:{label:'MDEF'},HP:{label:'HP'},PDMGRed:{label:'PDMG Reduction'},MDMGRed:{label:'MDMG Reduction'},
   _pveGroup:{group:'PvE'},
@@ -501,16 +521,31 @@ const WEIGHT_META={
 };
 // 0=Ignore 1=Nice to have 2=Important 3=Priority 4=Must maximize
 const PRESETS={
-  'PvE Attack':{desc:'Maximize PvE damage output. Aggressively chases Ign.PDEF, PvE DMG Bonus, PATK and MATK.',w:{PATK:3,MATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:4,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
-  'PvE Defense':{desc:'Maximize PvE survivability. Prioritizes PDEF, MDEF, HP, and PvE DMG Reduction.',w:{PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:4,PvPDMG:0,PvPDMGRed:0}},
-  'PvP Attack':{desc:'Maximize PvP damage output. Ign.PDEF, PvP DMG Bonus, PATK and MATK are top priority.',w:{PATK:3,MATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMG:4,PvPDMGRed:0}},
-  'PvP Defense':{desc:'Maximize PvP survivability. Prioritizes PDEF, MDEF, HP, and PvP DMG Reduction.',w:{PATK:0,MATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:4}},
-  'PvE Balanced':{desc:'Balanced PvE build with equal ATK and DEF. Chases PvE DMG Bonus and Ign.PDEF while keeping PDEF/MDEF as a solid foundation.',w:{PATK:2,MATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:3,PvEDMGRed:2,PvPDMG:0,PvPDMGRed:0}},
-  'PvP Balanced':{desc:'Balanced PvP build with equal ATK and DEF. Prioritizes PvP DMG Bonus, PvP DMG Reduction, and Ign.PDEF. Neither offense nor defense dominates.',w:{PATK:2,MATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:3,PvPDMGRed:3}},
-  'ALL Balanced':{desc:'Equal weight across all stats. Good general-purpose build for players who participate in both PvE and PvP content.',w:{PATK:2,MATK:2,IgnorePDEF:2,IgnoreMDEF:1,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:1,PvEDMGRed:1,PvPDMG:1,PvPDMGRed:1}},
+  'PvE Attack':{desc:'Maximize PvE damage output. Aggressively chases Ign.PDEF, PvE DMG Bonus and ATK.',w:{ATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:4,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
+  'PvE Defense':{desc:'Maximize PvE survivability. Prioritizes PDEF, MDEF, HP, and PvE DMG Reduction.',w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:4,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Attack':{desc:'Maximize PvP damage output. Ign.PDEF, PvP DMG Bonus and ATK are top priority.',w:{ATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMG:4,PvPDMGRed:0}},
+  'PvP Defense':{desc:'Maximize PvP survivability. Prioritizes PDEF, MDEF, HP, and PvP DMG Reduction.',w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:4}},
+  'PvE Balanced':{desc:'Balanced PvE build with equal ATK and DEF. Chases PvE DMG Bonus and Ign.PDEF while keeping PDEF/MDEF as a solid foundation.',w:{ATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:3,PvEDMGRed:2,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Balanced':{desc:'Balanced PvP build with equal ATK and DEF. Prioritizes PvP DMG Bonus, PvP DMG Reduction, and Ign.PDEF.',w:{ATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:3,PvPDMGRed:3}},
+  'ALL Balanced':{desc:'Equal weight across all stats. Good general-purpose build for players who participate in both PvE and PvP content.',w:{ATK:2,IgnorePDEF:2,IgnoreMDEF:1,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:1,PvEDMGRed:1,PvPDMG:1,PvPDMGRed:1}},
 };
-// Stat max values at Lv20 for normalization
-const STAT_MAX={PATK:56,MATK:56,IgnorePDEF:164,IgnoreMDEF:164,PDMG:56,MDMG:56,PDEF:56,MDEF:56,HP:1320,PDMGRed:56,MDMGRed:56,PvEDMG:80,PvEDMGRed:80,PvPDMG:69,PvPDMGRed:69};
+// Derived stat scale (ATK=1.0, PATK+MATK treated as one stat)
+// Anchored from same-pool feather equivalences
+const STAT_SCALE={
+  ATK:1.000,    // PATK+MATK combined
+  PATK:0.500,   // half of ATK (for display/filter purposes)
+  MATK:0.500,
+  PDEF:0.533,
+  MDEF:0.267,
+  HP:0.0952,
+  IgnorePDEF:0.571,
+  IgnoreMDEF:0.571,
+  PvEDMG:0.295,
+  PvEDMGRed:0.295,
+  PvPDMG:0.738,
+  PvPDMGRed:0.738,
+  PDMG:204.8,MDMG:204.8,PDMGRed:204.8,MDMGRed:204.8,
+};
 const STAT_LABELS_FILTER=[
   {group:'ATK Stats',stats:['PATK','MATK','IgnorePDEF','IgnoreMDEF','PDMG','MDMG']},
   {group:'DEF Stats',stats:['PDEF','MDEF','HP','PDMGRed','MDMGRed']},
@@ -519,7 +554,7 @@ const STAT_LABELS_FILTER=[
 ];
 const state={pools:{},weights:{},weights2:{},filters:{},results:[],results2:[],filterResults:[],expanded:new Set(),expanded2:new Set(),expandedF:new Set(),activePreset:'',activePreset2:'',beStatues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:[{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1}]}))};
 POOLS.forEach(p=>{state.pools[p.name]=0;});
-Object.keys(STAT_MAX).forEach(k=>{state.weights[k]=0;state.weights2[k]=0;state.filters[k]='';});
+Object.keys(STAT_SCALE).forEach(k=>{state.weights[k]=0;state.weights2[k]=0;state.filters[k]='';});
 function selectBestFeathers(type,floorLv,weights){
   const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
   const P=FEATHERS.filter(f=>f.r==='Purple'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
