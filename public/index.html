@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.6 · Raven's Hour</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.0.7 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -277,7 +277,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div id="preset-desc" class="preset-desc"></div>
   <div class="slider-grid" id="slider-grid"></div>
 
-  <div class="notice">⚠ Only <strong>Raven's Hour</strong> set data loaded (4 Yellow + 1 Purple per statue). Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
+  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P) and <strong>Raven's Prestige</strong> (3Y+2P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
 
   <div class="run-row">
     <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
@@ -320,7 +320,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div id="preset-desc2" class="preset-desc"></div>
   <div class="slider-grid" id="slider-grid2"></div>
 
-  <div class="notice">⚠ Only <strong>Raven's Hour</strong> set data loaded (4 Yellow + 1 Purple per statue). Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
+  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P) and <strong>Raven's Prestige</strong> (3Y+2P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
 
   <div class="run-row">
     <button class="run-btn" id="run-btn2" onclick="runOptimizer2()">Run Optimizer</button>
@@ -356,7 +356,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
   <div class="filter-grid" id="filter-grid"></div>
 
-  <div class="notice">⚠ Only <strong>Raven's Hour</strong> set data loaded. Builds failing any filter are excluded entirely — no partial matches.</div>
+  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P) and <strong>Raven's Prestige</strong> (3Y+2P). Builds failing any filter are excluded entirely — no partial matches.</div>
 
   <div class="run-row">
     <button class="run-btn" id="filter-run-btn" onclick="runFilterOptimizer()">Find Builds</button>
@@ -484,30 +484,90 @@ function scoreFromStatsNorm(s,w){
   },0);
 }
 
-const DEF_SET={},ATK_SET={};
-for(let t=1;t<=20;t++){
-  const hp=[110,200,290,380,470,560,650,740,830,920,960,1000,1040,1080,1120,1160,1200,1240,1280,1320][t-1];
-  const dM=[.10,.11,.12,.13,.14,.15,.16,.17,.18,.20,.21,.22,.23,.24,.25,.26,.27,.28,.29,.30][t-1];
-  const pveM=[.30,.33,.36,.39,.42,.45,.48,.51,.54,.60,.62,.64,.66,.68,.70,.72,.74,.76,.78,.80][t-1];
-  const pvpFlat=[12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66,69][t-1];
-  DEF_SET[t]={hp,defMult:dM,pveMult:pveM,pvpMult:pveM,pvpDmgRed:pvpFlat};ATK_SET[t]={hp,atkMult:dM,pveMult:pveM,pvpMult:pveM,pvpDmgBonus:pvpFlat};
-}
-function applySetBonus(raw,type,tier){
-  const s={...raw};
-  if(type==='DEF'){const b=DEF_SET[tier];s.HP+=b.hp;s.PDEF=Math.floor(s.PDEF*(1+b.defMult));s.MDEF=Math.floor(s.MDEF*(1+b.defMult));s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));s.PvPDMGRed+=b.pvpDmgRed;}
-  else{const b=ATK_SET[tier];s.PATK=Math.floor(s.PATK*(1+b.atkMult));s.MATK=Math.floor(s.MATK*(1+b.atkMult));s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));s.PDMG=Math.floor(s.PDMG*(1+b.atkMult));s.MDMG=Math.floor(s.MDMG*(1+b.atkMult));s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));s.HP+=b.hp;s.PvPDMG+=b.pvpDmgBonus;}
-  return s;
-}
+// Raven's Hour (4Y+1P) - ATK statue
+// Cols: pvpDmgBonus(flat), atkMult%, pveMult%, patkFlat, pvpMult%
+const RH_ATK={};
+[[1,12,0.10,0.30,13,0.30],[2,15,0.11,0.33,18,0.33],[3,18,0.12,0.36,23,0.36],[4,21,0.13,0.39,28,0.39],[5,24,0.14,0.42,33,0.42],[6,27,0.15,0.45,38,0.45],[7,30,0.16,0.48,43,0.48],[8,33,0.17,0.51,48,0.51],[9,36,0.18,0.54,53,0.54],[10,39,0.20,0.60,58,0.60],[11,42,0.21,0.62,60,0.62],[12,45,0.22,0.64,62,0.64],[13,48,0.23,0.66,64,0.66],[14,51,0.24,0.68,66,0.68],[15,54,0.25,0.70,68,0.70],[16,57,0.26,0.72,70,0.72],[17,60,0.27,0.74,72,0.74],[18,63,0.28,0.76,74,0.76],[19,66,0.29,0.78,76,0.78],[20,69,0.30,0.80,78,0.80]]
+.forEach(([t,pvpBonus,atkM,pveM,patkFlat,pvpM])=>{RH_ATK[t]={pvpDmgBonus:pvpBonus,atkMult:atkM,pveMult:pveM,patkFlat,pvpMult:pvpM};});
+
+// Raven's Hour (4Y+1P) - DEF statue
+// Cols: hpFlat, pveMult%, pvpDmgRedFlat, defMult%, pvpMult%
+const RH_DEF={};
+[[1,110,0.30,12,0.10,0.30],[2,200,0.33,15,0.11,0.33],[3,290,0.36,18,0.12,0.36],[4,380,0.39,21,0.13,0.39],[5,470,0.42,24,0.14,0.42],[6,560,0.45,27,0.15,0.45],[7,650,0.48,30,0.16,0.48],[8,740,0.51,33,0.17,0.51],[9,830,0.54,36,0.18,0.54],[10,920,0.60,39,0.20,0.60],[11,960,0.62,42,0.21,0.62],[12,1000,0.64,45,0.22,0.64],[13,1040,0.66,48,0.23,0.66],[14,1080,0.68,51,0.24,0.68],[15,1120,0.70,54,0.25,0.70],[16,1160,0.72,57,0.26,0.72],[17,1200,0.74,60,0.27,0.74],[18,1240,0.76,63,0.28,0.76],[19,1280,0.78,66,0.29,0.78],[20,1320,0.80,69,0.30,0.80]]
+.forEach(([t,hp,pveM,pvpRed,defM,pvpM])=>{RH_DEF[t]={hpFlat:hp,pveMult:pveM,pvpDmgRed:pvpRed,defMult:defM,pvpMult:pvpM};});
+
+// Raven's Prestige (3Y+2P) - ATK statue
+// Cols: pvpDmgBonus(flat), atkMult%, pveMult%, patkFlat, pvpMult%
+const RP_ATK={};
+[[1,9,0.10,0.30,12],[2,12,0.11,0.33,16],[3,15,0.12,0.36,20],[4,18,0.13,0.39,24],[5,21,0.14,0.42,28],[6,24,0.15,0.45,32],[7,27,0.16,0.48,36],[8,30,0.17,0.51,40],[9,33,0.18,0.54,44],[10,36,0.20,0.60,48],[11,39,0.21,0.62,50],[12,42,0.22,0.64,52],[13,45,0.23,0.66,54],[14,48,0.24,0.68,56],[15,51,0.25,0.70,58],[16,54,0.26,0.72,60],[17,57,0.27,0.74,62],[18,60,0.28,0.76,64],[19,63,0.29,0.78,66],[20,66,0.30,0.80,68]]
+.forEach(([t,pvpBonus,atkM,pveM,patkFlat])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,atkMult:atkM,pveMult:pveM,patkFlat,pvpMult:pveM};});
+
+// Raven's Prestige (3Y+2P) - DEF statue
+// Cols: hpFlat, pvpDmgBonus(flat), atkMult%, pveMult%
+const RP_DEF={};
+[[1,100,9,0.10,0.30],[2,180,12,0.11,0.33],[3,260,15,0.12,0.36],[4,340,18,0.13,0.39],[5,420,21,0.14,0.42],[6,500,24,0.15,0.45],[7,580,27,0.16,0.48],[8,660,30,0.17,0.51],[9,740,33,0.18,0.54],[10,820,36,0.20,0.60],[11,860,39,0.21,0.62],[12,900,42,0.22,0.64],[13,940,45,0.23,0.66],[14,980,48,0.24,0.68],[15,1020,51,0.25,0.70],[16,1060,54,0.26,0.72],[17,1100,57,0.27,0.74],[18,1140,60,0.28,0.76],[19,1180,63,0.29,0.78],[20,1220,66,0.30,0.80]]
+.forEach(([t,hp,pvpBonus,atkM,pveM])=>{RP_DEF[t]={hpFlat:hp,pvpDmgBonus:pvpBonus,atkMult:atkM,pveMult:pveM,pvpMult:pveM};});
+
 function checkSet(slots){
-  const filled=slots.filter(s=>s.f);if(filled.length<5)return{valid:false,name:'Incomplete'};
-  const y=filled.filter(s=>FEATHERS.find(f=>f.name===s.f)?.r==='Yellow').length;
-  if(y===4)return{valid:true,name:"Raven's Hour"};return{valid:false,name:`${y}Y+${5-y}P`};
+  const names=slots.map(s=>s.f).filter(Boolean);
+  if(names.length!==5)return{valid:false,name:'Incomplete'};
+  const yellows=names.filter(n=>FEATHERS.find(f=>f.name===n)?.r==='Yellow').length;
+  const purples=names.filter(n=>FEATHERS.find(f=>f.name===n)?.r==='Purple').length;
+  if(yellows===4&&purples===1)return{valid:true,name:"Raven's Hour",set:'RH'};
+  if(yellows===3&&purples===2)return{valid:true,name:"Raven's Prestige",set:'RP'};
+  return{valid:false,name:`${yellows}Y+${purples}P (invalid)`};
+}
+function applySetBonus(raw,type,tier,setName){
+  const s={...raw};
+  const isRP=setName==='RP';
+  if(type==='DEF'){
+    const b=isRP?RP_DEF[tier]:RH_DEF[tier];
+    if(!b)return s;
+    s.HP+=b.hpFlat;
+    if(!isRP){
+      // RH DEF: defMult on PDEF/MDEF/HP/PDMGRed/MDMGRed, pveMult on PvEDMGRed, pvpDmgRed flat, pvpMult on PvPDMGRed
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
+      s.PvPDMGRed+=b.pvpDmgRed;
+      s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
+    } else {
+      // RP DEF: pvpDmgBonus flat, atkMult on ATK stats, pveMult on PvE, pvpMult on PvP
+      s.PvPDMG+=b.pvpDmgBonus;
+      s.PATK=Math.floor(s.PATK*(1+b.atkMult));
+      s.MATK=Math.floor(s.MATK*(1+b.atkMult));
+      s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
+      s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
+      s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
+    }
+  } else {
+    // ATK statue — both RH and RP have similar structure
+    const b=isRP?RP_ATK[tier]:RH_ATK[tier];
+    if(!b)return s;
+    s.PATK=Math.floor(s.PATK*(1+b.atkMult));
+    s.MATK=Math.floor(s.MATK*(1+b.atkMult));
+    s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
+    s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
+    s.PDMG=s.PDMG*(1+b.atkMult);
+    s.MDMG=s.MDMG*(1+b.atkMult);
+    s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+    s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
+    s.PvPDMG+=b.pvpDmgBonus;
+    s.PATK+=b.patkFlat;
+    s.MATK+=b.patkFlat;
+    s.HP+=b.hpFlat||0;
+  }
+  s.ATK=(s.PATK||0)+(s.MATK||0);
+  return s;
 }
 function calcStatueResult(slots,type){
   const filled=slots.filter(s=>s.f);if(filled.length<5)return null;
   const comp=checkSet(slots);const tier=Math.min(...filled.map(s=>s.lv));
   const raw={};SK.forEach(k=>{raw[k]=0});filled.forEach(s=>{const o=statObj(s.f,s.lv);SK.forEach(k=>{raw[k]+=(o[k]||0)});});
-  return{stats:comp.valid?applySetBonus(raw,type,tier):{...raw},tier,comp};
+  return{stats:comp.valid?applySetBonus(raw,type,tier,comp.set):{...raw},tier,comp};
 }
 const WEIGHT_META={
   _atkGroup:{group:'ATK Stats'},
