@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.1.4 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.1.5 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -643,6 +643,13 @@ const STAT_LABELS_FILTER=[
 ];
 const state={pools:{},weights:{},weights2:{},filters:{},results:[],results2:[],filterResults:[],expanded:new Set(),expanded2:new Set(),expandedF:new Set(),activePreset:'',activePreset2:'',beStatues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:[{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1}]}))};
 POOLS.forEach(p=>{state.pools[p.name]=0;});
+// Load saved pool inventory from localStorage
+(function(){
+  try{
+    const saved=localStorage.getItem('rooc_pools');
+    if(saved){const d=JSON.parse(saved);POOLS.forEach(p=>{if(d[p.name])state.pools[p.name]=d[p.name];});}
+  }catch(e){}
+})();
 Object.keys(STAT_SCALE).forEach(k=>{state.weights[k]=0;state.weights2[k]=0;state.filters[k]='';});
 // Pre-compute all valid feather combos per statue type
 // Returns array of {yellows:[names], purples:[names], set:'RH'|'RP'}
@@ -767,6 +774,7 @@ function runOptimizer(){
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat priority > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
+  try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
   document.getElementById('run-btn').disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
