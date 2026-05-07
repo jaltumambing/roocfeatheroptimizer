@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.0.9 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.1.0 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -281,6 +281,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
   <div class="run-row">
     <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
+    <label style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px">
+      Results:
+      <input id="results-count" type="number" min="1" max="200" placeholder="20" style="width:56px;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;text-align:center">
+    </label>
     <span class="status" id="status-txt"></span><div class="spin-wrap" id="spin-wrap"><div class="spinner"></div><span id="spin-msg" style="font-size:11px;color:var(--color-text-tertiary)"></span></div>
   </div>
   <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
@@ -626,45 +630,123 @@ const STAT_LABELS_FILTER=[
 const state={pools:{},weights:{},weights2:{},filters:{},results:[],results2:[],filterResults:[],expanded:new Set(),expanded2:new Set(),expandedF:new Set(),activePreset:'',activePreset2:'',beStatues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:[{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1},{f:'',lv:1}]}))};
 POOLS.forEach(p=>{state.pools[p.name]=0;});
 Object.keys(STAT_SCALE).forEach(k=>{state.weights[k]=0;state.weights2[k]=0;state.filters[k]='';});
-function selectBestFeathers(type,floorLv,weights){
-  const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
-  const P=FEATHERS.filter(f=>f.r==='Purple'&&(type==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
-  const yS=Y.map(f=>({...f,sc:featherScore(f.name,floorLv,weights)})).sort((a,b)=>b.sc-a.sc);
-  const pS=P.map(f=>({...f,sc:featherScore(f.name,floorLv,weights)})).sort((a,b)=>b.sc-a.sc);
-  if(yS.length<4||pS.length<1)return null;
-  return [...yS.slice(0,4),...pS.slice(0,1)];
+// Pre-compute all valid feather combos per statue type
+// Returns array of {yellows:[names], purples:[names], set:'RH'|'RP'}
+function getFeatherCombos(type){
+  const isATK=type==='ATK';
+  const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(isATK?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
+  const P=FEATHERS.filter(f=>f.r==='Purple'&&(isATK?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
+  const combos=[];
+  // RH: C(Y,4) x C(P,1)
+  for(let a=0;a<Y.length;a++)for(let b=a+1;b<Y.length;b++)for(let c=b+1;c<Y.length;c++)for(let d=c+1;d<Y.length;d++)
+    for(let p=0;p<P.length;p++)
+      combos.push({yellows:[Y[a].name,Y[b].name,Y[c].name,Y[d].name],purples:[P[p].name],set:'RH'});
+  // RP: C(Y,3) x C(P,2)
+  for(let a=0;a<Y.length;a++)for(let b=a+1;b<Y.length;b++)for(let c=b+1;c<Y.length;c++)
+    for(let p=0;p<P.length;p++)for(let q=p+1;q<P.length;q++)
+      combos.push({yellows:[Y[a].name,Y[b].name,Y[c].name],purples:[P[p].name,P[q].name],set:'RP'});
+  return combos;
 }
-function buildFromTiers(atkTiers,defTiers,poolBudgets,weights){
+const COMBOS_ATK=getFeatherCombos('ATK');
+const COMBOS_DEF=getFeatherCombos('DEF');
+
+// Score a combo as a full statue (with set bonus) at a given floor level
+function scoreCombo(combo,type,floorLv,weights){
+  const slots=combo.yellows.concat(combo.purples).map(f=>({f,lv:floorLv}));
+  const result=calcStatueResult(slots,type);
+  if(!result||!result.comp.valid)return -1;
+  return scoreFromStatsNorm(result.stats,weights);
+}
+
+// Cost of a combo at a given floor level
+function comboCost(combo,floorLv){
+  const cost={};POOLS.forEach(p=>{cost[p.name]=0;});
+  combo.yellows.concat(combo.purples).forEach(name=>{
+    const f=FEATHERS.find(x=>x.name===name);
+    cost[f.pool]+=costAt(name,floorLv);
+  });
+  return cost;
+}
+
+function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   const allTypes=[...atkTiers.map(()=>'ATK'),...defTiers.map(()=>'DEF')];
   const allTiers=[...atkTiers,...defTiers];
-  const slots=[];const floorCosts={};POOLS.forEach(p=>{floorCosts[p.name]=0;});
+  const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=0;});
+
+  // Phase 1: for each statue, pick best scoring combo within remaining budget
+  const chosen=[];
   for(let si=0;si<10;si++){
-    const sel=selectBestFeathers(allTypes[si],allTiers[si],weights);
-    if(!sel)return null;
-    sel.forEach(f=>{floorCosts[f.pool]+=costAt(f.name,allTiers[si]);slots.push({si,name:f.name,pool:f.pool,lv:allTiers[si],floor:allTiers[si],type:allTypes[si]});});
+    const type=allTypes[si];
+    const floorLv=allTiers[si];
+    const combos=type==='ATK'?COMBOS_ATK:COMBOS_DEF;
+    let bestScore=-Infinity,bestCombo=null;
+    for(const combo of combos){
+      const cost=comboCost(combo,floorLv);
+      // Check budget feasibility
+      if(!POOLS.every(p=>poolUsed[p.name]+(cost[p.name]||0)<=poolBudgets[p.name]))continue;
+      const sc=scoreCombo(combo,type,floorLv,weights);
+      if(sc>bestScore){bestScore=sc;bestCombo=combo;}
+    }
+    if(!bestCombo)return null;
+    const cost=comboCost(bestCombo,floorLv);
+    POOLS.forEach(p=>{poolUsed[p.name]+=(cost[p.name]||0);});
+    chosen.push({si,type,floorLv,combo:bestCombo});
   }
-  if(!POOLS.every(p=>floorCosts[p.name]<=poolBudgets[p.name]))return null;
-  const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=floorCosts[p.name];});
+
+  // Build slots array for surplus phase
+  const slots=[];
+  chosen.forEach(({si,type,floorLv,combo})=>{
+    combo.yellows.concat(combo.purples).forEach(name=>{
+      const f=FEATHERS.find(x=>x.name===name);
+      slots.push({si,name,pool:f.pool,lv:floorLv,floor:floorLv,type,set:combo.set});
+    });
+  });
+
+  // Phase 2: greedy surplus — score gain uses full statue score delta
+  // Build a lookup: si → slots for that statue
+  const statueSlots=Array.from({length:10},(_,i)=>slots.filter(s=>s.si===i));
+  const statueSets=chosen.map(c=>c.combo.set);
+  function statueScore(si){
+    const st=statueSlots[si];
+    const slotObjs=st.map(s=>({f:s.name,lv:s.lv}));
+    const r=calcStatueResult(slotObjs,allTypes[si]);
+    return r?scoreFromStatsNorm(r.stats,weights):0;
+  }
   let any=true;
   while(any){
-    any=false;let bestR=-1,bestS=null;
+    any=false;let bestR=-1,bestS=null,bestGain=0;
     for(const fs of slots){
       if(fs.lv>=20)continue;
-      const cost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
-      if(cost<=0||cost>poolBudgets[fs.pool]-poolUsed[fs.pool])continue;
-      const gain=featherScore(fs.name,fs.lv+1,weights)-featherScore(fs.name,fs.lv,weights);
+      const stepCost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
+      if(stepCost<=0||poolUsed[fs.pool]+stepCost>poolBudgets[fs.pool])continue;
+      const before=statueScore(fs.si);
+      fs.lv++;
+      const after=statueScore(fs.si);
+      fs.lv--;
+      const gain=after-before;
       if(gain<=0)continue;
-      const r=gain/cost;if(r>bestR){bestR=r;bestS=fs;}
+      const r=gain/stepCost;
+      if(r>bestR){bestR=r;bestS=fs;bestGain=gain;}
     }
-    if(bestS){poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);bestS.lv++;any=true;}
+    if(bestS){
+      poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);
+      bestS.lv++;any=true;
+    }
   }
+
+  // Assemble statues
   const statues=[];
   for(let si=0;si<10;si++){
-    const my=slots.filter(s=>s.si===si);
-    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si]});
+    const my=statueSlots[si];
+    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si],set:statueSets[si]});
   }
-  const score=statues.reduce((sum,st)=>{const r=calcStatueResult(st.slots,st.type);return sum+(r?scoreFromStats(r.stats,weights):0);},0);
-  return{statues,score,atkTiers:[...atkTiers],defTiers:[...defTiers]};
+  const score=statues.reduce((sum,st)=>{
+    const r=calcStatueResult(st.slots,st.type);
+    return sum+(r?scoreFromStatsNorm(r.stats,weights):0);
+  },0);
+  const atkT=statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+  const defT=statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+  return{statues,score,atkTiers:atkT,defTiers:defT};
 }
 function runOptimizer(){
   const weights=state.weights;
@@ -693,10 +775,11 @@ function runOptimizer(){
         add(st,[...st].reverse());add([...st].reverse(),st);
       }
       add([1,1,1,1,1],[1,1,1,1,1]);setProg(80);
+      const maxResults=Math.max(1,parseInt(document.getElementById('results-count').value)||20);
       const seen=new Set();
-      const top20=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,20);
-      state.results=top20;state.expanded.clear();renderResults('results-area',state.results,state.expanded,'');setProg(100);
-      _timer.stop(`Found ${top20.length} builds`);
+      const topN=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score).slice(0,maxResults);
+      state.results=topN;state.expanded.clear();renderResults('results-area',state.results,state.expanded,'');setProg(100);
+      _timer.stop(`Found ${topN.length} builds`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
   },30);
@@ -783,40 +866,7 @@ function runOptimizer(){
   },30);
 }
 function buildFromTiersNorm(atkTiers,defTiers,poolBudgets,weights){
-  const allTypes=[...atkTiers.map(()=>'ATK'),...defTiers.map(()=>'DEF')];
-  const allTiers=[...atkTiers,...defTiers];
-  const slots=[];const floorCosts={};POOLS.forEach(p=>{floorCosts[p.name]=0;});
-  for(let si=0;si<10;si++){
-    const Y=FEATHERS.filter(f=>f.r==='Yellow'&&(allTypes[si]==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
-    const P=FEATHERS.filter(f=>f.r==='Purple'&&(allTypes[si]==='ATK'?(f.t==='ATK'||f.t==='MIX'):(f.t==='DEF'||f.t==='MIX')));
-    const yS=Y.map(f=>({...f,sc:scoreFromStatsNorm(statObj(f.name,allTiers[si]),weights)})).sort((a,b)=>b.sc-a.sc);
-    const pS=P.map(f=>({...f,sc:scoreFromStatsNorm(statObj(f.name,allTiers[si]),weights)})).sort((a,b)=>b.sc-a.sc);
-    if(yS.length<4||pS.length<1)return null;
-    const sel=[...yS.slice(0,4),...pS.slice(0,1)];
-    sel.forEach(f=>{floorCosts[f.pool]+=costAt(f.name,allTiers[si]);slots.push({si,name:f.name,pool:f.pool,lv:allTiers[si],floor:allTiers[si],type:allTypes[si]});});
-  }
-  if(!POOLS.every(p=>floorCosts[p.name]<=poolBudgets[p.name]))return null;
-  const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=floorCosts[p.name];});
-  let any=true;
-  while(any){
-    any=false;let bestR=-1,bestS=null;
-    for(const fs of slots){
-      if(fs.lv>=20)continue;
-      const cost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
-      if(cost<=0||cost>poolBudgets[fs.pool]-poolUsed[fs.pool])continue;
-      const gain=scoreFromStatsNorm(statObj(fs.name,fs.lv+1),weights)-scoreFromStatsNorm(statObj(fs.name,fs.lv),weights);
-      if(gain<=0)continue;
-      const r=gain/cost;if(r>bestR){bestR=r;bestS=fs;}
-    }
-    if(bestS){poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);bestS.lv++;any=true;}
-  }
-  const statues=[];
-  for(let si=0;si<10;si++){
-    const my=slots.filter(s=>s.si===si);
-    statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si]});
-  }
-  const score=statues.reduce((sum,st)=>{const r=calcStatueResult(st.slots,st.type);return sum+(r?scoreFromStatsNorm(r.stats,weights):0);},0);
-  return{statues,score,atkTiers:[...atkTiers],defTiers:[...defTiers]};
+  return buildExhaustive(atkTiers,defTiers,poolBudgets,weights);
 }
 function runOptimizer2(){
   const weights=state.weights2;
