@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.1.3 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.1.4 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -596,13 +596,27 @@ const WEIGHT_META={
 };
 // 0=Ignore 1=Nice to have 2=Important 3=Priority 4=Must maximize
 const PRESETS={
-  'PvE Attack':{desc:'Maximize PvE damage output. Aggressively chases Ign.PDEF, PvE DMG Bonus and ATK.',w:{ATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:4,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
-  'PvE Defense':{desc:'Maximize PvE survivability. Prioritizes PDEF, MDEF, HP, and PvE DMG Reduction.',w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:4,PvPDMG:0,PvPDMGRed:0}},
-  'PvP Attack':{desc:'Maximize PvP damage output. Ign.PDEF, PvP DMG Bonus and ATK are top priority.',w:{ATK:3,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMG:4,PvPDMGRed:0}},
-  'PvP Defense':{desc:'Maximize PvP survivability. Prioritizes PDEF, MDEF, HP, and PvP DMG Reduction.',w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:4,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:4}},
-  'PvE Balanced':{desc:'Balanced PvE build with equal ATK and DEF. Chases PvE DMG Bonus and Ign.PDEF while keeping PDEF/MDEF as a solid foundation.',w:{ATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:3,PvEDMGRed:2,PvPDMG:0,PvPDMGRed:0}},
-  'PvP Balanced':{desc:'Balanced PvP build with equal ATK and DEF. Prioritizes PvP DMG Bonus, PvP DMG Reduction, and Ign.PDEF.',w:{ATK:2,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:3,PvPDMGRed:3}},
-  'ALL Balanced':{desc:'Equal weight across all stats. Good general-purpose build for players who participate in both PvE and PvP content.',w:{ATK:2,IgnorePDEF:2,IgnoreMDEF:1,PDMG:1,MDMG:1,PDEF:2,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:1,PvEDMGRed:1,PvPDMG:1,PvPDMGRed:1}},
+  // ATK row
+  'PvE Attack':{desc:'Maximize PvE damage. ATK + IgnorePDEF + PvE DMG Bonus. Ignores all DEF stats.',
+    w:{ATK:4,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:4,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Attack':{desc:'Maximize PvP damage. ATK + IgnorePDEF + PvP DMG Bonus. Ignores all DEF stats.',
+    w:{ATK:4,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:0,PvEDMGRed:0,PvPDMG:4,PvPDMGRed:0}},
+  'ATK Balanced':{desc:'Maximize damage in both PvE and PvP. ATK + IgnorePDEF prioritized, PvE and PvP DMG Bonus weighted equally.',
+    w:{ATK:4,IgnorePDEF:4,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:0,MDEF:0,HP:0,PDMGRed:0,MDMGRed:0,PvEDMG:3,PvEDMGRed:0,PvPDMG:3,PvPDMGRed:0}},
+  // DEF row
+  'PvE Defense':{desc:'Maximize PvE survivability. PDEF + MDEF + HP + PvE DMG Reduction. Ignores all ATK stats.',
+    w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:3,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:4,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Defense':{desc:'Maximize PvP survivability. PDEF + MDEF + HP + PvP DMG Reduction. Ignores all ATK stats.',
+    w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:3,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:0,PvPDMGRed:4}},
+  'DEF Balanced':{desc:'Maximize survivability in both PvE and PvP. PDEF + MDEF + HP prioritized, PvE and PvP DMG Reduction weighted equally.',
+    w:{ATK:0,IgnorePDEF:0,IgnoreMDEF:0,PDMG:0,MDMG:0,PDEF:4,MDEF:3,HP:3,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:3,PvPDMG:0,PvPDMGRed:3}},
+  // Balanced row
+  'PvE Balanced':{desc:'Balanced ATK and DEF for PvE. Equal investment in offense and defense, PvE DMG and DMG Reduction prioritized.',
+    w:{ATK:3,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:3,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:3,PvEDMGRed:3,PvPDMG:0,PvPDMGRed:0}},
+  'PvP Balanced':{desc:'Balanced ATK and DEF for PvP. Equal investment in offense and defense, PvP DMG Bonus and DMG Reduction prioritized.',
+    w:{ATK:3,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:3,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:0,PvEDMGRed:0,PvPDMG:3,PvPDMGRed:3}},
+  'ALL Balanced':{desc:'Equal weight across all stats for both PvE and PvP. Best general-purpose build for players active in all content.',
+    w:{ATK:3,IgnorePDEF:3,IgnoreMDEF:2,PDMG:1,MDMG:1,PDEF:3,MDEF:2,HP:2,PDMGRed:1,MDMGRed:1,PvEDMG:2,PvEDMGRed:2,PvPDMG:2,PvPDMGRed:2}},
 };
 // Derived stat scale (ATK=1.0, PATK+MATK treated as one stat)
 // Anchored from same-pool feather equivalences
