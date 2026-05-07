@@ -243,7 +243,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.1.0 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.1.1 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -842,7 +842,7 @@ function runOptimizer(){
     try{
       const cands=[];let _done=0;
       const _total=(()=>{let n=20+400;for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/5))){n+=3*7+3*7+2;}}for(let top=20;top>=2;top--){n+=1+7+7;}return n+1;})();
-      function add(aT,dT){_done++;if(_done%8===0)_timer.update(_done,_total);const r=buildFromTiers(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
+      function add(aT,dT){_done++;if(_done%8===0)_timer.update(_done,_total);const r=buildFromTiersNorm(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
       for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);setProg(15);
       for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);setProg(35);
       for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
