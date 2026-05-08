@@ -248,6 +248,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 .donate-btn{padding:4px 14px;background:transparent;border:1px solid #c9a227;border-radius:20px;color:#c9a227;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:12px}
 .donate-btn:hover{background:#c9a227;color:#000}
+.discord-btn{padding:4px 14px;background:transparent;border:1px solid #5865F2;border-radius:20px;color:#5865F2;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:8px;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.discord-btn:hover{background:#5865F2;color:#fff}
+.app-footer{padding:16px 20px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
+.app-footer a{color:#5865F2;text-decoration:none;font-weight:500}
+.app-footer a:hover{text-decoration:underline}
+.app-footer .sep{margin:0 8px;opacity:.4}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);cursor:pointer}
 .modal-overlay.on{display:flex}
 .modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px 18px;max-width:300px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:mIn .2s ease;cursor:default}
@@ -286,7 +292,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.2.5 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.2.6 · Raven's Hour + Prestige</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1215,5 +1221,13 @@ function closeDonate(){document.getElementById('donate-overlay').classList.remov
 function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDonate();});
 </script>
+<div class="app-footer">
+  <a href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Join the Discord</a>
+  <span class="sep">·</span>
+  Bug reports &amp; feedback welcome
+  <span class="sep">·</span>
+  Free forever for the ROOC community
+</div>
+
 </body>
 </html>
