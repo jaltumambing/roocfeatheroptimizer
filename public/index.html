@@ -261,7 +261,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.2.0 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.2.3 · Raven's Hour + Prestige</span><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -424,6 +424,8 @@ const FEATHERS=[
   {name:'Time',  r:'Yellow',t:'ATK',pool:'Time/Space'},
   {name:'Sky',   r:'Yellow',t:'ATK',pool:'Sky/Terra'},
   {name:'Terra', r:'Yellow',t:'DEF',pool:'Sky/Terra'},
+  {name:'Order', r:'Purple',t:'MIX',pool:'90SF Purple'},
+  {name:'Truth', r:'Purple',t:'MIX',pool:'90SF Purple'},
 ];
 const POOLS=[
   {name:'25SF Purple',r:'Purple',members:['Valor','Faith','Glory','Soul','Virtue','Mercy','Justice','Grace']},
@@ -431,6 +433,7 @@ const POOLS=[
   {name:'Day/Night',  r:'Yellow',members:['Day','Night']},
   {name:'Time/Space', r:'Yellow',members:['Nature','Divine','Space','Time']},
   {name:'Sky/Terra',  r:'Yellow',members:['Sky','Terra']},
+  {name:'90SF Purple',r:'Purple',members:['Order','Truth']},
 ];
 const LEVELCOST={};
 (function(){
@@ -439,7 +442,8 @@ const LEVELCOST={};
   const S=cum([4,6,7,9,10,12,13,15,22,25,25,25,25,25,30,30,30,30,30]);
   const L=cum([6,8,10,12,14,16,18,20,28,33,33,33,33,33,45,45,45,45,45]);
   const LD=cum([9,12,13,15,17,19,21,24,28,33,35,37,39,41,47,49,51,54,57]);
-  FEATHERS.forEach(f=>{LEVELCOST[f.name]=f.r==='Purple'?P:f.pool==='Light/Dark'?LD:f.pool==='Time/Space'?L:S;});
+  const N=cum([8,10,12,16,20,24,30,36,43,45,45,45,45,45,60,60,60,60,60]);
+  FEATHERS.forEach(f=>{LEVELCOST[f.name]=f.r==='Purple'?(f.pool==='90SF Purple'?N:P):f.pool==='Light/Dark'?LD:f.pool==='Time/Space'?L:S;});
 })();
 function costAt(n,lv){return LEVELCOST[n][lv]||0;}
 const SD={
@@ -461,6 +465,8 @@ const SD={
   Time:   {1:[0,0,0,7,7,12,3,17,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,17,17,44,11,45,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,30,30,84,21,80,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,43,43,124,31,115,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,56,56,164,41,150,0,0,0,0,0,0,0,0,0,0,0]},
   Sky:    {1:[0,0,0,2,2,4,1,0,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,10,10,20,5,0,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,20,20,40,10,0,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,30,30,50,13,0,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,40,40,60,15,0,0,0,0,0,0,0,0,0,0,0,0]},
   Terra:  {1:[2,1,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[10,5,165,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[20,10,330,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[25,13,495,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[30,15,660,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  Order:  {1:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0023,0.0023],5:[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.004,0.004],10:[10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.006,0.006],15:[15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.008,0.008],20:[20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.010,0.010]},
+  Truth:  {1:[0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0.0023,0.0023,0,0],5:[0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0.004,0.004,0,0],10:[0,0,0,10,10,0,0,0,0,0,0,0,0,0,0,0.006,0.006,0,0],15:[0,0,0,15,15,0,0,0,0,0,0,0,0,0,0,0.008,0.008,0,0],20:[0,0,0,20,20,0,0,0,0,0,0,0,0,0,0,0.010,0.010,0,0]},
 };
 const SK=['PDEF','MDEF','HP','PATK','MATK','IgnorePDEF','IgnoreMDEF','PvEDMG','PvPDMG','PvEDMGRed','STR','INT','DEX','VIT','PvPDMGRed','PDMG','MDMG','PDMGRed','MDMGRed'];
 const STAT_META={
