@@ -139,6 +139,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .run-btn{padding:9px 24px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.2px}
 .run-btn:hover{background:var(--gold2)}
 .run-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed}
+.raizar-btn{padding:9px 18px;background:transparent;border:2px solid #2dd4bf;color:#2dd4bf;border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.2px;white-space:nowrap}
+.raizar-btn:hover{background:#2dd4bf;color:#0f1117}
+.raizar-btn:disabled{border-color:var(--border);color:var(--text3);cursor:not-allowed;background:transparent}
+.raizar-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:#0d2e2b;border:1px solid #2dd4bf;border-radius:12px;font-size:10px;font-weight:700;color:#2dd4bf;margin-bottom:8px}
 .status{font-size:11px;color:var(--text3)}
 
 /* Progress */
@@ -328,7 +332,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.5.1 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.5.2 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -390,6 +394,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
       <input id="results-count" type="number" min="1" max="200" placeholder="20" style="width:56px;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;text-align:center">
     </label>
     <span class="status" id="status-txt"></span><div class="spin-wrap" id="spin-wrap"><div class="spinner"></div><span id="spin-msg" style="font-size:11px;color:var(--color-text-tertiary)"></span></div>
+    <button class="raizar-btn" id="raizar-btn" onclick="runRaizarMode()" style="margin-left:auto" title="Only show builds where all ATK statues are identical and all DEF statues are identical. No surplus leveling. For the OCD enjoyers 🧠">✦ Raizar Mode</button>
   </div>
   <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   <div class="results-area" id="results-area">
@@ -904,6 +909,82 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   const atkT=statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
   const defT=statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
   return{statues,score,atkTiers:atkT,defTiers:defT};
+}
+function runRaizarMode(){
+  const weights=state.weights;
+  if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
+  try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
+  document.getElementById('raizar-btn').disabled=true;
+  document.getElementById('run-btn').disabled=true;
+  _comboScoreCache.clear();
+  setStatus('',false);showProg(true);setProg(5);
+  const _timer=startTimer();
+  setTimeout(()=>{
+    try{
+      const cands=[];let _done=0;
+      // Raizar: test uniform tiers — same combo for all 5 ATK, same combo for all 5 DEF
+      // No surplus phase — floor level only
+      const ATK_SORTED=COMBOS_ATK.map(c=>({c,sc:scoreComboFast(c,'ATK',1,weights)})).sort((a,b)=>b.sc-a.sc);
+      const DEF_SORTED=COMBOS_DEF.map(c=>({c,sc:scoreComboFast(c,'DEF',1,weights)})).sort((a,b)=>b.sc-a.sc);
+      const totalConfigs=20*ATK_SORTED.length*DEF_SORTED.length;
+      // For each tier combo, find best ATK combo × best DEF combo feasible within budget
+      for(let t=1;t<=20;t++){
+        _done++;if(_done%5===0)_timer.update(_done,20);
+        // Try all ATK combos at tier t, all DEF combos at tier t
+        for(const {c:aC} of ATK_SORTED){
+          const aCost=comboCost(aC,t);
+          const aTotalByPool={};
+          POOLS.forEach(p=>{aTotalByPool[p.name]=(aCost[p.name]||0)*5;});
+          // Check 5× ATK fits
+          if(!POOLS.every(p=>aTotalByPool[p.name]<=poolBudgets[p.name])) continue;
+          for(const {c:dC} of DEF_SORTED){
+            const dCost=comboCost(dC,t);
+            const combined={};
+            POOLS.forEach(p=>{combined[p.name]=aTotalByPool[p.name]+(dCost[p.name]||0)*5;});
+            if(!POOLS.every(p=>combined[p.name]<=poolBudgets[p.name])) continue;
+            // Build result — same combo ×5 for ATK, same combo ×5 for DEF, no surplus
+            const poolUsed={...combined};
+            const statues=[];
+            for(let si=0;si<5;si++){
+              const slots=aC.yellows.concat(aC.purples).map(name=>({f:name,lv:t,floor:t}));
+              statues.push({type:'ATK',slots,tier:t});
+            }
+            for(let si=0;si<5;si++){
+              const slots=dC.yellows.concat(dC.purples).map(name=>({f:name,lv:t,floor:t}));
+              statues.push({type:'DEF',slots,tier:t});
+            }
+            const score=statues.reduce((sum,st)=>{
+              const raw=st.slots.reduce((o,sl)=>{
+                const s=statObj(sl.f,sl.lv);
+                Object.keys(s).forEach(k=>{o[k]=(o[k]||0)+s[k];});
+                return o;
+              },{});
+              const withBonus=applySetBonus(raw,st.type,st.tier,checkSet(st.slots).set);
+              return sum+scoreFromStatsNorm(withBonus,weights);
+            },0);
+            cands.push({statues,score,atkTiers:[t,t,t,t,t],defTiers:[t,t,t,t,t],poolUsed,raizar:true});
+            break; // Only best DEF combo per ATK+tier
+          }
+          break; // Only best ATK combo per tier
+        }
+      }
+      setProg(80);
+      const seen=new Set();
+      const results=cands.filter(c=>{
+        const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',')+'/'+c.statues[0].slots.map(s=>s.f).join('+')+'/'+c.statues[5].slots.map(s=>s.f).join('+');
+        if(seen.has(fp))return false;seen.add(fp);return true;
+      }).sort((a,b)=>b.score-a.score);
+      state.results=results;state.expanded.clear();
+      renderResults('results-area',state.results,state.expanded,'');
+      setProg(100);
+      _timer.stop(`✦ Raizar Mode: ${results.length} uniform build${results.length!==1?'s':''}`);
+    }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
+    document.getElementById('raizar-btn').disabled=false;
+    document.getElementById('run-btn').disabled=false;
+    setTimeout(()=>showProg(false),600);
+  },30);
 }
 function runOptimizer(){
   const weights=state.weights;
