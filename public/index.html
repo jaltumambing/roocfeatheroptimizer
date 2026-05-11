@@ -328,7 +328,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.5.0 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.5.1 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1393,16 +1393,12 @@ function renderInvTable(){
 function renderInvSummary(){
   let h='';
   POOLS.forEach(p=>{
-    const total=state.pools[p.name]||0;
     const spent=getPoolSpent(p);
-    const free=Math.max(0,total-spent);
-    const over=spent>total&&total>0;
-    const freeColor=over?'var(--red2)':'var(--green3)';
-    const freeText=over?('⚠ Over by '+(spent-total)):(free+' free');
+    const color=spent>0?'var(--gold)':'var(--text3)';
     h+=`<div style="flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px">
       <div style="font-size:10px;font-weight:700;color:var(--text2);margin-bottom:3px">${p.name}</div>
-      <div style="font-size:9px;color:var(--text3);margin-bottom:4px">${spent} copies spent</div>
-      <div style="font-size:13px;font-weight:700;color:${freeColor}">${freeText}</div>
+      <div style="font-size:9px;color:var(--text3);margin-bottom:4px">copies consumed</div>
+      <div style="font-size:13px;font-weight:700;color:${color}">${spent>0?spent:'—'}</div>
     </div>`;
   });
   const el=document.getElementById('inv-calc-summary');
@@ -1410,9 +1406,8 @@ function renderInvSummary(){
 }
 function applyInvCalc(){
   POOLS.forEach(p=>{
-    const total=state.pools[p.name]||0;
     const spent=getPoolSpent(p);
-    state.pools[p.name]=Math.max(0,total-spent);
+    if(spent>0) state.pools[p.name]=spent;
   });
   try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
   renderPools();
@@ -1431,7 +1426,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();close
     <button class="modal-close" onclick="closeInvCalc()" title="Close">×</button>
     <div class="modal-title" style="text-align:left;margin-bottom:6px">🧮 Inventory Calculator</div>
     <div class="inv-note">
-      <strong>How to use:</strong> Each column is a feather pool. Each row is a level. Enter the <strong>total number of feathers</strong> you own from that pool at that level — e.g. if you have 1 Sky and 2 Terra both at Lv8, enter <strong>3</strong> in Sky/Terra · Lv8. Then enter your <strong>total copies owned</strong> per pool in the bottom row. The calculator subtracts what's already spent and shows your <strong>unspent copies</strong> — hit <strong>Submit</strong> to auto-fill Pool Inventory.
+      <strong>How to use:</strong> Each column is a feather pool. Each row is a level. Enter how many feathers you own from that pool at that level — e.g. if you have 1 Sky at Lv8 and 2 Terra at Lv8, enter <strong>3</strong> in Sky/Terra · Lv8. The calculator adds up all copies consumed by your existing feathers. Hit <strong>Submit</strong> to fill Pool Inventory with those totals.
     </div>
     <div class="inv-modal-scroll">
       <div id="inv-calc-body"></div>
