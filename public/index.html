@@ -205,6 +205,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .tier-b{font-size:9px;padding:1px 5px;border-radius:3px;background:#1a1200;color:var(--gold);font-weight:600;border:1px solid var(--gold3)}
 .set-b{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600;margin-left:2px}
 .set-valid{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
+.set-rh{background:#1a1400;border:1px solid var(--gold3);color:var(--gold2)}
+.set-rp{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
+.set-rd{background:#140a1a;border:1px solid var(--purple);color:var(--purple2)}
 .set-invalid{background:#1a0a0a;border:1px solid #6b1a1a;color:#e8705e}
 .detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px 12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .ds-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
@@ -284,6 +287,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .sf-layout .sec-row{grid-column:1/-1}
 .sf-col-hdr{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:4px;border-bottom:1px solid var(--border2);margin-bottom:8px;grid-column:span 1}
 
+/* ── Inventory Calculator ──────────────────────────────────────────────────── */
+.inv-calc-btn{padding:3px 10px;background:transparent;border:1px solid var(--blue);border-radius:12px;color:var(--blue2);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;margin-left:10px;white-space:nowrap}
+.inv-calc-btn:hover{background:var(--blue);color:#fff}
+.inv-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 20px 16px;max-width:96vw;width:860px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .2s ease;cursor:default;max-height:90vh;display:flex;flex-direction:column;gap:12px}
+.inv-note{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;line-height:1.6}
+.inv-note strong{color:var(--text2)}
+.inv-modal-scroll{overflow:auto;flex:1;min-height:0}
+/* Table */
+.inv-tbl{border-collapse:collapse;font-size:11px;width:100%;background:var(--bg2)}
+.inv-tbl th,.inv-tbl td{border:1px solid var(--border);background:var(--bg2)}
+.inv-tbl thead th{background:var(--bg3);color:var(--text3);font-size:10px;font-weight:700;padding:5px 8px;white-space:nowrap;position:sticky;top:0;z-index:2;text-align:center}
+.inv-tbl thead th.th-lv{position:sticky;left:0;z-index:5;min-width:40px;background:var(--bg3)}
+.inv-tbl thead th.th-pool{font-size:11px;font-weight:700;border-bottom:2px solid var(--border)}
+.inv-tbl thead th.th-pool.y{color:var(--gold);border-bottom-color:var(--gold3)}
+.inv-tbl thead th.th-pool.p{color:var(--purple2);border-bottom-color:var(--purple)}
+/* Total row */
+.inv-tbl tfoot td{background:var(--bg3);border-top:2px solid var(--border);padding:4px 3px;text-align:center;position:sticky;bottom:0;z-index:2}
+.inv-tbl tfoot td.td-lv-foot{position:sticky;left:0;z-index:5;background:var(--bg3);font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:4px 6px}
+
+/* Body rows */
+.inv-tbl tbody td.td-lv{position:sticky;left:0;z-index:1;background:var(--bg3);font-size:10px;font-weight:700;color:var(--text3);text-align:center;padding:0 8px;border-right:2px solid var(--border)}
+.inv-tbl tbody tr:hover td{background:#1c2538}
+.inv-tbl tbody tr:hover td.td-lv{background:var(--bg3)}
+.inv-tbl tbody td.td-cell{padding:1px;text-align:center;min-width:50px}
+.inv-cell-inp{width:46px;padding:3px 2px;background:transparent;border:none;color:var(--text3);font-size:11px;text-align:center;outline:none;display:block;margin:0 auto}
+.inv-cell-inp:focus{background:var(--bg3);border-radius:3px;color:var(--text)}
+.inv-cell-inp.has-val{color:var(--gold);font-weight:700}
+/* Result bar */
+
+/* Submit */
+.inv-submit-btn{flex-shrink:0;padding:10px 0;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;width:100%}
+.inv-submit-btn:hover{background:var(--gold2)}
+
 </style>
 </head>
 <body>
@@ -292,7 +328,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.3.0 · Raven's Hour + Prestige</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.5.0 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -301,7 +337,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 
 <div id="pane-opt" class="pane on">
-  <div class="sec-row"><span class="sec">Pool Inventory</span></div>
+  <div class="sec-row"><span class="sec">Pool Inventory</span><button class="inv-calc-btn" onclick="openInvCalc()">🧮 Calculate from feather levels</button></div>
   <div class="pool-grid" id="pool-grid"></div>
 
   <div class="sec-row">
@@ -325,7 +361,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div id="preset-desc" class="preset-desc"></div>
   <div class="slider-grid" id="slider-grid"></div>
 
-  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P) and <strong>Raven's Prestige</strong> (3Y+2P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
+  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P), <strong>Raven's Prestige</strong> (3Y+2P), and <strong>Raven's Plunder</strong> (2Y+3P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
 
   <div class="opt-filter-toggle" onclick="toggleOptFilter()">
     <span class="opt-filter-caret" id="opt-filter-caret">▶</span>
@@ -366,7 +402,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 
 <div id="pane-sf" class="pane">
-  <div class="sec-row"><span class="sec">Pool Inventory</span></div>
+  <div class="sec-row"><span class="sec">Pool Inventory</span><button class="inv-calc-btn" onclick="openInvCalc()">🧮 Calculate from feather levels</button></div>
   <div class="pool-grid" id="pool-grid3"></div>
 
   <div class="sec-row">
@@ -401,7 +437,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
   <div class="filter-grid" id="sf-filter-grid"></div>
 
-  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P) and <strong>Raven's Prestige</strong> (3Y+2P). Builds failing any filter are excluded entirely.</div>
+  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P), <strong>Raven's Prestige</strong> (3Y+2P), and <strong>Raven's Plunder</strong> (2Y+3P). Builds failing any filter are excluded entirely.</div>
 
   <div class="run-row">
     <button class="run-btn" id="sf-run-btn" onclick="runSmartFilter()">Find Builds</button>
@@ -551,10 +587,10 @@ function scoreFromStatsNorm(s,w){
 }
 
 // Raven's Hour (4Y+1P) - ATK statue
-// Cols: pvpDmgBonus(flat), atkMult%, pveMult%, patkFlat, pvpMult%
+// Cols: pvpDmgBonus(flat), patkFlat, matkFlat, atkMult%, pveMult%, pvpMult%
 const RH_ATK={};
-[[1,12,0.10,0.30,13,0.30],[2,15,0.11,0.33,18,0.33],[3,18,0.12,0.36,23,0.36],[4,21,0.13,0.39,28,0.39],[5,24,0.14,0.42,33,0.42],[6,27,0.15,0.45,38,0.45],[7,30,0.16,0.48,43,0.48],[8,33,0.17,0.51,48,0.51],[9,36,0.18,0.54,53,0.54],[10,39,0.20,0.60,58,0.60],[11,42,0.21,0.62,60,0.62],[12,45,0.22,0.64,62,0.64],[13,48,0.23,0.66,64,0.66],[14,51,0.24,0.68,66,0.68],[15,54,0.25,0.70,68,0.70],[16,57,0.26,0.72,70,0.72],[17,60,0.27,0.74,72,0.74],[18,63,0.28,0.76,74,0.76],[19,66,0.29,0.78,76,0.78],[20,69,0.30,0.80,78,0.80]]
-.forEach(([t,pvpBonus,atkM,pveM,patkFlat,pvpM])=>{RH_ATK[t]={pvpDmgBonus:pvpBonus,atkMult:atkM,pveMult:pveM,patkFlat,pvpMult:pvpM};});
+[[1,12,13,13,0.10,0.30,0.30],[2,15,18,18,0.11,0.33,0.33],[3,18,23,23,0.12,0.36,0.36],[4,21,28,28,0.13,0.39,0.39],[5,24,33,33,0.14,0.42,0.42],[6,27,38,38,0.15,0.45,0.45],[7,30,43,43,0.16,0.48,0.48],[8,33,48,48,0.17,0.51,0.51],[9,36,53,53,0.18,0.54,0.54],[10,39,58,58,0.20,0.60,0.60],[11,42,60,60,0.21,0.62,0.62],[12,45,62,62,0.22,0.64,0.64],[13,48,64,64,0.23,0.66,0.66],[14,51,66,66,0.24,0.68,0.68],[15,54,68,68,0.25,0.70,0.70],[16,57,70,70,0.26,0.72,0.72],[17,60,72,72,0.27,0.74,0.74],[18,63,74,74,0.28,0.76,0.76],[19,66,76,76,0.29,0.78,0.78],[20,69,78,78,0.30,0.80,0.80]]
+.forEach(([t,pvpBonus,patkFlat,matkFlat,atkM,pveM,pvpM])=>{RH_ATK[t]={pvpDmgBonus:pvpBonus,patkFlat,matkFlat,atkMult:atkM,pveMult:pveM,pvpMult:pvpM};});
 
 // Raven's Hour (4Y+1P) - DEF statue
 // Cols: hpFlat, pveMult%, pvpDmgRedFlat, defMult%, pvpMult%
@@ -563,16 +599,28 @@ const RH_DEF={};
 .forEach(([t,hp,pveM,pvpRed,defM,pvpM])=>{RH_DEF[t]={hpFlat:hp,pveMult:pveM,pvpDmgRed:pvpRed,defMult:defM,pvpMult:pvpM};});
 
 // Raven's Prestige (3Y+2P) - ATK statue
-// Cols: pvpDmgBonus(flat), pveMult%, patkFlat, defMult%  — NO atkMult
+// Cols: pvpDmgBonus(flat), patkFlat, matkFlat, pveMult%, defMult%  — NO atkMult
 const RP_ATK={};
-[[1,9,0.30,12,0.10],[2,12,0.33,16,0.11],[3,15,0.36,20,0.12],[4,18,0.39,24,0.13],[5,21,0.42,28,0.14],[6,24,0.45,32,0.15],[7,27,0.48,36,0.16],[8,30,0.51,40,0.17],[9,33,0.54,44,0.18],[10,36,0.60,48,0.20],[11,39,0.62,50,0.21],[12,42,0.64,52,0.22],[13,45,0.66,54,0.23],[14,48,0.68,56,0.24],[15,51,0.70,58,0.25],[16,54,0.72,60,0.26],[17,57,0.74,62,0.27],[18,60,0.76,64,0.28],[19,63,0.78,66,0.29],[20,66,0.80,68,0.30]]
-.forEach(([t,pvpBonus,pveM,patkFlat,defM])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,pveMult:pveM,patkFlat,defMult:defM};});
+[[1,9,12,12,0.30,0.10],[2,12,16,16,0.33,0.11],[3,15,20,20,0.36,0.12],[4,18,24,24,0.39,0.13],[5,21,28,28,0.42,0.14],[6,24,32,32,0.45,0.15],[7,27,36,36,0.48,0.16],[8,30,40,40,0.51,0.17],[9,33,44,44,0.54,0.18],[10,36,48,48,0.60,0.20],[11,39,50,50,0.62,0.21],[12,42,52,52,0.64,0.22],[13,45,54,54,0.66,0.23],[14,48,56,56,0.68,0.24],[15,51,58,58,0.70,0.25],[16,54,60,60,0.72,0.26],[17,57,62,62,0.74,0.27],[18,60,64,64,0.76,0.28],[19,63,66,66,0.78,0.29],[20,66,68,68,0.80,0.30]]
+.forEach(([t,pvpBonus,patkFlat,matkFlat,pveM,defM])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,patkFlat,matkFlat,pveMult:pveM,defMult:defM};});
 
 // Raven's Prestige (3Y+2P) - DEF statue
 // Cols: hpFlat, pvpDmgBonus(flat), pveMult%, defMult%  — NO atkMult
 const RP_DEF={};
 [[1,100,9,0.30,0.10],[2,180,12,0.33,0.11],[3,260,15,0.36,0.12],[4,340,18,0.39,0.13],[5,420,21,0.42,0.14],[6,500,24,0.45,0.15],[7,580,27,0.48,0.16],[8,660,30,0.51,0.17],[9,740,33,0.54,0.18],[10,820,36,0.60,0.20],[11,860,39,0.62,0.21],[12,900,42,0.64,0.22],[13,940,45,0.66,0.23],[14,980,48,0.68,0.24],[15,1020,51,0.70,0.25],[16,1060,54,0.72,0.26],[17,1100,57,0.74,0.27],[18,1140,60,0.76,0.28],[19,1180,63,0.78,0.29],[20,1220,66,0.80,0.30]]
 .forEach(([t,hp,pvpBonus,pveM,defM])=>{RP_DEF[t]={hpFlat:hp,pvpDmgBonus:pvpBonus,pveMult:pveM,defMult:defM};});
+
+// Raven's Plunder (2Y+3P) - ATK statue
+// Cols: pvpDmgBonus(flat), patkFlat, matkFlat, pveMult%  — NO atkMult, NO defMult
+const RD_ATK={};
+[[1,6,11,11,0.10,0.30],[2,9,14,14,0.11,0.33],[3,12,17,17,0.12,0.36],[4,15,20,20,0.13,0.39],[5,18,23,23,0.14,0.42],[6,21,26,26,0.15,0.45],[7,24,29,29,0.16,0.48],[8,27,32,32,0.17,0.51],[9,30,35,35,0.18,0.54],[10,33,38,38,0.20,0.60],[11,36,40,40,0.21,0.62],[12,39,42,42,0.22,0.64],[13,42,44,44,0.23,0.66],[14,45,46,46,0.24,0.68],[15,48,48,48,0.25,0.70],[16,51,50,50,0.26,0.72],[17,54,52,52,0.27,0.74],[18,57,54,54,0.28,0.76],[19,60,56,56,0.29,0.78],[20,63,58,58,0.30,0.80]]
+.forEach(([t,pvpBonus,patkFlat,matkFlat,atkM,pveM])=>{RD_ATK[t]={pvpDmgBonus:pvpBonus,patkFlat,matkFlat,atkMult:atkM,pveMult:pveM};});
+
+// Raven's Plunder (2Y+3P) - DEF statue
+// Cols: hpFlat, pvpDmgRedFlat, pveMult%, defMult%
+const RD_DEF={};
+[[1,90,6,0.10,0.30],[2,160,9,0.11,0.33],[3,230,12,0.12,0.36],[4,300,15,0.13,0.39],[5,370,18,0.14,0.42],[6,440,21,0.15,0.45],[7,510,24,0.16,0.48],[8,580,27,0.17,0.51],[9,650,30,0.18,0.54],[10,720,33,0.20,0.60],[11,760,36,0.21,0.62],[12,800,39,0.22,0.64],[13,840,42,0.23,0.66],[14,880,45,0.24,0.68],[15,920,48,0.25,0.70],[16,960,51,0.26,0.72],[17,1000,54,0.27,0.74],[18,1040,57,0.28,0.76],[19,1080,60,0.29,0.78],[20,1120,63,0.30,0.80]]
+.forEach(([t,hp,pvpRed,defM,pveM])=>{RD_DEF[t]={hpFlat:hp,pvpDmgRed:pvpRed,defMult:defM,pveMult:pveM};});
 
 function checkSet(slots){
   const names=slots.map(s=>s.f).filter(Boolean);
@@ -581,17 +629,19 @@ function checkSet(slots){
   const purples=names.filter(n=>FEATHERS.find(f=>f.name===n)?.r==='Purple').length;
   if(yellows===4&&purples===1)return{valid:true,name:"Raven's Hour",set:'RH'};
   if(yellows===3&&purples===2)return{valid:true,name:"Raven's Prestige",set:'RP'};
+  if(yellows===2&&purples===3)return{valid:true,name:"Raven's Plunder",set:'RD'};
   return{valid:false,name:`${yellows}Y+${purples}P (invalid)`};
 }
 function applySetBonus(raw,type,tier,setName){
   const s={...raw};
+  const isRD=setName==='RD';
   const isRP=setName==='RP';
   if(type==='DEF'){
-    const b=isRP?RP_DEF[tier]:RH_DEF[tier];
+    const b=isRD?RD_DEF[tier]:isRP?RP_DEF[tier]:RH_DEF[tier];
     if(!b)return s;
     s.HP+=b.hpFlat;
-    if(!isRP){
-      // RH DEF: defMult on PDEF/MDEF/HP/PDMGRed/MDMGRed, pveMult on PvEDMGRed, pvpDmgRed flat, pvpMult on PvPDMGRed
+    if(setName==='RH'){
+      // RH DEF: defMult on PDEF/MDEF/HP/PDMGRed/MDMGRed, pveMult on PvEDMGRed, pvpDmgRed flat+pvpMult
       s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
       s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
       s.PDMGRed=s.PDMGRed*(1+b.defMult);
@@ -599,7 +649,7 @@ function applySetBonus(raw,type,tier,setName){
       s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
       s.PvPDMGRed+=b.pvpDmgRed;
       s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
-    } else {
+    } else if(setName==='RP'){
       // RP DEF: hpFlat + pvpDmgBonus(flat) + pveMult on PvEDMGRed + defMult on PDEF/MDEF/PDMGRed/MDMGRed
       s.PvPDMG+=b.pvpDmgBonus;
       s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
@@ -607,13 +657,21 @@ function applySetBonus(raw,type,tier,setName){
       s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
       s.PDMGRed=s.PDMGRed*(1+b.defMult);
       s.MDMGRed=s.MDMGRed*(1+b.defMult);
+    } else {
+      // RD DEF: hpFlat + pvpDmgRed(flat) + defMult on PDEF/MDEF/PDMGRed/MDMGRed + pveMult on PvEDMGRed
+      s.PvPDMGRed+=b.pvpDmgRed;
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
     }
   } else {
     // ATK statue
-    const b=isRP?RP_ATK[tier]:RH_ATK[tier];
+    const b=isRD?RD_ATK[tier]:isRP?RP_ATK[tier]:RH_ATK[tier];
     if(!b)return s;
-    if(!isRP){
-      // RH ATK: atkMult on ATK stats, pveMult on PvEDMG, pvpMult on PvPDMG, pvpDmgBonus+patkFlat flat
+    if(setName==='RH'){
+      // RH ATK: atkMult on ATK stats, pveMult on PvEDMG, pvpMult on PvPDMG, pvpDmgBonus+patkFlat+matkFlat flat
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
       s.MATK=Math.floor(s.MATK*(1+b.atkMult));
       s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
@@ -624,17 +682,29 @@ function applySetBonus(raw,type,tier,setName){
       s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
       s.PvPDMG+=b.pvpDmgBonus;
       s.PATK+=b.patkFlat;
-      s.MATK+=b.patkFlat;
-    } else {
-      // RP ATK: pvpDmgBonus(flat) + pveMult on PvEDMG + patkFlat + defMult on DEF stats — NO atkMult
+      s.MATK+=b.matkFlat;
+    } else if(setName==='RP'){
+      // RP ATK: pvpDmgBonus(flat) + pveMult on PvEDMG + patkFlat/matkFlat + defMult on DEF stats
       s.PvPDMG+=b.pvpDmgBonus;
       s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
       s.PATK+=b.patkFlat;
-      s.MATK+=b.patkFlat;
+      s.MATK+=b.matkFlat;
       s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
       s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
       s.PDMGRed=s.PDMGRed*(1+b.defMult);
       s.MDMGRed=s.MDMGRed*(1+b.defMult);
+    } else {
+      // RD ATK: atkMult on ATK stats, pveMult on PvEDMG, pvpDmgBonus+patkFlat+matkFlat flat
+      s.PATK=Math.floor(s.PATK*(1+b.atkMult));
+      s.MATK=Math.floor(s.MATK*(1+b.atkMult));
+      s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
+      s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
+      s.PDMG=s.PDMG*(1+b.atkMult);
+      s.MDMG=s.MDMG*(1+b.atkMult);
+      s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+      s.PvPDMG+=b.pvpDmgBonus;
+      s.PATK+=b.patkFlat;
+      s.MATK+=b.matkFlat;
     }
   }
   s.ATK=(s.PATK||0)+(s.MATK||0);
@@ -728,6 +798,10 @@ function getFeatherCombos(type){
   for(let a=0;a<Y.length;a++)for(let b=a+1;b<Y.length;b++)for(let c=b+1;c<Y.length;c++)
     for(let p=0;p<P.length;p++)for(let q=p+1;q<P.length;q++)
       combos.push({yellows:[Y[a].name,Y[b].name,Y[c].name],purples:[P[p].name,P[q].name],set:'RP'});
+  // RD: C(Y,2) x C(P,3)
+  for(let a=0;a<Y.length;a++)for(let b=a+1;b<Y.length;b++)
+    for(let p=0;p<P.length;p++)for(let q=p+1;q<P.length;q++)for(let r=q+1;r<P.length;r++)
+      combos.push({yellows:[Y[a].name,Y[b].name],purples:[P[p].name,P[q].name,P[r].name],set:'RD'});
   return combos;
 }
 const COMBOS_ATK=getFeatherCombos('ATK');
@@ -1049,7 +1123,7 @@ function renderFilterResults(){
       html+=`<div class="tier-dist">`;build.statues.slice(0,5).forEach((st,j)=>{const at=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-atk">ATK${j+1} T${at}</span>`;});build.statues.slice(5,10).forEach((st,j)=>{const dt=Math.min(...st.slots.map(s=>s.lv));html+=`<span class="td-pill td-def">DEF${j+1} T${dt}</span>`;});html+=`</div>`;
       build.statues.forEach((st,si)=>{
         const comp=checkSet(st.slots);const actualTier=Math.min(...st.slots.map(s=>s.lv));
-        html+=`<div class="st-row"><span class="st-lbl">${labels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
+        html+=`<div class="st-row"><span class="st-lbl">${labels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
         st.slots.forEach(sl=>{const f=FEATHERS.find(x=>x.name===sl.f);const above=sl.lv>(sl.floor||st.tier);html+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}${above?' above':''}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;});html+=`</div>`;
       });
       html+=`<div class="divider"></div><div class="stat-sum">`;
@@ -1119,7 +1193,7 @@ function renderResults(areaId,results,expandedSet,sfx){
       build.statues.forEach((st,si)=>{
         const comp=checkSet(st.slots);
         const actualTier=Math.min(...st.slots.map(s=>s.lv));
-        detail+=`<div class="st-row"><span class="st-lbl">${statueLabels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
+        detail+=`<div class="st-row"><span class="st-lbl">${statueLabels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
         st.slots.forEach(sl=>{
           const f=FEATHERS.find(x=>x.name===sl.f);
           const above=sl.lv>(sl.floor||st.tier);
@@ -1227,11 +1301,146 @@ function showProg(v){document.getElementById('prog-bar').style.display=v?'block'
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
 renderPools();renderSliders('slider-grid','presets','preset-desc','weights','activePreset');renderMinMaxGrid('opt-filter-grid','optFiltersMin','optFiltersMax');
 
+// ── Inventory Calculator ──────────────────────────────────────────────────────
+const INV_LS_KEY='rooc_inv_grid';
+// invGrid[featherName][level] = count
+const invGrid={__pool__:{}};
+FEATHERS.forEach(f=>{invGrid[f.name]={};});
+
+function invLoadLS(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(INV_LS_KEY)||'{}');
+    FEATHERS.forEach(f=>{
+      invGrid[f.name]={};
+      if(saved[f.name]) Object.entries(saved[f.name]).forEach(([lv,cnt])=>{if(cnt>0)invGrid[f.name][lv]=cnt;});
+    });
+    invGrid['__pool__']={};
+    if(saved['__pool__']) Object.entries(saved['__pool__']).forEach(([k,cnt])=>{if(cnt>0)invGrid['__pool__'][k]=cnt;});
+  }catch(e){}
+}
+function invSaveLS(){
+  try{localStorage.setItem(INV_LS_KEY,JSON.stringify(invGrid));}catch(e){}
+}
+
+function openInvCalc(){
+  invLoadLS();
+  renderInvTable();
+  renderInvSummary();
+  document.getElementById('inv-calc-overlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeInvCalc(){
+  document.getElementById('inv-calc-overlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+function handleInvCalcOverlay(e){if(e.target===document.getElementById('inv-calc-overlay'))closeInvCalc();}
+
+function invCellChange(name,lv,val){
+  const n=Math.max(0,parseInt(val)||0);
+  if(n===0) delete invGrid[name][lv]; else invGrid[name][lv]=n;
+  invSaveLS();
+  const inp=document.getElementById(`ic-${name}-${lv}`);
+  if(inp){inp.classList.toggle('has-val',n>0);if(n===0)inp.value='';}
+}
+function invPoolCellChange(poolName,lv,val){
+  const n=Math.max(0,parseInt(val)||0);
+  const key=poolName+'__'+lv;
+  if(n===0) delete invGrid['__pool__'][key]; else invGrid['__pool__'][key]=n;
+  invSaveLS();
+  const safeId=poolName.replace(/\//g,'-');
+  const inp=document.getElementById(`ic-pool-${safeId}-${lv}`);
+  if(inp){inp.classList.toggle('has-val',n>0);if(n===0)inp.value='';}
+  renderInvSummary();
+}
+
+function getPoolSpent(pool){
+  // Use pool-level grid: each cell = count of feathers from this pool at that level
+  // Cost per feather = costAt(first member, lv) — all members in same pool share same cost curve
+  const poolEntries=Object.entries(invGrid['__pool__']||{})
+    .filter(([key])=>key.startsWith(pool.name+'__'));
+  if(!poolEntries.length) return 0;
+  return poolEntries.reduce((tot,[key,cnt])=>{
+    const lv=parseInt(key.split('__')[1]);
+    // Use pool's cost curve via first member
+    return tot+costAt(pool.members[0],lv)*cnt;
+  },0);
+}
+
+function renderInvTable(){
+  let h='<table class="inv-tbl"><thead><tr>';
+  h+=`<th class="th-lv">Lv</th>`;
+  POOLS.forEach(p=>{
+    h+=`<th class="th-pool ${p.r==='Yellow'?'y':'p'}">${p.name}<br><span style="font-size:9px;font-weight:400;color:var(--text3)">${p.members.join(' · ')}</span></th>`;
+  });
+  h+='</tr></thead><tbody>';
+  for(let lv=1;lv<=20;lv++){
+    h+=`<tr><td class="td-lv">${lv}</td>`;
+    POOLS.forEach(p=>{
+      // Single input per pool per level — total feathers of this pool at this level
+      const poolKey=p.name+'__'+lv;
+      const cnt=invGrid['__pool__']?.[poolKey]||0;
+      h+=`<td class="td-cell"><input id="ic-pool-${p.name.replace(/\//g,'-')}-${lv}" class="inv-cell-inp${cnt?' has-val':''}"
+        type="number" min="0" max="99" ${cnt?`value="${cnt}"`:''}
+        oninput="invPoolCellChange('${p.name}',${lv},this.value)"></td>`;
+    });
+    h+='</tr>';
+  }
+  h+='</tbody></table>';
+  document.getElementById('inv-calc-body').innerHTML=h;
+}
+
+
+function renderInvSummary(){
+  let h='';
+  POOLS.forEach(p=>{
+    const total=state.pools[p.name]||0;
+    const spent=getPoolSpent(p);
+    const free=Math.max(0,total-spent);
+    const over=spent>total&&total>0;
+    const freeColor=over?'var(--red2)':'var(--green3)';
+    const freeText=over?('⚠ Over by '+(spent-total)):(free+' free');
+    h+=`<div style="flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px">
+      <div style="font-size:10px;font-weight:700;color:var(--text2);margin-bottom:3px">${p.name}</div>
+      <div style="font-size:9px;color:var(--text3);margin-bottom:4px">${spent} copies spent</div>
+      <div style="font-size:13px;font-weight:700;color:${freeColor}">${freeText}</div>
+    </div>`;
+  });
+  const el=document.getElementById('inv-calc-summary');
+  if(el) el.innerHTML=h;
+}
+function applyInvCalc(){
+  POOLS.forEach(p=>{
+    const total=state.pools[p.name]||0;
+    const spent=getPoolSpent(p);
+    state.pools[p.name]=Math.max(0,total-spent);
+  });
+  try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
+  renderPools();
+  closeInvCalc();
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
 function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDonate();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();closeInvCalc();}});
 </script>
+<!-- Inventory Calculator Modal -->
+<div class="modal-overlay" id="inv-calc-overlay" onclick="handleInvCalcOverlay(event)">
+  <div class="inv-modal-box">
+    <button class="modal-close" onclick="closeInvCalc()" title="Close">×</button>
+    <div class="modal-title" style="text-align:left;margin-bottom:6px">🧮 Inventory Calculator</div>
+    <div class="inv-note">
+      <strong>How to use:</strong> Each column is a feather pool. Each row is a level. Enter the <strong>total number of feathers</strong> you own from that pool at that level — e.g. if you have 1 Sky and 2 Terra both at Lv8, enter <strong>3</strong> in Sky/Terra · Lv8. Then enter your <strong>total copies owned</strong> per pool in the bottom row. The calculator subtracts what's already spent and shows your <strong>unspent copies</strong> — hit <strong>Submit</strong> to auto-fill Pool Inventory.
+    </div>
+    <div class="inv-modal-scroll">
+      <div id="inv-calc-body"></div>
+    </div>
+    <div id="inv-calc-summary" style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"></div>
+    <button class="inv-submit-btn" onclick="applyInvCalc()">✓ Submit — Fill Pool Inventory with Unspent Copies</button>
+  </div>
+</div>
+
 <div class="app-footer">
   <a href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Join the Discord</a>
   <span class="sep">·</span>
