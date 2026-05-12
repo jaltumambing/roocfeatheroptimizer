@@ -390,7 +390,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.7.6 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.7.7 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1938,7 +1938,7 @@ function updateMyBuildBanner(){
   state.myBuild.statues.forEach((st,si)=>{
     const filled=st.slots.filter(s=>s.f);
     if(!filled.length)return; // skip fully empty statues
-    const {raw,withBonus,comp,tier}=getStatueStats(st.slots,st.type);
+    const {raw,withBonus,withBonusNoFlats,comp,tier}=getStatueStats(st.slots,st.type);
     const setBonusRows=comp.valid?getSetBonusStats(comp.set,st.type,tier):[];
     const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
     html+=`<div class="statue-detail">`;
