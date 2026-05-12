@@ -332,7 +332,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.5.2 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.5.3 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -910,6 +910,79 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   const defT=statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
   return{statues,score,atkTiers:atkT,defTiers:defT};
 }
+function raizarSurplus(atkCombo,defCombo,floorT,poolBudgets){
+  // Raizar surplus: level feathers in sync across all identical statues
+  // Each unique feather position in the combo is leveled ×5 (ATK) or ×5 (DEF) simultaneously
+  // so all statues stay identical.
+  // poolUsed already reflects 5× floorT cost for each feather in each combo.
+  const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=0;});
+  // Init poolUsed from floor cost
+  const aCost=comboCost(atkCombo,floorT);
+  const dCost=comboCost(defCombo,floorT);
+  POOLS.forEach(p=>{poolUsed[p.name]=(aCost[p.name]||0)*5+(dCost[p.name]||0)*5;});
+
+  // Track current level per unique feather slot (ATK and DEF separately)
+  // ATK: atkCombo.yellows.concat(purples) — each feather name, leveled in sync ×5
+  // DEF: same
+  const atkSlots=atkCombo.yellows.concat(atkCombo.purples).map(name=>{
+    const f=FEATHERS.find(x=>x.name===name);
+    return {name,pool:f.pool,lv:floorT,count:5}; // count=5 statues
+  });
+  const defSlots=defCombo.yellows.concat(defCombo.purples).map(name=>{
+    const f=FEATHERS.find(x=>x.name===name);
+    return {name,pool:f.pool,lv:floorT,count:5};
+  });
+  const allUnique=[...atkSlots,...defSlots];
+
+  // Greedy: each step levels ONE feather slot across all count statues simultaneously
+  let any=true;
+  while(any){
+    any=false;let bestR=-1,bestS=null;
+    for(const fs of allUnique){
+      if(fs.lv>=20)continue;
+      // Cost = step cost × count (level all statues together)
+      const stepCost=(costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv))*fs.count;
+      if(stepCost<=0||poolUsed[fs.pool]+stepCost>poolBudgets[fs.pool])continue;
+      const gain=scoreFromStatsNorm(statObj(fs.name,fs.lv+1),{})-scoreFromStatsNorm(statObj(fs.name,fs.lv),{});
+      // Use raw stat gain (weights applied at build score level)
+      const r=gain/stepCost;
+      if(r>bestR){bestR=r;bestS=fs;}
+    }
+    if(bestS){
+      poolUsed[bestS.pool]+=(costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv))*bestS.count;
+      bestS.lv++;any=true;
+    }
+  }
+  return {atkSlots,defSlots,poolUsed};
+}
+
+function raizarScore(atkSlots,defSlots,atkSet,defSet,weights){
+  // Score one statue's worth, multiply by 5 for each type
+  const scoreStatue=(slots,type,setCode)=>{
+    const raw=slots.reduce((o,sl)=>{
+      const s=statObj(sl.name,sl.lv);
+      Object.keys(s).forEach(k=>{o[k]=(o[k]||0)+s[k];});
+      return o;
+    },{});
+    const tier=Math.min(...slots.map(s=>s.lv));
+    return scoreFromStatsNorm(applySetBonus(raw,type,tier,setCode),weights);
+  };
+  return scoreStatue(atkSlots,'ATK',atkSet)*5 + scoreStatue(defSlots,'DEF',defSet)*5;
+}
+
+function buildRaizarStatues(atkSlots,defSlots,atkSet,defSet,floorT){
+  const statues=[];
+  for(let si=0;si<5;si++){
+    const slots=atkSlots.map(s=>({f:s.name,lv:s.lv,floor:floorT}));
+    statues.push({type:'ATK',slots,tier:Math.min(...slots.map(s=>s.lv))});
+  }
+  for(let si=0;si<5;si++){
+    const slots=defSlots.map(s=>({f:s.name,lv:s.lv,floor:floorT}));
+    statues.push({type:'DEF',slots,tier:Math.min(...slots.map(s=>s.lv))});
+  }
+  return statues;
+}
+
 function runRaizarMode(){
   const weights=state.weights;
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
@@ -924,58 +997,41 @@ function runRaizarMode(){
   setTimeout(()=>{
     try{
       const cands=[];let _done=0;
-      // Raizar: test uniform tiers — same combo for all 5 ATK, same combo for all 5 DEF
-      // No surplus phase — floor level only
       const ATK_SORTED=COMBOS_ATK.map(c=>({c,sc:scoreComboFast(c,'ATK',1,weights)})).sort((a,b)=>b.sc-a.sc);
       const DEF_SORTED=COMBOS_DEF.map(c=>({c,sc:scoreComboFast(c,'DEF',1,weights)})).sort((a,b)=>b.sc-a.sc);
-      const totalConfigs=20*ATK_SORTED.length*DEF_SORTED.length;
-      // For each tier combo, find best ATK combo × best DEF combo feasible within budget
       for(let t=1;t<=20;t++){
-        _done++;if(_done%5===0)_timer.update(_done,20);
-        // Try all ATK combos at tier t, all DEF combos at tier t
+        _done++;_timer.update(_done,20);
         for(const {c:aC} of ATK_SORTED){
           const aCost=comboCost(aC,t);
           const aTotalByPool={};
           POOLS.forEach(p=>{aTotalByPool[p.name]=(aCost[p.name]||0)*5;});
-          // Check 5× ATK fits
           if(!POOLS.every(p=>aTotalByPool[p.name]<=poolBudgets[p.name])) continue;
           for(const {c:dC} of DEF_SORTED){
             const dCost=comboCost(dC,t);
-            const combined={};
-            POOLS.forEach(p=>{combined[p.name]=aTotalByPool[p.name]+(dCost[p.name]||0)*5;});
-            if(!POOLS.every(p=>combined[p.name]<=poolBudgets[p.name])) continue;
-            // Build result — same combo ×5 for ATK, same combo ×5 for DEF, no surplus
-            const poolUsed={...combined};
-            const statues=[];
-            for(let si=0;si<5;si++){
-              const slots=aC.yellows.concat(aC.purples).map(name=>({f:name,lv:t,floor:t}));
-              statues.push({type:'ATK',slots,tier:t});
-            }
-            for(let si=0;si<5;si++){
-              const slots=dC.yellows.concat(dC.purples).map(name=>({f:name,lv:t,floor:t}));
-              statues.push({type:'DEF',slots,tier:t});
-            }
-            const score=statues.reduce((sum,st)=>{
-              const raw=st.slots.reduce((o,sl)=>{
-                const s=statObj(sl.f,sl.lv);
-                Object.keys(s).forEach(k=>{o[k]=(o[k]||0)+s[k];});
-                return o;
-              },{});
-              const withBonus=applySetBonus(raw,st.type,st.tier,checkSet(st.slots).set);
-              return sum+scoreFromStatsNorm(withBonus,weights);
-            },0);
-            cands.push({statues,score,atkTiers:[t,t,t,t,t],defTiers:[t,t,t,t,t],poolUsed,raizar:true});
-            break; // Only best DEF combo per ATK+tier
+            const baseCombined={};
+            POOLS.forEach(p=>{baseCombined[p.name]=aTotalByPool[p.name]+(dCost[p.name]||0)*5;});
+            if(!POOLS.every(p=>baseCombined[p.name]<=poolBudgets[p.name])) continue;
+            // Run Raizar surplus — level feathers in sync across all statues
+            const {atkSlots,defSlots,poolUsed}=raizarSurplus(aC,dC,t,poolBudgets);
+            const atkSet=checkSet(aC.yellows.concat(aC.purples).map(n=>({f:n}))).set;
+            const defSet=checkSet(dC.yellows.concat(dC.purples).map(n=>({f:n}))).set;
+            const score=raizarScore(atkSlots,defSlots,atkSet,defSet,weights);
+            const statues=buildRaizarStatues(atkSlots,defSlots,atkSet,defSet,t);
+            const atkT=statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+            const defT=statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+            cands.push({statues,score,atkTiers:atkT,defTiers:defT,poolUsed,raizar:true});
+            break;
           }
-          break; // Only best ATK combo per tier
+          break;
         }
       }
-      setProg(80);
+      setProg(85);
       const seen=new Set();
+      const maxResults=Math.max(1,parseInt(document.getElementById('results-count').value)||20);
       const results=cands.filter(c=>{
-        const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',')+'/'+c.statues[0].slots.map(s=>s.f).join('+')+'/'+c.statues[5].slots.map(s=>s.f).join('+');
+        const fp=c.statues[0].slots.map(s=>s.f).join('+')+'/'+c.statues[5].slots.map(s=>s.f).join('+')+'/'+c.atkTiers[0]+'/'+c.defTiers[0];
         if(seen.has(fp))return false;seen.add(fp);return true;
-      }).sort((a,b)=>b.score-a.score);
+      }).sort((a,b)=>b.score-a.score).slice(0,maxResults);
       state.results=results;state.expanded.clear();
       renderResults('results-area',state.results,state.expanded,'');
       setProg(100);
