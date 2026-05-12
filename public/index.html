@@ -337,6 +337,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .inv-submit-btn{flex-shrink:0;padding:10px 0;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;width:100%}
 .inv-submit-btn:hover{background:var(--gold2)}
 
+/* ── My Build ──────────────────────────────────────────────────────────────── */
+.mybuild-btn{padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:20px;color:#38bdf8;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:8px;display:inline-flex;align-items:center;gap:5px}
+.mybuild-btn:hover{background:#38bdf8;color:#0f1117}
+.mybuild-btn.active{background:#0c2a38;border-color:#38bdf8}
+.mb-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:96vw;width:940px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .2s ease;cursor:default;max-height:90vh;display:flex;flex-direction:column;gap:12px}
+.mb-scroll{overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.mb-group-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding:6px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.mb-group-hdr.atk{color:#e8705e}
+.mb-group-hdr.def{color:#4fa06a}
+.mb-statues{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mb-statue{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px}
+.mb-statue-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mb-statue-lbl{font-size:11px;font-weight:700;color:var(--text2)}
+.mb-statue-setinfo{font-size:10px;color:var(--text3);margin-left:auto;display:flex;align-items:center;gap:4px}
+.mb-slots{display:flex;flex-direction:column;gap:4px}
+.mb-slot{display:grid;grid-template-columns:1fr 56px;gap:6px;align-items:center}
+.mb-slot-sel{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;padding:4px 6px;outline:none;cursor:pointer;transition:border-color .15s}
+.mb-slot-sel:focus{border-color:#38bdf8}
+.mb-slot-lv{width:56px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;padding:4px 6px;text-align:center;outline:none;transition:border-color .15s}
+.mb-slot-lv:focus{border-color:#38bdf8}
+.mb-footer{display:flex;gap:10px;align-items:center;padding-top:8px;border-top:1px solid var(--border);flex-shrink:0}
+.mb-save-btn{padding:9px 24px;background:#38bdf8;color:#0f1117;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.mb-save-btn:hover{background:#7dd3fc}
+.mb-clear-btn{padding:9px 16px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);font-size:12px;cursor:pointer;transition:all .15s}
+.mb-clear-btn:hover{border-color:var(--red2);color:var(--red2)}
+.mb-hint{font-size:10px;color:var(--text3);margin-left:auto}
+/* Comparison banner above results */
+.mybuild-compare{background:var(--bg3);border:1px solid #38bdf8;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:8px;display:none}
+.mybuild-compare.on{display:block}
+.mybuild-compare-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mybuild-compare-title{font-size:11px;font-weight:700;color:#38bdf8}
+.mybuild-compare-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:3px 12px}
+.mbc-row{display:flex;justify-content:space-between;font-size:11px;padding:1px 0}
+.mbc-n{color:var(--text3)}
+.mbc-v{font-weight:600;color:var(--text)}
+/* Delta in result rows */
+.delta-pos{color:var(--green3);font-size:10px;margin-left:3px}
+.delta-neg{color:var(--red2);font-size:10px;margin-left:3px}
+
 </style>
 </head>
 <body>
@@ -345,7 +384,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.6.1 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.7.0 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -410,6 +449,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <button class="raizar-btn" id="raizar-btn" onclick="runRaizarMode()" style="margin-left:auto" title="Only show builds where all ATK statues are identical and all DEF statues are identical. No surplus leveling. For the OCD enjoyers 🧠">✦ Raizar Mode</button>
   </div>
   <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="mybuild-compare" id="mybuild-compare">
+    <div class="mybuild-compare-hdr">
+      <span class="mybuild-compare-title">📋 My Current Build</span>
+      <span id="mybuild-compare-tiers" style="font-size:10px;color:var(--text3)"></span>
+      <button onclick="openMyBuild()" style="margin-left:auto;padding:2px 10px;background:transparent;border:1px solid #38bdf8;border-radius:10px;color:#38bdf8;font-size:10px;cursor:pointer">Edit</button>
+    </div>
+    <div class="mybuild-compare-stats" id="mybuild-compare-stats"></div>
+  </div>
   <div class="results-area" id="results-area">
     <div class="empty-state">
       <div class="empty-icon">⚗</div>
@@ -475,6 +522,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
+
+<!-- My Build Modal -->
+<div class="modal-overlay" id="mybuild-overlay" onclick="handleMyBuildOverlay(event)">
+  <div class="mb-modal-box">
+    <button class="modal-close" onclick="closeMyBuild()" title="Close">×</button>
+    <div>
+      <div class="modal-title" style="text-align:left;margin-bottom:2px">📋 My Current Build</div>
+      <div class="modal-sub" style="text-align:left;margin-bottom:0;line-height:1.5">Enter your current feathers and levels. Once saved, results will show stat deltas vs your build. You can also import any optimizer result directly.</div>
+    </div>
+    <div class="mb-scroll" id="mb-body"></div>
+    <div class="mb-footer">
+      <button class="mb-save-btn" onclick="saveMyBuild()">💾 Save My Build</button>
+      <button class="mb-clear-btn" onclick="clearMyBuild()">Clear</button>
+      <span class="mb-hint">Saved automatically to your browser</span>
+    </div>
+  </div>
+</div>
 
 <!-- Donate Modal -->
 <div class="modal-overlay" id="donate-overlay" onclick="handleOverlayClick(event)">
@@ -1395,7 +1459,8 @@ function renderResults(areaId,results,expandedSet,sfx){
     const atkT=build.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
     const defT=build.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
     const tiersHtml=`<div class="tiers-cell"><span class="td-pill td-atk">ATK ${atkT.join('-')}</span><span class="td-pill td-def">DEF ${defT.join('-')}</span></div>`;
-    let tr=`<tr class="data-row${exp?' expanded':''}" onclick="toggleBuildTbl(${i},'${areaId}','${sfx}')"><td>${i+1}</td><td>${Math.round(build.score).toLocaleString()}</td><td>${tiersHtml}</td>`;
+    const hasMB=state.myBuild&&state.myBuild.statues;
+    let tr=`<tr class="data-row${exp?' expanded':''}" onclick="toggleBuildTbl(${i},'${areaId}','${sfx}')"><td>${i+1}</td><td>${Math.round(build.score).toLocaleString()}${hasMB?renderScoreDelta(build):''}  </td><td>${tiersHtml}</td>`;
     visCols.forEach(({k})=>{const v=tot[k]||0;const show=PCT_STATS.has(k)?v!==0:v>0.001;tr+=`<td>${show?fmtV(v,k):'—'}</td>`;});
     tr+=`</tr>`;
     // detail row
@@ -1411,7 +1476,7 @@ function renderResults(areaId,results,expandedSet,sfx){
       }));
       // which feathers used/unused per pool
       const usedFeathers=new Set(build.statues.flatMap(st=>st.slots.map(s=>s.f)));
-      let detail=`<div class="detail-panel">`;
+      let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer">📋 Use as My Build</button></div>`;
       // per-statue rows with set bonus + feather bonuses overview
       build.statues.forEach((st,si)=>{
         const {raw,withBonus,comp,tier}=getStatueStats(st.slots,st.type);
@@ -1544,7 +1609,7 @@ function startTimer(){
 }
 function showProg(v){document.getElementById('prog-bar').style.display=v?'block':'none';}
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
-renderPools();renderSliders('slider-grid','presets','preset-desc','weights','activePreset');renderMinMaxGrid('opt-filter-grid','optFiltersMin','optFiltersMax');
+renderPools();renderSliders('slider-grid','presets','preset-desc','weights','activePreset');renderMinMaxGrid('opt-filter-grid','optFiltersMin','optFiltersMax');loadMyBuild();updateMyBuildBanner();
 
 // ── Inventory Calculator ──────────────────────────────────────────────────────
 const INV_LS_KEY='rooc_inv_grid';
@@ -1660,10 +1725,208 @@ function applyInvCalc(){
 }
 // ──────────────────────────────────────────────────────────────────────────────
 
+// ── My Build ──────────────────────────────────────────────────────────────────
+const MB_LS_KEY='rooc_mybuild';
+// myBuild = {statues:[{type,slots:[{f,lv}×5]}×10]}
+if(!state.myBuild) state.myBuild=null;
+
+const STATUE_TYPES=['ATK','ATK','ATK','ATK','ATK','DEF','DEF','DEF','DEF','DEF'];
+const STATUE_LABELS=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+
+// Feather options per statue type (ATK accepts ATK+MIX, DEF accepts DEF+MIX)
+function featherOptionsFor(type){
+  return FEATHERS.filter(f=>f.t===type||f.t==='MIX');
+}
+
+function loadMyBuild(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(MB_LS_KEY));
+    if(saved&&saved.statues) state.myBuild=saved;
+  }catch(e){}
+}
+
+function saveMyBuild(){
+  // Read all selects/inputs from the modal
+  const statues=[];
+  for(let si=0;si<10;si++){
+    const type=STATUE_TYPES[si];
+    const slots=[];
+    for(let sl=0;sl<5;sl++){
+      const sel=document.getElementById(`mb-sel-${si}-${sl}`);
+      const lvinp=document.getElementById(`mb-lv-${si}-${sl}`);
+      const f=sel?sel.value:'';
+      const lv=lvinp?Math.min(20,Math.max(1,parseInt(lvinp.value)||1)):1;
+      slots.push({f,lv});
+    }
+    statues.push({type,slots});
+  }
+  state.myBuild={statues};
+  try{localStorage.setItem(MB_LS_KEY,JSON.stringify(state.myBuild));}catch(e){}
+  updateMyBuildBanner();
+  closeMyBuild();
+}
+
+function clearMyBuild(){
+  state.myBuild=null;
+  try{localStorage.removeItem(MB_LS_KEY);}catch(e){}
+  renderMyBuildModal();
+  updateMyBuildBanner();
+}
+
+function importBuildAsMyBuild(i,sfx){
+  const results=sfx==='s'?state.sfResults:state.results;
+  const build=results[i];
+  if(!build)return;
+  state.myBuild={
+    statues:build.statues.map(st=>({
+      type:st.type,
+      slots:st.slots.map(s=>({f:s.f,lv:s.lv}))
+    }))
+  };
+  try{localStorage.setItem(MB_LS_KEY,JSON.stringify(state.myBuild));}catch(e){}
+  updateMyBuildBanner();
+  // Flash the header button
+  const btn=document.getElementById('mybuild-hdr-btn');
+  if(btn){btn.classList.add('active');setTimeout(()=>btn.classList.remove('active'),1500);}
+  // Re-render results to show deltas
+  const expandedSet=sfx==='s'?state.expandedS:state.expanded;
+  renderResults(sfx==='s'?'sf-results-area':'results-area',results,expandedSet,sfx);
+}
+
+function getMyBuildTotals(){
+  if(!state.myBuild)return null;
+  const t={};SK.forEach(k=>{t[k]=0;});
+  state.myBuild.statues.forEach(st=>{
+    const r=calcStatueResult(st.slots,st.type);
+    if(r)SK.forEach(k=>{t[k]+=(r.stats[k]||0);});
+  });
+  return t;
+}
+
+function renderScoreDelta(build){
+  if(!state.myBuild)return'';
+  const myTot=getMyBuildTotals();
+  const buildTot=getTotals(build);
+  // Score delta based on active weights
+  const w=state.weights;
+  const myScore=Object.keys(w).reduce((s,k)=>s+((myTot[k]||0)*(STAT_SCALE[k]||1))*(w[k]||0),0);
+  const buildScore=Object.keys(w).reduce((s,k)=>s+((buildTot[k]||0)*(STAT_SCALE[k]||1))*(w[k]||0),0);
+  const delta=Math.round(buildScore-myScore);
+  if(Math.abs(delta)<1)return'';
+  return delta>0
+    ?`<span class="delta-pos">▲${delta.toLocaleString()}</span>`
+    :`<span class="delta-neg">▼${Math.abs(delta).toLocaleString()}</span>`;
+}
+
+function updateMyBuildBanner(){
+  const banner=document.getElementById('mybuild-compare');
+  const statsEl=document.getElementById('mybuild-compare-stats');
+  const tiersEl=document.getElementById('mybuild-compare-tiers');
+  if(!banner||!statsEl)return;
+  if(!state.myBuild){banner.classList.remove('on');return;}
+  banner.classList.add('on');
+  // Tiers
+  const atkT=state.myBuild.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+  const defT=state.myBuild.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+  if(tiersEl) tiersEl.textContent=`ATK ${atkT.join('-')}  ·  DEF ${defT.join('-')}`;
+  // Stats
+  const tot=getMyBuildTotals();
+  const visKeys=Object.entries(COL_LABELS);
+  let html='';
+  visKeys.forEach(([k,lbl])=>{
+    const v=tot[k]||0;
+    if(PCT_STATS.has(k)&&Math.abs(v)<0.0001)return;
+    if(!PCT_STATS.has(k)&&Math.abs(v)<0.001)return;
+    html+=`<div class="mbc-row"><span class="mbc-n">${lbl}</span><span class="mbc-v">${fmtV(v,k)}</span></div>`;
+  });
+  statsEl.innerHTML=html;
+}
+
+function renderMyBuildModal(){
+  const statues=state.myBuild?state.myBuild.statues:null;
+  let html='';
+  // ATK group
+  html+=`<div class="mb-group-hdr atk">⚔ ATK Statues</div><div class="mb-statues">`;
+  for(let si=0;si<5;si++) html+=renderMyBuildStatue(si,statues);
+  html+=`</div>`;
+  // DEF group
+  html+=`<div class="mb-group-hdr def">🛡 DEF Statues</div><div class="mb-statues">`;
+  for(let si=5;si<10;si++) html+=renderMyBuildStatue(si,statues);
+  html+=`</div>`;
+  document.getElementById('mb-body').innerHTML=html;
+}
+
+function renderMyBuildStatue(si,statues){
+  const type=STATUE_TYPES[si];
+  const savedSlots=statues?statues[si].slots:null;
+  const opts=featherOptionsFor(type);
+  // Show set info if we have saved slots
+  let setInfo='';
+  if(savedSlots&&savedSlots.every(s=>s.f)){
+    const comp=checkSet(savedSlots.map(s=>({f:s.f})));
+    const tier=Math.min(...savedSlots.map(s=>s.lv));
+    const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
+    setInfo=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
+  }
+  let html=`<div class="mb-statue">
+    <div class="mb-statue-hdr">
+      <span class="mb-statue-lbl">${STATUE_LABELS[si]}</span>
+      <span class="mb-statue-setinfo">${setInfo}</span>
+    </div>
+    <div class="mb-slots">`;
+  for(let sl=0;sl<5;sl++){
+    const saved=savedSlots?savedSlots[sl]:null;
+    const selVal=saved&&saved.f?saved.f:'';
+    const lvVal=saved?saved.lv:1;
+    html+=`<div class="mb-slot">
+      <select id="mb-sel-${si}-${sl}" class="mb-slot-sel" onchange="mbSlotChanged(${si},${sl})">
+        <option value="">— select feather —</option>`;
+    opts.forEach(f=>{
+      const rLabel=f.r==='Yellow'?'[Y]':'[P]';
+      html+=`<option value="${f.name}"${selVal===f.name?' selected':''}>${rLabel} ${f.name}</option>`;
+    });
+    html+=`</select>
+      <input id="mb-lv-${si}-${sl}" class="mb-slot-lv" type="number" min="1" max="20" value="${lvVal}" placeholder="Lv">
+    </div>`;
+  }
+  html+=`</div></div>`;
+  return html;
+}
+
+function mbSlotChanged(si,sl){
+  // Re-render statue header to update set badge live
+  const slots=[];
+  for(let s=0;s<5;s++){
+    const sel=document.getElementById(`mb-sel-${si}-${s}`);
+    const lv=document.getElementById(`mb-lv-${si}-${s}`);
+    slots.push({f:sel?sel.value:'',lv:lv?parseInt(lv.value)||1:1});
+  }
+  if(slots.every(s=>s.f)){
+    const comp=checkSet(slots.map(s=>({f:s.f})));
+    const tier=Math.min(...slots.map(s=>s.lv));
+    const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
+    const hdr=document.querySelector(`#mb-body .mb-statue:nth-of-type(${(si%5)+1}) .mb-statue-setinfo`);
+    if(hdr) hdr.innerHTML=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
+  }
+}
+
+function openMyBuild(){
+  loadMyBuild();
+  renderMyBuildModal();
+  document.getElementById('mybuild-overlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeMyBuild(){
+  document.getElementById('mybuild-overlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+function handleMyBuildOverlay(e){if(e.target===document.getElementById('mybuild-overlay'))closeMyBuild();}
+// ──────────────────────────────────────────────────────────────────────────────
+
 function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
 function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();closeInvCalc();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();closeInvCalc();closeMyBuild();}});
 </script>
 <!-- Inventory Calculator Modal -->
 <div class="modal-overlay" id="inv-calc-overlay" onclick="handleInvCalcOverlay(event)">
