@@ -214,6 +214,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .set-rd{background:#140a1a;border:1px solid var(--purple);color:var(--purple2)}
 .set-invalid{background:#1a0a0a;border:1px solid #6b1a1a;color:#e8705e}
 .detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+/* Per-statue set bonus + feather bonuses panel */
+.statue-detail{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px}
+.statue-detail-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.statue-detail-slots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border2)}
+.statue-bonus-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+.statue-bonus-col{display:flex;flex-direction:column;gap:3px}
+.bonus-col-hdr{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:2px;padding-bottom:3px;border-bottom:1px solid var(--border2)}
+.bonus-col-hdr.set{color:var(--gold2)}
+.bonus-col-hdr.total{color:var(--blue2)}
+.bonus-row{display:flex;justify-content:space-between;font-size:11px;padding:1px 0}
+.bonus-n{color:var(--text2)}
+.bonus-v{font-weight:600;color:var(--text)}
+.bonus-v.pos{color:var(--green3)}
 .ds-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
 .ds-n{color:var(--text2)}.ds-v{font-weight:600;color:var(--text)}
 
@@ -332,7 +345,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.6.0 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.6.1 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1297,6 +1310,64 @@ const COL_GROUPS={
 };
 const COL_LABELS={PATK:'PATK',MATK:'MATK',IgnorePDEF:'Ign.PDEF',IgnoreMDEF:'Ign.MDEF',PDMG:'PDMG',MDMG:'MDMG',PDEF:'PDEF',MDEF:'MDEF',HP:'HP',PDMGRed:'PDMGRed',MDMGRed:'MDMGRed',PvEDMG:'PvEDMG',PvEDMGRed:'PvEDMGRed',PvPDMG:'PvPDMG',PvPDMGRed:'PvPDMGRed'};
 function getVisibleCols(){const c=[];Object.entries(COL_GROUPS).forEach(([g,m])=>{if(tblState.groups[g])m.cols.forEach(k=>c.push({k,g,cls:m.cls}));});return c;}
+function getSetBonusStats(setCode,type,tier){
+  // Returns object of set bonus stats at this tier
+  const b = setCode==='RH'&&type==='ATK'?RH_ATK[tier]:
+            setCode==='RH'&&type==='DEF'?RH_DEF[tier]:
+            setCode==='RP'&&type==='ATK'?RP_ATK[tier]:
+            setCode==='RP'&&type==='DEF'?RP_DEF[tier]:
+            setCode==='RD'&&type==='ATK'?RD_ATK[tier]:
+            setCode==='RD'&&type==='DEF'?RD_DEF[tier]:null;
+  if(!b) return [];
+  const rows=[];
+  // Flat bonuses
+  if(b.patkFlat)  rows.push({label:'PATK',val:'+'+b.patkFlat});
+  if(b.matkFlat)  rows.push({label:'MATK',val:'+'+b.matkFlat});
+  if(b.hpFlat)    rows.push({label:'Max HP',val:'+'+b.hpFlat});
+  if(b.pvpDmgBonus) rows.push({label:'PvP DMG Bonus',val:'+'+b.pvpDmgBonus});
+  if(b.pvpDmgRed)   rows.push({label:'PvP DMG Red.',val:'+'+b.pvpDmgRed});
+  // Multipliers
+  if(b.atkMult)   rows.push({label:'Attack Stats',val:'+'+(b.atkMult*100).toFixed(0)+'%'});
+  if(b.pveMult)   rows.push({label:'PvE Stats',   val:'+'+(b.pveMult*100).toFixed(0)+'%'});
+  if(b.pvpMult)   rows.push({label:'PvP Stats',   val:'+'+(b.pvpMult*100).toFixed(0)+'%'});
+  if(b.defMult)   rows.push({label:'Defense Stats',val:'+'+(b.defMult*100).toFixed(0)+'%'});
+  return rows;
+}
+function getStatueStats(slots,type){
+  // Returns {raw, withBonus, setCode, tier} for a statue
+  const comp=checkSet(slots);
+  const tier=Math.min(...slots.map(s=>s.lv));
+  const raw=slots.reduce((o,sl)=>{
+    if(!sl.f)return o;
+    const s=statObj(sl.f,sl.lv);
+    Object.keys(s).forEach(k=>{o[k]=(o[k]||0)+s[k];});
+    return o;
+  },{});
+  const withBonus=comp.valid?applySetBonus({...raw},type,tier,comp.set):{...raw};
+  return{raw,withBonus,comp,tier};
+}
+const STAT_DISPLAY=[
+  {k:'PATK',label:'PATK'},{k:'MATK',label:'MATK'},
+  {k:'ATK',label:'PATK/MATK'},
+  {k:'IgnorePDEF',label:'Ignore PDEF'},{k:'IgnoreMDEF',label:'Ignore MDEF'},
+  {k:'PvEDMG',label:'PvE DMG Bonus'},{k:'PvPDMG',label:'PvP DMG Bonus'},
+  {k:'PDMG',label:'PDMG%',pct:true},{k:'MDMG',label:'MDMG%',pct:true},
+  {k:'PDEF',label:'PDEF'},{k:'MDEF',label:'MDEF'},{k:'HP',label:'Max HP'},
+  {k:'PvEDMGRed',label:'PvE DMG Red.'},{k:'PvPDMGRed',label:'PvP DMG Red.'},
+  {k:'PDMGRed',label:'PDMG Red.%',pct:true},{k:'MDMGRed',label:'MDMG Red.%',pct:true},
+];
+function renderStatueBonusRows(stats){
+  return STAT_DISPLAY.filter(d=>{
+    // Show ATK combined, skip PATK/MATK individually
+    if(d.k==='PATK'||d.k==='MATK')return false;
+    const v=stats[d.k]||0;
+    return d.pct?(Math.abs(v)>0.0001):(Math.abs(v)>0.001);
+  }).map(d=>{
+    const v=stats[d.k]||0;
+    const disp=d.pct?(v*100).toFixed(2)+'%':Math.round(v).toLocaleString();
+    return `<div class="bonus-row"><span class="bonus-n">${d.label}</span><span class="bonus-v">+${disp}</span></div>`;
+  }).join('');
+}
 function renderResults(areaId,results,expandedSet,sfx){
   const area=document.getElementById(areaId);
   if(!results.length){area.innerHTML=`<div class="empty-state"><div class="empty-icon">⚗</div><h3>No builds yet</h3><p>Enter pool inventory, set stat priority, then click Run Optimizer.</p></div>`;return;}
@@ -1341,17 +1412,39 @@ function renderResults(areaId,results,expandedSet,sfx){
       // which feathers used/unused per pool
       const usedFeathers=new Set(build.statues.flatMap(st=>st.slots.map(s=>s.f)));
       let detail=`<div class="detail-panel">`;
-      // per-statue rows
+      // per-statue rows with set bonus + feather bonuses overview
       build.statues.forEach((st,si)=>{
-        const comp=checkSet(st.slots);
-        const actualTier=Math.min(...st.slots.map(s=>s.lv));
-        detail+=`<div class="st-row"><span class="st-lbl">${statueLabels[si]} <span class="tier-b">T${actualTier}</span><span class="set-b ${comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid'}">${comp.name}</span></span>`;
+        const {raw,withBonus,comp,tier}=getStatueStats(st.slots,st.type);
+        const setBonusRows=getSetBonusStats(comp.set,st.type,tier);
+        const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
+        detail+=`<div class="statue-detail">`;
+        // Header: label + tier + set badge
+        detail+=`<div class="statue-detail-hdr">
+          <span style="font-size:12px;font-weight:700;color:var(--text2)">${statueLabels[si]}</span>
+          <span class="tier-b">T${tier}</span>
+          <span class="set-b ${badgeCls}">${comp.name}</span>
+        </div>`;
+        // Feather chips
+        detail+=`<div class="statue-detail-slots">`;
         st.slots.forEach(sl=>{
           const f=FEATHERS.find(x=>x.name===sl.f);
           const above=sl.lv>(sl.floor||st.tier);
           detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;
         });
         detail+=`</div>`;
+        // Two-column: Set Stat | Feather Bonuses Overview
+        detail+=`<div class="statue-bonus-grid">`;
+        // Left: Set Stat (active set bonus)
+        detail+=`<div class="statue-bonus-col">
+          <div class="bonus-col-hdr set">Set Stat — T${tier}</div>
+          ${setBonusRows.length?setBonusRows.map(r=>`<div class="bonus-row"><span class="bonus-n">${r.label}</span><span class="bonus-v pos">${r.val}</span></div>`).join(''):'<div class="bonus-row"><span class="bonus-n" style="color:var(--text3)">No active set bonus</span></div>'}
+        </div>`;
+        // Right: Feather Bonuses Overview (raw + set applied)
+        detail+=`<div class="statue-bonus-col">
+          <div class="bonus-col-hdr total">Feather Bonuses Overview</div>
+          ${renderStatueBonusRows(withBonus)}
+        </div>`;
+        detail+=`</div></div>`;
       });
       // pool utilization section
       detail+=`<div class="pool-util-section">`;
