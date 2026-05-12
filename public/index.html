@@ -163,12 +163,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .csv-btn{margin-left:auto;font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .12s}
 .csv-btn:hover{border-color:var(--green2);color:var(--green3)}
 .res-table{width:100%;border-collapse:collapse;font-size:11px}
-.res-table th{padding:6px 10px;text-align:right;font-weight:600;font-size:10px;color:var(--text3);background:var(--bg3);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0}
+.res-table th{padding:8px 12px;text-align:right;font-weight:600;font-size:11px;color:var(--text3);background:var(--bg3);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0}
 .res-table th:first-child,.res-table th:nth-child(2),.res-table th:nth-child(3){text-align:left;cursor:default}
 .res-table th:hover:not(:first-child):not(:nth-child(2)):not(:nth-child(3)){color:var(--text);background:#222a36}
 .res-table th.sort-asc::after{content:' ↑';color:var(--gold)}
 .res-table th.sort-desc::after{content:' ↓';color:var(--gold)}
-.res-table td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border2);white-space:nowrap;color:var(--text)}
+.res-table td{padding:9px 12px;font-size:12px;text-align:right;border-bottom:1px solid var(--border2);white-space:nowrap;color:var(--text)}
 .res-table td:first-child{text-align:left;color:var(--text3);font-size:10px;width:28px}
 .res-table td:nth-child(2){text-align:left;font-weight:700;color:var(--gold);min-width:70px}
 .res-table td:nth-child(3){text-align:left;min-width:160px}
@@ -187,34 +187,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .col-grp-pve{color:#7fb5d4}
 .col-grp-pvp{color:#9b7fd4}
 /* Pool utilization bars */
-.pool-util-section{margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:5px 12px}
-.pool-util-row{display:flex;flex-direction:column;gap:2px}
-.pool-util-hdr{display:flex;justify-content:space-between;font-size:10px}
+.pool-util-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px}
+.pool-util-row{display:flex;flex-direction:column;gap:3px}
+.pool-util-hdr{display:flex;justify-content:space-between;font-size:11px}
 .pool-util-name{color:var(--text2);font-weight:600}
 .pool-util-nums{color:var(--text3)}
 .pool-util-nums.over{color:var(--red2)}
-.pool-bar-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.pool-bar-track{height:5px;background:var(--border);border-radius:2px;overflow:hidden}
 .pool-bar-fill{height:100%;border-radius:2px;transition:width .2s}
 .pool-bar-fill.ok{background:var(--green2)}
 .pool-bar-fill.warn{background:var(--gold)}
 .pool-bar-fill.over{background:var(--red2)}
-.st-row{display:flex;gap:5px;margin-bottom:5px;align-items:flex-start;flex-wrap:wrap}
-.st-lbl{font-size:10px;font-weight:600;color:var(--text2);min-width:60px;padding-top:3px;flex-shrink:0}
-.f-chip{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.st-row{display:flex;gap:6px;margin-bottom:7px;align-items:flex-start;flex-wrap:wrap}
+.st-lbl{font-size:11px;font-weight:600;color:var(--text2);min-width:68px;padding-top:3px;flex-shrink:0}
+.f-chip{font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid}
 .f-yellow{background:#1a1200;border-color:#6a4e10;color:#c9a227}
 .f-purple{background:#110a20;border-color:#4a3070;color:#9b7fd4}
 .f-yellow.above{font-weight:700;border-color:var(--gold)}
 .f-purple.above{font-weight:700;border-color:var(--purple2)}
 .f-unused{opacity:.35;border-style:dashed}
-.tier-b{font-size:9px;padding:1px 5px;border-radius:3px;background:#1a1200;color:var(--gold);font-weight:600;border:1px solid var(--gold3)}
-.set-b{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600;margin-left:2px}
+.tier-b{font-size:10px;padding:2px 6px;border-radius:3px;background:#1a1200;color:var(--gold);font-weight:600;border:1px solid var(--gold3)}
+.set-b{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;margin-left:3px}
 .set-valid{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
 .set-rh{background:#1a1400;border:1px solid var(--gold3);color:var(--gold2)}
 .set-rp{background:#001a0a;border:1px solid #1a6b3c;color:#4fa06a}
 .set-rd{background:#140a1a;border:1px solid var(--purple);color:var(--purple2)}
 .set-invalid{background:#1a0a0a;border:1px solid #6b1a1a;color:#e8705e}
-.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px 12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.ds-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.ds-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
 .ds-n{color:var(--text2)}.ds-v{font-weight:600;color:var(--text)}
 
 /* Empty state */
@@ -332,7 +332,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.5.3 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.6.0 · Raven's Hour + Prestige + Plunder</span><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -876,24 +876,39 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
     });
   });
 
-  // Phase 2: greedy surplus — per-feather score delta
-  let any=true;
-  while(any){
-    any=false;let bestR=-1,bestS=null;
-    for(const fs of slots){
-      if(fs.lv>=20)continue;
-      const stepCost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
-      if(stepCost<=0||poolUsed[fs.pool]+stepCost>poolBudgets[fs.pool])continue;
-      const gain=scoreFromStatsNorm(statObj(fs.name,fs.lv+1),weights)-scoreFromStatsNorm(statObj(fs.name,fs.lv),weights);
-      if(gain<=0)continue;
-      const r=gain/stepCost;
-      if(r>bestR){bestR=r;bestS=fs;}
+  // Phase 2: surplus allocation — O(n log n) per pool
+  // Group slots by pool, sort by score-per-copy at floor, allocate greedily
+  // but batch: level each slot as high as budget allows before moving to next
+  const poolSlots={};
+  POOLS.forEach(p=>{poolSlots[p.name]=[];});
+  slots.forEach(fs=>{poolSlots[fs.pool].push(fs);});
+
+  POOLS.forEach(p=>{
+    const pSlots=poolSlots[p.name];
+    if(!pSlots.length)return;
+    // Score gain from floor to Lv20 — use total gain as priority proxy
+    const scored=pSlots.map(fs=>{
+      const gainTotal=scoreFromStatsNorm(statObj(fs.name,20),weights)-scoreFromStatsNorm(statObj(fs.name,fs.floor),weights);
+      const costTotal=costAt(fs.name,20)-costAt(fs.name,fs.floor);
+      return{fs,r:costTotal>0?gainTotal/costTotal:0};
+    }).sort((a,b)=>b.r-a.r);
+
+    // Multi-pass: keep leveling until no budget remains
+    let improved=true;
+    while(improved){
+      improved=false;
+      for(const {fs} of scored){
+        if(fs.lv>=20)continue;
+        const stepCost=costAt(fs.name,fs.lv+1)-costAt(fs.name,fs.lv);
+        if(stepCost<=0)continue;
+        if(poolUsed[p.name]+stepCost<=poolBudgets[p.name]){
+          poolUsed[p.name]+=stepCost;
+          fs.lv++;
+          improved=true;
+        }
+      }
     }
-    if(bestS){
-      poolUsed[bestS.pool]+=costAt(bestS.name,bestS.lv+1)-costAt(bestS.name,bestS.lv);
-      bestS.lv++;any=true;
-    }
-  }
+  });
 
   // Assemble statues
   const statueSlots=Array.from({length:10},(_,i)=>slots.filter(s=>s.si===i));
