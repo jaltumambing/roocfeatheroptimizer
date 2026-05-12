@@ -366,12 +366,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 /* Comparison banner above results */
 .mybuild-compare{background:var(--bg3);border:1px solid #38bdf8;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:8px;display:none}
 .mybuild-compare.on{display:block}
-.mybuild-compare-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mybuild-compare-hdr{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
 .mybuild-compare-title{font-size:11px;font-weight:700;color:#38bdf8}
-.mybuild-compare-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:3px 12px}
-.mbc-row{display:flex;justify-content:space-between;font-size:11px;padding:1px 0}
-.mbc-n{color:var(--text3)}
-.mbc-v{font-weight:600;color:var(--text)}
+.mybuild-compare-caret{font-size:10px;color:#38bdf8;transition:transform .15s;margin-left:2px}
+.mybuild-compare-caret.open{transform:rotate(90deg)}
+.mybuild-compare-body{display:none;margin-top:10px}
+.mybuild-compare-body.open{display:block}
+/* Collapsed: show flat stat summary */
+.mybuild-summary-row{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px}
+.mbs-stat{font-size:11px;color:var(--text2)}
+.mbs-stat span{font-weight:700;color:var(--text);margin-left:3px}
+/* Expanded: per-statue grid */
+.mybuild-statues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px}
 /* Delta in result rows */
 .delta-pos{color:var(--green3);font-size:10px;margin-left:3px}
 .delta-neg{color:var(--red2);font-size:10px;margin-left:3px}
@@ -384,7 +390,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.7.0 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.7.3 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -450,12 +456,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
   <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   <div class="mybuild-compare" id="mybuild-compare">
-    <div class="mybuild-compare-hdr">
+    <div class="mybuild-compare-hdr" onclick="toggleMyBuildBanner()">
       <span class="mybuild-compare-title">📋 My Current Build</span>
       <span id="mybuild-compare-tiers" style="font-size:10px;color:var(--text3)"></span>
-      <button onclick="openMyBuild()" style="margin-left:auto;padding:2px 10px;background:transparent;border:1px solid #38bdf8;border-radius:10px;color:#38bdf8;font-size:10px;cursor:pointer">Edit</button>
+      <span class="mybuild-compare-caret" id="mybuild-compare-caret">▶</span>
+      <button onclick="openMyBuild();event.stopPropagation()" style="margin-left:auto;padding:2px 10px;background:transparent;border:1px solid #38bdf8;border-radius:10px;color:#38bdf8;font-size:10px;cursor:pointer">Edit</button>
     </div>
-    <div class="mybuild-compare-stats" id="mybuild-compare-stats"></div>
+    <div class="mybuild-summary-row" id="mybuild-summary-row"></div>
+    <div class="mybuild-compare-body" id="mybuild-compare-body">
+      <div class="mybuild-statues-grid" id="mybuild-compare-stats"></div>
+    </div>
   </div>
   <div class="results-area" id="results-area">
     <div class="empty-state">
@@ -1755,7 +1765,7 @@ function saveMyBuild(){
       const sel=document.getElementById(`mb-sel-${si}-${sl}`);
       const lvinp=document.getElementById(`mb-lv-${si}-${sl}`);
       const f=sel?sel.value:'';
-      const lv=lvinp?Math.min(20,Math.max(1,parseInt(lvinp.value)||1)):1;
+      const lv=f?Math.min(20,Math.max(1,parseInt(lvinp?.value)||1)):0;
       slots.push({f,lv});
     }
     statues.push({type,slots});
@@ -1818,28 +1828,78 @@ function renderScoreDelta(build){
     :`<span class="delta-neg">▼${Math.abs(delta).toLocaleString()}</span>`;
 }
 
+function toggleMyBuildBanner(){
+  const body=document.getElementById('mybuild-compare-body');
+  const caret=document.getElementById('mybuild-compare-caret');
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(caret)caret.classList.toggle('open',open);
+}
+
 function updateMyBuildBanner(){
   const banner=document.getElementById('mybuild-compare');
   const statsEl=document.getElementById('mybuild-compare-stats');
+  const summaryEl=document.getElementById('mybuild-summary-row');
   const tiersEl=document.getElementById('mybuild-compare-tiers');
-  if(!banner||!statsEl)return;
+  if(!banner)return;
   if(!state.myBuild){banner.classList.remove('on');return;}
   banner.classList.add('on');
+
   // Tiers
-  const atkT=state.myBuild.statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
-  const defT=state.myBuild.statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
-  if(tiersEl) tiersEl.textContent=`ATK ${atkT.join('-')}  ·  DEF ${defT.join('-')}`;
-  // Stats
+  const atkT=state.myBuild.statues.slice(0,5).map(st=>{const f=st.slots.filter(s=>s.f);return f.length===5?Math.min(...f.map(s=>s.lv)):'?';});
+  const defT=state.myBuild.statues.slice(5,10).map(st=>{const f=st.slots.filter(s=>s.f);return f.length===5?Math.min(...f.map(s=>s.lv)):'?';});
+  if(tiersEl)tiersEl.textContent=`ATK ${atkT.join('-')}  ·  DEF ${defT.join('-')}`;
+
+  // Collapsed summary — key totals in one line
   const tot=getMyBuildTotals();
-  const visKeys=Object.entries(COL_LABELS);
+  if(summaryEl){
+    const keys=Object.entries(COL_LABELS).filter(([k])=>{
+      const v=tot[k]||0;
+      return PCT_STATS.has(k)?Math.abs(v)>0.0001:Math.abs(v)>0.001;
+    });
+    summaryEl.innerHTML=keys.map(([k,lbl])=>`<span class="mbs-stat">${lbl}<span>${fmtV(tot[k],k)}</span></span>`).join('');
+  }
+
+  // Expanded — per-statue cards using same detail panel style
+  if(!statsEl)return;
+  const statueLabels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
   let html='';
-  visKeys.forEach(([k,lbl])=>{
-    const v=tot[k]||0;
-    if(PCT_STATS.has(k)&&Math.abs(v)<0.0001)return;
-    if(!PCT_STATS.has(k)&&Math.abs(v)<0.001)return;
-    html+=`<div class="mbc-row"><span class="mbc-n">${lbl}</span><span class="mbc-v">${fmtV(v,k)}</span></div>`;
+  state.myBuild.statues.forEach((st,si)=>{
+    const filled=st.slots.filter(s=>s.f);
+    if(!filled.length)return; // skip fully empty statues
+    const {raw,withBonus,comp,tier}=getStatueStats(st.slots,st.type);
+    const setBonusRows=comp.valid?getSetBonusStats(comp.set,st.type,tier):[];
+    const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
+    html+=`<div class="statue-detail">`;
+    // Header
+    html+=`<div class="statue-detail-hdr">
+      <span style="font-size:12px;font-weight:700;color:var(--text2)">${statueLabels[si]}</span>
+      ${filled.length===5?`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}">${comp.name}</span>`:`<span style="font-size:10px;color:var(--text3)">${filled.length}/5 feathers</span>`}
+    </div>`;
+    // Feather chips
+    html+=`<div class="statue-detail-slots">`;
+    st.slots.forEach(sl=>{
+      if(!sl.f)return;
+      const f=FEATHERS.find(x=>x.name===sl.f);
+      html+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}">${sl.f} <span style="opacity:.7">Lv${sl.lv}</span></span>`;
+    });
+    html+=`</div>`;
+    // Set stat + feather bonuses — only if complete
+    if(filled.length===5){
+      html+=`<div class="statue-bonus-grid">
+        <div class="statue-bonus-col">
+          <div class="bonus-col-hdr set">Set Stat — T${tier}</div>
+          ${setBonusRows.length?setBonusRows.map(r=>`<div class="bonus-row"><span class="bonus-n">${r.label}</span><span class="bonus-v pos">${r.val}</span></div>`).join(''):'<div class="bonus-row"><span class="bonus-n" style="color:var(--text3)">No active set bonus</span></div>'}
+        </div>
+        <div class="statue-bonus-col">
+          <div class="bonus-col-hdr total">Feather Bonuses Overview</div>
+          ${renderStatueBonusRows(withBonus)}
+        </div>
+      </div>`;
+    }
+    html+=`</div>`;
   });
-  statsEl.innerHTML=html;
+  statsEl.innerHTML=html||`<div style="font-size:11px;color:var(--text3);padding:8px">No complete statues yet. Fill in feathers to see per-statue breakdown.</div>`;
 }
 
 function renderMyBuildModal(){
@@ -1864,35 +1924,44 @@ function renderMyBuildStatue(si,statues){
   let setInfo='';
   if(savedSlots&&savedSlots.every(s=>s.f)){
     const comp=checkSet(savedSlots.map(s=>({f:s.f})));
-    const tier=Math.min(...savedSlots.map(s=>s.lv));
+    // Only use filled slots for tier calculation
+    const filledLevels=savedSlots.filter(s=>s.f).map(s=>s.lv);
+    const tier=filledLevels.length?Math.min(...filledLevels):1;
     const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
     setInfo=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
   }
   let html=`<div class="mb-statue">
     <div class="mb-statue-hdr">
       <span class="mb-statue-lbl">${STATUE_LABELS[si]}</span>
-      <span class="mb-statue-setinfo">${setInfo}</span>
+      <span class="mb-statue-setinfo" id="mb-setinfo-${si}">${setInfo}</span>
     </div>
     <div class="mb-slots">`;
   for(let sl=0;sl<5;sl++){
     const saved=savedSlots?savedSlots[sl]:null;
     const selVal=saved&&saved.f?saved.f:'';
-    const lvVal=saved?saved.lv:1;
+    const lvVal=saved&&saved.f?saved.lv:0;
     html+=`<div class="mb-slot">
-      <select id="mb-sel-${si}-${sl}" class="mb-slot-sel" onchange="mbSlotChanged(${si},${sl})">
+      <select id="mb-sel-${si}-${sl}" class="mb-slot-sel" onchange="mbSelChanged(${si},${sl})">
         <option value="">— select feather —</option>`;
     opts.forEach(f=>{
       const rLabel=f.r==='Yellow'?'[Y]':'[P]';
       html+=`<option value="${f.name}"${selVal===f.name?' selected':''}>${rLabel} ${f.name}</option>`;
     });
     html+=`</select>
-      <input id="mb-lv-${si}-${sl}" class="mb-slot-lv" type="number" min="1" max="20" value="${lvVal}" placeholder="Lv">
+      <input id="mb-lv-${si}-${sl}" class="mb-slot-lv" type="number" min="1" max="20" value="${lvVal}" placeholder="Lv" oninput="mbSlotChanged(${si},${sl})">
     </div>`;
   }
   html+=`</div></div>`;
   return html;
 }
 
+function mbSelChanged(si,sl){
+  // If feather cleared, reset level to 0
+  const sel=document.getElementById(`mb-sel-${si}-${sl}`);
+  const lv=document.getElementById(`mb-lv-${si}-${sl}`);
+  if(sel&&!sel.value&&lv) lv.value=0;
+  mbSlotChanged(si,sl);
+}
 function mbSlotChanged(si,sl){
   // Re-render statue header to update set badge live
   const slots=[];
@@ -1901,12 +1970,18 @@ function mbSlotChanged(si,sl){
     const lv=document.getElementById(`mb-lv-${si}-${s}`);
     slots.push({f:sel?sel.value:'',lv:lv?parseInt(lv.value)||1:1});
   }
+  // Only show badge when all 5 slots are filled
+  const hdr=document.getElementById(`mb-setinfo-${si}`);
+  if(!hdr) return;
   if(slots.every(s=>s.f)){
     const comp=checkSet(slots.map(s=>({f:s.f})));
-    const tier=Math.min(...slots.map(s=>s.lv));
+    // Tier = min of FILLED slots only
+    const filledLevels=slots.filter(s=>s.f).map(s=>s.lv);
+    const tier=filledLevels.length?Math.min(...filledLevels):1;
     const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
-    const hdr=document.querySelector(`#mb-body .mb-statue:nth-of-type(${(si%5)+1}) .mb-statue-setinfo`);
-    if(hdr) hdr.innerHTML=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
+    hdr.innerHTML=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
+  } else {
+    hdr.innerHTML='';
   }
 }
 
