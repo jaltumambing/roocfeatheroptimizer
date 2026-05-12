@@ -390,7 +390,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.7.3 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.7.5 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -635,7 +635,7 @@ const SD={
   Time:   {1:[0,0,0,7,7,12,3,17,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,17,17,44,11,45,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,30,30,84,21,80,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,43,43,124,31,115,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,56,56,164,41,150,0,0,0,0,0,0,0,0,0,0,0]},
   Sky:    {1:[0,0,0,2,2,4,1,0,0,0,0,0,0,0,0,0,0,0,0],5:[0,0,0,10,10,20,5,0,0,0,0,0,0,0,0,0,0,0,0],10:[0,0,0,20,20,40,10,0,0,0,0,0,0,0,0,0,0,0,0],15:[0,0,0,30,30,50,13,0,0,0,0,0,0,0,0,0,0,0,0],20:[0,0,0,40,40,60,15,0,0,0,0,0,0,0,0,0,0,0,0]},
   Terra:  {1:[2,1,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],5:[10,5,165,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],10:[20,10,330,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],15:[25,13,495,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],20:[30,15,660,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
-  Order:  {1:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0023,0.0023],5:[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.004,0.004],10:[10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.006,0.006],15:[15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.008,0.008],20:[20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.010,0.010]},
+  Order:  {1:[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0023,0.0023],5:[10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.004,0.004],10:[20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.006,0.006],15:[25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.008,0.008],20:[30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.010,0.010]},
   Truth:  {1:[0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0.0023,0.0023,0,0],5:[0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0.004,0.004,0,0],10:[0,0,0,10,10,0,0,0,0,0,0,0,0,0,0,0.006,0.006,0,0],15:[0,0,0,15,15,0,0,0,0,0,0,0,0,0,0,0.008,0.008,0,0],20:[0,0,0,20,20,0,0,0,0,0,0,0,0,0,0,0.010,0.010,0,0]},
 };
 const SK=['PDEF','MDEF','HP','PATK','MATK','IgnorePDEF','IgnoreMDEF','PvEDMG','PvPDMG','PvEDMGRed','STR','INT','DEX','VIT','PvPDMGRed','PDMG','MDMG','PDMGRed','MDMGRed'];
@@ -1407,10 +1407,73 @@ function getSetBonusStats(setCode,type,tier){
   if(b.defMult)   rows.push({label:'Defense Stats',val:'+'+(b.defMult*100).toFixed(0)+'%'});
   return rows;
 }
+function applySetBonusNoFlats(raw,type,tier,setName){
+  // Same as applySetBonus but WITHOUT flat additions (patkFlat, matkFlat, hpFlat, pvpDmgBonus, pvpDmgRed)
+  // Matches what the game shows in "Feather Bonuses Overview" — multipliers only
+  const s={...raw};
+  const isRD=setName==='RD', isRP=setName==='RP';
+  if(type==='DEF'){
+    const b=isRD?RD_DEF[tier]:isRP?RP_DEF[tier]:RH_DEF[tier];
+    if(!b)return s;
+    // Apply multipliers only — no hpFlat, no pvpDmgBonus/pvpDmgRed
+    if(setName==='RH'){
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
+      s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
+    } else if(setName==='RP'){
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+    } else {
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+      s.PvEDMGRed=Math.floor(s.PvEDMGRed*(1+b.pveMult));
+    }
+  } else {
+    const b=isRD?RD_ATK[tier]:isRP?RP_ATK[tier]:RH_ATK[tier];
+    if(!b)return s;
+    if(setName==='RH'){
+      s.PATK=Math.floor(s.PATK*(1+b.atkMult));
+      s.MATK=Math.floor(s.MATK*(1+b.atkMult));
+      s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
+      s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
+      s.PDMG=s.PDMG*(1+b.atkMult);
+      s.MDMG=s.MDMG*(1+b.atkMult);
+      s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+      s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
+    } else if(setName==='RP'){
+      s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
+      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
+      s.PDMGRed=s.PDMGRed*(1+b.defMult);
+      s.MDMGRed=s.MDMGRed*(1+b.defMult);
+    } else {
+      // RD ATK: atkMult + pveMult only, no flat
+      s.PATK=Math.floor(s.PATK*(1+b.atkMult));
+      s.MATK=Math.floor(s.MATK*(1+b.atkMult));
+      s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
+      s.IgnoreMDEF=Math.floor(s.IgnoreMDEF*(1+b.atkMult));
+      s.PDMG=s.PDMG*(1+b.atkMult);
+      s.MDMG=s.MDMG*(1+b.atkMult);
+      s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
+    }
+  }
+  s.ATK=(s.PATK||0)+(s.MATK||0);
+  return s;
+}
+
 function getStatueStats(slots,type){
-  // Returns {raw, withBonus, setCode, tier} for a statue
+  // Returns {raw, withBonus, withBonusNoFlats, comp, tier} for a statue
   const comp=checkSet(slots);
-  const tier=Math.min(...slots.map(s=>s.lv));
+  const filledLvs=slots.filter(s=>s.f).map(s=>s.lv);
+  const tier=filledLvs.length?Math.min(...filledLvs):1;
   const raw=slots.reduce((o,sl)=>{
     if(!sl.f)return o;
     const s=statObj(sl.f,sl.lv);
@@ -1418,11 +1481,12 @@ function getStatueStats(slots,type){
     return o;
   },{});
   const withBonus=comp.valid?applySetBonus({...raw},type,tier,comp.set):{...raw};
-  return{raw,withBonus,comp,tier};
+  const withBonusNoFlats=comp.valid?applySetBonusNoFlats({...raw},type,tier,comp.set):{...raw};
+  return{raw,withBonus,withBonusNoFlats,comp,tier};
 }
 const STAT_DISPLAY=[
-  {k:'PATK',label:'PATK'},{k:'MATK',label:'MATK'},
-  {k:'ATK',label:'PATK/MATK'},
+  // Show PATK only (labeled PATK/MATK) since they're always equal — skip MATK and ATK(sum)
+  {k:'PATK',label:'PATK/MATK'},
   {k:'IgnorePDEF',label:'Ignore PDEF'},{k:'IgnoreMDEF',label:'Ignore MDEF'},
   {k:'PvEDMG',label:'PvE DMG Bonus'},{k:'PvPDMG',label:'PvP DMG Bonus'},
   {k:'PDMG',label:'PDMG%',pct:true},{k:'MDMG',label:'MDMG%',pct:true},
@@ -1432,8 +1496,6 @@ const STAT_DISPLAY=[
 ];
 function renderStatueBonusRows(stats){
   return STAT_DISPLAY.filter(d=>{
-    // Show ATK combined, skip PATK/MATK individually
-    if(d.k==='PATK'||d.k==='MATK')return false;
     const v=stats[d.k]||0;
     return d.pct?(Math.abs(v)>0.0001):(Math.abs(v)>0.001);
   }).map(d=>{
@@ -1517,7 +1579,7 @@ function renderResults(areaId,results,expandedSet,sfx){
         // Right: Feather Bonuses Overview (raw + set applied)
         detail+=`<div class="statue-bonus-col">
           <div class="bonus-col-hdr total">Feather Bonuses Overview</div>
-          ${renderStatueBonusRows(withBonus)}
+          ${renderStatueBonusRows(withBonusNoFlats)}
         </div>`;
         detail+=`</div></div>`;
       });
@@ -1893,7 +1955,7 @@ function updateMyBuildBanner(){
         </div>
         <div class="statue-bonus-col">
           <div class="bonus-col-hdr total">Feather Bonuses Overview</div>
-          ${renderStatueBonusRows(withBonus)}
+          ${renderStatueBonusRows(withBonusNoFlats)}
         </div>
       </div>`;
     }
