@@ -379,8 +379,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 /* Expanded: per-statue grid */
 .mybuild-statues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px}
 /* Delta in result rows */
-.delta-pos{color:var(--green3);font-size:10px;margin-left:3px}
-.delta-neg{color:var(--red2);font-size:10px;margin-left:3px}
+.delta-pos{color:var(--green3);font-size:9px;margin-left:2px;font-weight:600}
+.delta-neg{color:var(--red2);font-size:9px;margin-left:2px;font-weight:600}
 
 </style>
 </head>
@@ -390,7 +390,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.7.7 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v2.7.9 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1533,7 +1533,22 @@ function renderResults(areaId,results,expandedSet,sfx){
     const tiersHtml=`<div class="tiers-cell"><span class="td-pill td-atk">ATK ${atkT.join('-')}</span><span class="td-pill td-def">DEF ${defT.join('-')}</span></div>`;
     const hasMB=state.myBuild&&state.myBuild.statues;
     let tr=`<tr class="data-row${exp?' expanded':''}" onclick="toggleBuildTbl(${i},'${areaId}','${sfx}')"><td>${i+1}</td><td>${Math.round(build.score).toLocaleString()}${hasMB?renderScoreDelta(build):''}  </td><td>${tiersHtml}</td>`;
-    visCols.forEach(({k})=>{const v=tot[k]||0;const show=PCT_STATS.has(k)?v!==0:v>0.001;tr+=`<td>${show?fmtV(v,k):'—'}</td>`;});
+    const myTot=hasMB?getMyBuildTotals():null;
+    visCols.forEach(({k})=>{
+      const v=tot[k]||0;
+      const show=PCT_STATS.has(k)?v!==0:v>0.001;
+      let delta='';
+      if(myTot){
+        const mv=myTot[k]||0;
+        const diff=v-mv;
+        const thresh=PCT_STATS.has(k)?0.00001:0.5;
+        if(Math.abs(diff)>thresh){
+          const diffFmt=fmtV(Math.abs(diff),k);
+          delta=diff>0?`<span class="delta-pos"> ▲${diffFmt}</span>`:`<span class="delta-neg"> ▼${diffFmt}</span>`;
+        }
+      }
+      tr+=`<td>${show?fmtV(v,k):'—'}${delta}</td>`;
+    });
     tr+=`</tr>`;
     // detail row
     tr+=`<tr class="detail-row${exp?' on':''}"><td colspan="${3+visCols.length}" style="padding:0">`;
@@ -1551,7 +1566,7 @@ function renderResults(areaId,results,expandedSet,sfx){
       let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer">📋 Use as My Build</button></div>`;
       // per-statue rows with set bonus + feather bonuses overview
       build.statues.forEach((st,si)=>{
-        const {raw,withBonus,comp,tier}=getStatueStats(st.slots,st.type);
+        const {raw,withBonus,withBonusNoFlats,comp,tier}=getStatueStats(st.slots,st.type);
         const setBonusRows=getSetBonusStats(comp.set,st.type,tier);
         const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
         detail+=`<div class="statue-detail">`;
