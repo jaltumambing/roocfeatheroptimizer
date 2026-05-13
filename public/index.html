@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3240565865542619" crossorigin="anonymous"></script>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FFYD0M41Y2"></script>
 <script>
@@ -383,9 +386,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .delta-pos{color:var(--green3);font-size:9px;margin-left:2px;font-weight:600}
 .delta-neg{color:var(--red2);font-size:9px;margin-left:2px;font-weight:600}
 
+/* ── Ads ───────────────────────────────────────────────────────────────────── */
+.ad-banner{width:100%;text-align:center;padding:8px 0;background:var(--bg2);border-bottom:1px solid var(--border)}
+.ad-banner-bottom{width:100%;text-align:center;padding:8px 0;background:var(--bg2);border-top:1px solid var(--border)}
+.ad-mid-run{display:none;text-align:center;padding:10px;margin:8px 0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.ad-mid-run.on{display:block}
+
 </style>
 </head>
 <body>
+<!-- Top Banner Ad -->
+<div class="ad-banner">
+  <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-3240565865542619"
+    data-ad-slot="XXXXXXXXXX"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
 <div class="app">
 
 <div class="hdr">
@@ -456,6 +476,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <button class="raizar-btn" id="raizar-btn" onclick="runRaizarMode()" style="margin-left:auto" title="Only show builds where all ATK statues are identical and all DEF statues are identical. No surplus leveling. For the OCD enjoyers 🧠">✦ Raizar Mode</button>
   </div>
   <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <!-- Mid-run Ad (shows while optimizer is running) -->
+  <div class="ad-mid-run" id="ad-mid-run">
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-3240565865542619"
+      data-ad-slot="XXXXXXXXXX"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
   <div class="mybuild-compare" id="mybuild-compare">
     <div class="mybuild-compare-hdr" onclick="toggleMyBuildBanner()">
       <span class="mybuild-compare-title">📋 My Current Build</span>
@@ -1697,7 +1727,11 @@ function startTimer(){
     }
   };
 }
-function showProg(v){document.getElementById('prog-bar').style.display=v?'block':'none';}
+function showProg(v){
+  document.getElementById('prog-bar').style.display=v?'block':'none';
+  const adEl=document.getElementById('ad-mid-run');
+  if(adEl) adEl.classList.toggle('on',v);
+}
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
 renderPools();renderSliders('slider-grid','presets','preset-desc','weights','activePreset');renderMinMaxGrid('opt-filter-grid','optFiltersMin','optFiltersMax');loadMyBuild();updateMyBuildBanner();
 
@@ -2114,6 +2148,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();close
   Bug reports &amp; feedback welcome
   <span class="sep">·</span>
   Free forever for the ROOC community
+</div>
+
+<!-- Bottom Banner Ad -->
+<div class="ad-banner-bottom">
+  <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-3240565865542619"
+    data-ad-slot="XXXXXXXXXX"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 
 </body>
