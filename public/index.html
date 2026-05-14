@@ -433,6 +433,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .gs-btn-saveall:hover{background:var(--gold2)}
 .gs-saved-toast{font-size:11px;color:var(--green3);opacity:0;transition:opacity .3s;margin-left:8px}
 .gs-saved-toast.show{opacity:1}
+.gs-sync-indicator{font-size:11px;margin-left:8px;opacity:0;transition:opacity .3s;}
+.gs-sync-indicator.syncing{opacity:1;color:var(--text2);}
+.gs-sync-indicator.synced{opacity:1;color:var(--green3);}
+.gs-sync-indicator.sync-err{opacity:1;color:var(--red2);}
 .gs-collapsible-hdr{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:8px}
 .gs-collapsible-hdr:hover{opacity:.85}
 .gs-caret{font-size:10px;transition:transform .15s;color:var(--text3);margin-left:2px;display:inline-block}
@@ -531,7 +535,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.1.2</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.1.4</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -638,6 +642,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <button class="gs-btn gs-btn-unslotted" onclick="saveUnslotted()">💾 Save Unslotted Feathers</button>
     <button class="gs-btn gs-btn-saveall" onclick="saveAll()">✓ Save All</button>
     <span class="gs-saved-toast" id="gs-toast">Saved!</span>
+    <span class="gs-sync-indicator" id="gs-sync-indicator"></span>
   </div>
 
 </div>
@@ -1931,8 +1936,11 @@ function invLoadLS(){
     if(saved['__pool__']) Object.entries(saved['__pool__']).forEach(([k,cnt])=>{if(cnt>0)invGrid['__pool__'][k]=cnt;});
   }catch(e){}
 }
+let _invSyncTimeout = null;
 function invSaveLS(){
   try{localStorage.setItem(INV_LS_KEY,JSON.stringify(invGrid));}catch(e){}
+  clearTimeout(_invSyncTimeout);
+  _invSyncTimeout = setTimeout(() => syncProfileToServer({ inv_grid: invGrid }), 800);
 }
 
 function openInvCalc(){
@@ -2309,11 +2317,16 @@ function handleMyBuildOverlay(e){if(e.target===document.getElementById('mybuild-
 // ── Character Profile (Get Started) ──────────────────────────────────────────
 const CP_KEY = 'rooc_charprofile';
 
+let _cpSyncTimeout = null;
 function cpChanged() {
   const ign = document.getElementById('cp-ign')?.value || '';
   const cls = document.getElementById('cp-class')?.value || '';
   const types = [...document.querySelectorAll('.cp-type-chip.on')].map(el => el.dataset.type||el.textContent.trim());
-  try { localStorage.setItem(CP_KEY, JSON.stringify({ign, cls, types})); } catch(e) {}
+  const profile = {ign, cls, types};
+  try { localStorage.setItem(CP_KEY, JSON.stringify(profile)); } catch(e) {}
+  // Debounce server sync — wait 800ms after last change
+  clearTimeout(_cpSyncTimeout);
+  _cpSyncTimeout = setTimeout(() => syncProfileToServer({ char_profile: profile }), 800);
 }
 
 function toggleCpType(el, type) {
@@ -2794,9 +2807,95 @@ async function checkAuth() {
   if (authResult === 'success' && _authUser) {
     // Clean URL
     window.history.replaceState({}, '', '/');
+    // Load cloud profile — overrides localStorage with server data
+    await loadProfileFromServer();
   } else if (authResult === 'error') {
     window.history.replaceState({}, '', '/');
     console.warn('Discord auth failed');
+  } else if (_authUser) {
+    // Already logged in on page load — load cloud profile
+    await loadProfileFromServer();
+  }
+}
+
+// ── Cloud sync helpers ────────────────────────────────────────────────────────
+let _syncTimeout = null;
+
+function setSyncIndicator(state) {
+  const el = document.getElementById('gs-sync-indicator');
+  if (!el) return;
+  el.className = 'gs-sync-indicator';
+  if (state === 'syncing') {
+    el.className = 'gs-sync-indicator syncing';
+    el.textContent = '⟳ Syncing…';
+  } else if (state === 'synced') {
+    el.className = 'gs-sync-indicator synced';
+    el.textContent = '☁ Synced';
+    clearTimeout(_syncTimeout);
+    _syncTimeout = setTimeout(() => { el.className='gs-sync-indicator'; el.textContent=''; }, 3000);
+  } else if (state === 'error') {
+    el.className = 'gs-sync-indicator sync-err';
+    el.textContent = '✕ Sync failed';
+    clearTimeout(_syncTimeout);
+    _syncTimeout = setTimeout(() => { el.className='gs-sync-indicator'; el.textContent=''; }, 4000);
+  } else {
+    el.textContent = '';
+  }
+}
+
+async function syncProfileToServer(fields) {
+  if (!_authUser) return;
+  setSyncIndicator('syncing');
+  try {
+    const res = await fetch('/api/profile/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fields),
+    });
+    if (!res.ok) throw new Error('non-ok');
+    setSyncIndicator('synced');
+  } catch(e) {
+    console.warn('Cloud sync failed:', e);
+    setSyncIndicator('error');
+  }
+}
+
+async function loadProfileFromServer() {
+  if (!_authUser) return;
+  try {
+    const res = await fetch('/api/profile/data');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // Seed localStorage with server data (server is source of truth when logged in)
+    if (data.my_build != null) {
+      try { localStorage.setItem(GS_MB_KEY, JSON.stringify(data.my_build)); } catch(e) {}
+      state.myBuild = data.my_build;
+    }
+    if (data.unslotted != null) {
+      try { localStorage.setItem(GS_UNSLOTTED_KEY, JSON.stringify(data.unslotted)); } catch(e) {}
+    }
+    if (data.char_profile != null) {
+      try { localStorage.setItem(CP_KEY, JSON.stringify(data.char_profile)); } catch(e) {}
+    }
+    if (data.inv_grid != null) {
+      try { localStorage.setItem(INV_LS_KEY, JSON.stringify(data.inv_grid)); } catch(e) {}
+      // Also hydrate the live invGrid object so the modal is correct if opened before next invLoadLS
+      try {
+        FEATHERS.forEach(f => {
+          invGrid[f.name] = {};
+          if (data.inv_grid[f.name]) Object.entries(data.inv_grid[f.name]).forEach(([lv,cnt]) => { if(cnt>0) invGrid[f.name][lv]=cnt; });
+        });
+        invGrid['__pool__'] = {};
+        if (data.inv_grid['__pool__']) Object.entries(data.inv_grid['__pool__']).forEach(([k,cnt]) => { if(cnt>0) invGrid['__pool__'][k]=cnt; });
+      } catch(e) {}
+    }
+
+    // Re-render Get Started tab with loaded data
+    renderGS();
+    updateMyBuildBanner();
+  } catch(e) {
+    console.warn('Failed to load profile from server:', e);
   }
 }
 
@@ -3072,6 +3171,7 @@ function saveMB(){
   updateMyBuildBanner();
   if(state.results.length) renderResults('results-area',state.results,state.expanded,'');
   showToast();
+  syncProfileToServer({ my_build: mb });
 }
 
 function saveUnslotted(){
@@ -3083,6 +3183,7 @@ function saveUnslotted(){
     localStorage.setItem('rooc_pools',JSON.stringify(pools));
   }catch(e){}
   showToast();
+  syncProfileToServer({ unslotted: us });
 }
 
 function saveAll(){
