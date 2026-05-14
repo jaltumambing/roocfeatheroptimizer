@@ -454,6 +454,73 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .auth-username{font-size:11px;font-weight:600;color:var(--text)}
 .auth-logout{font-size:10px;color:var(--text3);margin-left:2px}
 
+/* ── Social Tab ────────────────────────────────────────────────────────────── */
+.social-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.social-tab{padding:8px 20px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.social-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.social-tab:hover:not(.on){color:var(--text)}
+.social-pane{display:none}.social-pane.on{display:block}
+.build-cards{display:flex;flex-direction:column;gap:10px}
+.build-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.build-card-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.build-card-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.build-card-user{font-size:11px;font-weight:700;color:var(--text)}
+.build-card-ign{font-size:10px;color:var(--text3)}
+.build-card-name{font-size:12px;font-weight:700;color:var(--gold)}
+.build-card-class{font-size:10px;padding:2px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text2);margin-left:auto}
+.build-card-types{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.build-type-tag{font-size:9px;padding:1px 7px;border-radius:10px;font-weight:700;background:#0c2a38;border:1px solid #38bdf8;color:#38bdf8}
+.build-card-actions{display:flex;gap:8px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border2);flex-wrap:wrap}
+.bc-btn{padding:4px 12px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:transparent}
+.bc-btn-import{background:#38bdf8;color:#0f1117;border-color:#38bdf8}
+.bc-btn-import:hover{background:#7dd3fc}
+.bc-btn-share{color:#4fa06a;border-color:#4fa06a}
+.bc-btn-share:hover,.bc-btn-shared{background:#4fa06a;color:#0f1117}
+.bc-btn-delete{color:var(--red2);border-color:var(--red2)}
+.bc-btn-delete:hover{background:var(--red2);color:#fff}
+.bc-like-btn{background:transparent;border:1px solid var(--border);color:var(--text3);padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s}
+.bc-like-btn:hover,.bc-like-btn.liked{border-color:#f59e0b;color:#f59e0b;background:#1a1200}
+.bc-meta{font-size:10px;color:var(--text3);margin-left:auto}
+.build-comments{margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);display:none}
+.build-comments.open{display:block}
+.comment-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;max-height:180px;overflow-y:auto}
+.comment-item{display:flex;gap:8px;align-items:flex-start}
+.comment-avatar{width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.comment-body{background:var(--bg2);border-radius:var(--radius-sm);padding:5px 10px;flex:1}
+.comment-user{font-size:10px;font-weight:700;color:var(--text2)}
+.comment-text{font-size:11px;color:var(--text);margin-top:1px}
+.comment-input-row{display:flex;gap:6px}
+.comment-input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;padding:5px 10px;outline:none}
+.comment-input:focus{border-color:#38bdf8}
+.comment-submit{padding:5px 14px;background:#38bdf8;color:#0f1117;border:none;border-radius:var(--radius-sm);font-size:11px;font-weight:700;cursor:pointer}
+.save-build-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:480px;width:94vw;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .2s ease}
+.sbm-field{margin-bottom:12px}
+.sbm-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block}
+.sbm-input{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;outline:none;box-sizing:border-box;transition:border-color .15s}
+.sbm-input:focus{border-color:#38bdf8}
+.sbm-select{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;outline:none;cursor:pointer}
+.sbm-types{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.sbm-type-chip{padding:4px 12px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--text3);background:var(--bg3);transition:all .15s}
+.sbm-type-chip.on{border-color:#38bdf8;color:#38bdf8;background:#0c2a38}
+.community-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.cf-select{padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;cursor:pointer;outline:none}
+.char-profile{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px}
+.char-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cp-field{display:flex;flex-direction:column;gap:4px}
+.cp-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.cp-input,.cp-select{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+.cp-input:focus,.cp-select:focus{border-color:#38bdf8}
+.cp-types-row{display:flex;gap:5px;flex-wrap:wrap}
+.cp-type-chip{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--text3);background:var(--bg2);transition:all .15s}
+.cp-type-chip.on{border-color:#38bdf8;color:#38bdf8;background:#0c2a38}
+.save-as-current-btn{padding:4px 12px;background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
+.save-as-current-btn:hover{background:var(--gold);color:#000}
+.login-prompt{text-align:center;padding:32px 20px;color:var(--text3);font-size:12px}
+.login-prompt strong{display:block;font-size:14px;color:var(--text);margin-bottom:8px}
+.login-prompt-btn{margin-top:12px;padding:8px 24px;background:#5865F2;color:#fff;border:none;border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer}
+.social-empty{text-align:center;padding:40px 20px;color:var(--text3)}
+.social-empty-icon{font-size:32px;margin-bottom:8px}
+
 </style>
 </head>
 <body>
@@ -473,17 +540,52 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.0.3</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.1.0</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
   <div class="tab on" onclick="showTab('gs')">Get Started</div>
   <div class="tab" onclick="showTab('opt')">Optimizer</div>
-  <div class="tab" onclick="showTab('sf')">Smart Filter</div>
+  <div class="tab" onclick="showTab('social')">Social</div>
 </div>
 </div>
 
 <div id="pane-gs" class="pane on">
+
+  <!-- CHARACTER PROFILE -->
+  <div class="char-profile">
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px">👤 Character Profile <span style="font-size:10px;color:var(--text3);font-weight:400">(optional — used when saving builds)</span></div>
+    <div class="char-profile-grid">
+      <div class="cp-field">
+        <label class="cp-label">In-Game Name</label>
+        <input id="cp-ign" class="cp-input" type="text" placeholder="Your IGN" maxlength="50" oninput="cpChanged()">
+      </div>
+      <div class="cp-field">
+        <label class="cp-label">Class</label>
+        <select id="cp-class" class="cp-select" onchange="cpChanged()">
+          <option value="">— select class —</option>
+          <optgroup label="Swordsman"><option>Lord Knight</option><option>Paladin</option></optgroup>
+          <optgroup label="Thief"><option>Assassin Cross</option><option>Stalker</option></optgroup>
+          <optgroup label="Merchant"><option>Mastersmith</option><option>Biochemist</option></optgroup>
+          <optgroup label="Acolyte"><option>High Priest</option><option>Champion</option></optgroup>
+          <optgroup label="Mage"><option>High Wizard</option><option>Professor</option></optgroup>
+          <optgroup label="Archer"><option>Sniper</option><option>Performer</option></optgroup>
+          <optgroup label="Doram"><option>Summoner</option></optgroup>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label class="cp-label" style="margin-bottom:6px;display:block">Build Type <span style="color:var(--text3);font-weight:400">(select all that apply)</span></label>
+      <div class="cp-types-row" id="cp-types">
+        <div class="cp-type-chip" onclick="toggleCpType(this,'DPS')">DPS</div>
+        <div class="cp-type-chip" onclick="toggleCpType(this,'Tank')">Tank</div>
+        <div class="cp-type-chip" onclick="toggleCpType(this,'Support')">Support</div>
+        <div class="cp-type-chip" onclick="toggleCpType(this,'Hybrid')">Hybrid</div>
+        <div class="cp-type-chip" onclick="toggleCpType(this,'PvE')">PvE</div>
+        <div class="cp-type-chip" onclick="toggleCpType(this,'PvP')">PvP</div>
+      </div>
+    </div>
+  </div>
 
   <!-- HOW TO USE -->
   <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--text3);line-height:1.7">
@@ -640,63 +742,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
-<div id="pane-sf" class="pane">
-  <div class="sec-row"><span class="sec">Pool Inventory</span><span style="font-size:10px;color:var(--text3);margin-left:8px">Set in <strong style="color:#38bdf8;cursor:pointer" onclick="showTab('gs')">Get Started</strong></span></div>
-  <div class="pool-readonly" id="pool-readonly-sf"></div>
-
-  <div class="sec-row" style="cursor:pointer" onclick="gsToggle('sf-stat-priority-body','sf-stat-priority-caret')">
-    <span class="sec">Stat Priority</span>
-    <span class="gs-caret open" id="sf-stat-priority-caret" style="margin-left:6px">▶</span>
-    <div class="tooltip-wrap" onclick="event.stopPropagation()" style="margin-left:4px">
-      <div class="tooltip-btn" tabindex="0">?</div>
-      <div class="tooltip-box">
-        <b>How Smart Filter works</b>
-        Pick a preset (or set stat priorities) to guide which feathers the optimizer selects. Then set minimum and/or maximum stat filters — only builds meeting all constraints are returned.<br><br>
-        Results are sorted by optimizer score given your priorities.
-      </div>
-    </div>
+<div id="pane-social" class="pane">
+  <div class="social-tabs">
+    <div class="social-tab on" onclick="showSocialPane('my-builds')">📋 My Saved Builds</div>
+    <div class="social-tab" onclick="showSocialPane('community')">🌐 Community Builds</div>
   </div>
-  <div class="gs-collapsible-body open" id="sf-stat-priority-body">
-  <div class="preset-row" id="sf-presets"></div>
-  <div id="sf-preset-desc" class="preset-desc"></div>
-  <div class="slider-grid" id="sf-slider-grid"></div>
-  </div>
-
-  <div class="sec-row" style="margin-top:4px">
-    <span class="sec">Stat Filters</span>
-    <span style="font-size:10px;color:var(--text3);margin-left:4px">(min / max — leave blank to skip)</span>
-    <div class="tooltip-wrap">
-      <div class="tooltip-btn" tabindex="0">?</div>
-      <div class="tooltip-box">
-        <b>Stat Filters</b>
-        Hard constraints on the final build totals. Builds that fail any active filter are excluded entirely.<br><br>
-        <table class="tooltip-table">
-          <tr><td>Min</td><td>Must have at least this value</td></tr>
-          <tr><td>Max</td><td>Must not exceed this value</td></tr>
-        </table>
-      </div>
-    </div>
-  </div>
-  <div class="filter-grid" id="sf-filter-grid"></div>
-
-  <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P), <strong>Raven's Prestige</strong> (3Y+2P), and <strong>Raven's Plunder</strong> (2Y+3P). Builds failing any filter are excluded entirely.</div>
-
-  <div class="run-row">
-    <button class="run-btn" id="sf-run-btn" onclick="runSmartFilter()">Find Builds</button>
-    <label style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px">
-      Results:
-      <input id="sf-results-count" type="number" min="1" max="200" placeholder="20" style="width:56px;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;text-align:center">
-    </label>
-    <span class="status" id="sf-status-txt"></span><div class="spin-wrap" id="sf-spin-wrap"><div class="spinner"></div><span id="sf-spin-msg" style="font-size:11px;color:var(--color-text-tertiary)"></span></div>
-  </div>
-  <div class="prog-bar" id="sf-prog-bar"><div class="prog-fill" id="sf-prog-fill" style="width:0%"></div></div>
-  <div class="results-area" id="sf-results-area">
-    <div class="empty-state">
-      <div class="empty-icon">🔍</div>
-      <h3>No builds yet</h3>
-      <p>Set stat priority, add filters, then click Find Builds.</p>
-    </div>
-  </div>
+  <div class="social-pane on" id="social-my-builds"></div>
+  <div class="social-pane" id="social-community"></div>
 </div>
 
 
@@ -1736,7 +1788,11 @@ function renderResults(areaId,results,expandedSet,sfx){
       }));
       // which feathers used/unused per pool
       const usedFeathers=new Set(build.statues.flatMap(st=>st.slots.map(s=>s.f)));
-      let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer">📋 Use as My Build</button></div>`;
+      let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px">
+        <button onclick="saveResultAsCurrentBuild(${i},'${sfx}');event.stopPropagation()" class="save-as-current-btn">✓ Save as Current Build</button>
+        <button onclick="openSaveBuildModal(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid var(--gold);border-radius:12px;color:var(--gold);font-size:10px;font-weight:600;cursor:pointer">💾 Save Build</button>
+        <button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer">📋 Use as My Build</button>
+      </div>`;
       // per-statue rows with set bonus + feather bonuses overview
       build.statues.forEach((st,si)=>{
         const {raw,withBonus,withBonusNoFlats,comp,tier}=getStatueStats(st.slots,st.type);
@@ -1837,11 +1893,11 @@ function exportCSV(results){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='feather-builds.csv';a.click();
 }
 function showTab(id){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['gs','opt','sf'][i]===id));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['gs','opt','social'][i]===id));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
   document.getElementById('pane-'+id).classList.add('on');
-  if(id==='sf'){renderSliders('sf-slider-grid','sf-presets','sf-preset-desc','weightsS','activePresetS');renderMinMaxGrid('sf-filter-grid','sfFiltersMin','sfFiltersMax');}
   if(id==='gs'){renderGS();}
+  if(id==='social'){renderSocialTab();}
 }
 function setStatus(t,warn){
   const el=document.getElementById('status-txt');
@@ -2268,6 +2324,380 @@ function closeMyBuild(){
 function handleMyBuildOverlay(e){if(e.target===document.getElementById('mybuild-overlay'))closeMyBuild();}
 // ──────────────────────────────────────────────────────────────────────────────
 
+// ── Character Profile (Get Started) ──────────────────────────────────────────
+const CP_KEY = 'rooc_charprofile';
+
+function cpChanged() {
+  const ign = document.getElementById('cp-ign')?.value || '';
+  const cls = document.getElementById('cp-class')?.value || '';
+  const types = [...document.querySelectorAll('.cp-type-chip.on')].map(el => el.dataset.type||el.textContent.trim());
+  try { localStorage.setItem(CP_KEY, JSON.stringify({ign, cls, types})); } catch(e) {}
+}
+
+function toggleCpType(el, type) {
+  el.classList.toggle('on');
+  cpChanged();
+}
+
+function loadCharProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CP_KEY));
+    if (!saved) return;
+    const ignEl = document.getElementById('cp-ign');
+    const clsEl = document.getElementById('cp-class');
+    if (ignEl && saved.ign) ignEl.value = saved.ign;
+    if (clsEl && saved.cls) clsEl.value = saved.cls;
+    if (saved.types?.length) {
+      document.querySelectorAll('.cp-type-chip').forEach(el => {
+        if (saved.types.includes(el.textContent.trim())) el.classList.add('on');
+      });
+    }
+  } catch(e) {}
+}
+
+function getCharProfile() {
+  return {
+    ign: document.getElementById('cp-ign')?.value || '',
+    cls: document.getElementById('cp-class')?.value || '',
+    types: [...document.querySelectorAll('.cp-type-chip.on')].map(el => el.textContent.trim()),
+  };
+}
+
+// ── Save Build Modal ──────────────────────────────────────────────────────────
+let _saveBuildCtx = null; // {buildIdx, sfx}
+
+function openSaveBuildModal(i, sfx) {
+  if (!_authUser) { loginWithDiscord(); return; }
+  _saveBuildCtx = {i, sfx};
+  // Pre-fill from character profile
+  const cp = getCharProfile();
+  const nameEl = document.getElementById('sbm-name');
+  const clsEl = document.getElementById('sbm-class');
+  const errEl = document.getElementById('sbm-error');
+  if (nameEl) nameEl.value = '';
+  if (clsEl && cp.cls) clsEl.value = cp.cls;
+  if (errEl) { errEl.style.display='none'; errEl.textContent=''; }
+  // Pre-select types
+  document.querySelectorAll('.sbm-type-chip').forEach(el => {
+    el.classList.toggle('on', cp.types.includes(el.textContent.trim()));
+  });
+  document.getElementById('sbm-notes').value = '';
+  document.getElementById('save-build-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSaveBuildModal() {
+  document.getElementById('save-build-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+  _saveBuildCtx = null;
+}
+
+function handleSaveBuildOverlay(e) {
+  if (e.target === document.getElementById('save-build-overlay')) closeSaveBuildModal();
+}
+
+function toggleSbmType(el, type) {
+  el.classList.toggle('on');
+}
+
+async function confirmSaveBuild() {
+  if (!_authUser || !_saveBuildCtx) return;
+  const cls = document.getElementById('sbm-class').value;
+  const types = [...document.querySelectorAll('.sbm-type-chip.on')].map(el => el.textContent.trim());
+  const errEl = document.getElementById('sbm-error');
+  if (!cls) { errEl.textContent='Please select a class.'; errEl.style.display='block'; return; }
+  if (!types.length) { errEl.textContent='Please select at least one type.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  const results = _saveBuildCtx.sfx==='s' ? state.sfResults : state.results;
+  const build = results[_saveBuildCtx.i];
+  if (!build) return;
+
+  const cp = getCharProfile();
+  const payload = {
+    name: document.getElementById('sbm-name').value.trim()||null,
+    ign: cp.ign||null,
+    class: cls,
+    types,
+    notes: document.getElementById('sbm-notes').value.trim()||null,
+    statues: build.statues,
+    pool_inventory: state.pools,
+  };
+
+  try {
+    const res = await fetch('/api/builds', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeSaveBuildModal();
+      showGsToast('Build saved! View it in the Social tab.');
+    } else {
+      errEl.textContent = data.error||'Failed to save.';
+      errEl.style.display='block';
+    }
+  } catch(err) {
+    errEl.textContent='Network error. Please try again.';
+    errEl.style.display='block';
+  }
+}
+
+function showGsToast(msg) {
+  const t = document.getElementById('gs-toast');
+  if (!t) return;
+  t.textContent = msg || 'Saved!';
+  t.classList.add('show');
+  setTimeout(()=>{ t.classList.remove('show'); t.textContent='Saved!'; }, 3000);
+}
+
+// ── Save as Current Build (from result row) ───────────────────────────────────
+function saveResultAsCurrentBuild(i, sfx) {
+  const results = sfx==='s' ? state.sfResults : state.results;
+  const build = results[i];
+  if (!build) return;
+
+  // 1. Update state.myBuild
+  state.myBuild = { statues: build.statues.map(st=>({type:st.type, slots:st.slots.map(s=>({f:s.f, lv:s.lv}))})) };
+  try { localStorage.setItem('rooc_mybuild', JSON.stringify(state.myBuild)); } catch(e) {}
+
+  // 2. Update pool inventory — set to build's poolUsed
+  if (build.poolUsed) {
+    POOLS.forEach(p => { state.pools[p.name] = build.poolUsed[p.name]||0; });
+    try { localStorage.setItem('rooc_pools', JSON.stringify(state.pools)); } catch(e) {}
+  }
+
+  // 3. Update unslotted feathers to 0 (all copies now in build)
+  const emptyUnslotted = {};
+  POOLS.forEach(p => { emptyUnslotted[p.name] = 0; });
+  try { localStorage.setItem('rooc_unslotted', JSON.stringify(emptyUnslotted)); } catch(e) {}
+
+  // 4. Re-render everything
+  updateMyBuildBanner();
+  renderPoolReadonly();
+  renderResults('results-area', state.results, state.expanded, '');
+
+  // 5. Re-render Get Started if active
+  const gsPane = document.getElementById('pane-gs');
+  if (gsPane?.classList.contains('on')) renderGS();
+
+  showGsToast('✓ Current build updated!');
+}
+
+// ── Social Tab ────────────────────────────────────────────────────────────────
+function showSocialPane(id) {
+  document.querySelectorAll('.social-tab').forEach((t,i)=>t.classList.toggle('on',['my-builds','community'][i]===id));
+  document.querySelectorAll('.social-pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('social-'+id).classList.add('on');
+  if (id==='my-builds') loadMyBuilds();
+  if (id==='community') loadCommunityBuilds();
+}
+
+function renderSocialTab() {
+  // Default to my-builds pane
+  loadMyBuilds();
+}
+
+function getAvatarUrlFromData(discord_id, avatar) {
+  if (!avatar) return 'https://cdn.discordapp.com/embed/avatars/0.png';
+  return `https://cdn.discordapp.com/avatars/${discord_id}/${avatar}.png?size=64`;
+}
+
+// ── My Builds ─────────────────────────────────────────────────────────────────
+async function loadMyBuilds() {
+  const el = document.getElementById('social-my-builds');
+  if (!el) return;
+  if (!_authUser) {
+    el.innerHTML = `<div class="login-prompt"><strong>Login to save and view your builds</strong>Sign in with Discord to save builds, track your progress, and share with the community.<br><button class="login-prompt-btn" onclick="loginWithDiscord()">Login with Discord</button></div>`;
+    return;
+  }
+  el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:16px">Loading...</div>';
+  try {
+    const res = await fetch('/api/builds/mine');
+    const data = await res.json();
+    if (!data.builds?.length) {
+      el.innerHTML = `<div class="social-empty"><div class="social-empty-icon">📋</div>No saved builds yet.<br><span style="font-size:11px">Expand any optimizer result and click 💾 Save Build.</span></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="build-cards">${data.builds.map(b=>renderBuildCard(b,true)).join('')}</div>`;
+  } catch(err) {
+    el.innerHTML = '<div style="color:var(--red2);font-size:12px;padding:16px">Failed to load builds.</div>';
+  }
+}
+
+// ── Community Builds ──────────────────────────────────────────────────────────
+let _communityFilter = {cls:'', type:'', sort:'likes'};
+
+async function loadCommunityBuilds() {
+  const el = document.getElementById('social-community');
+  if (!el) return;
+  const {cls, type, sort} = _communityFilter;
+  const params = new URLSearchParams({sort});
+  if (cls) params.set('class', cls);
+  if (type) params.set('type', type);
+
+  el.innerHTML = `
+    <div class="community-filters">
+      <span class="cf-label">Filter:</span>
+      <select class="cf-select" onchange="_communityFilter.cls=this.value;loadCommunityBuilds()">
+        <option value="">All Classes</option>
+        <optgroup label="Swordsman"><option>Lord Knight</option><option>Paladin</option></optgroup>
+        <optgroup label="Thief"><option>Assassin Cross</option><option>Stalker</option></optgroup>
+        <optgroup label="Merchant"><option>Mastersmith</option><option>Biochemist</option></optgroup>
+        <optgroup label="Acolyte"><option>High Priest</option><option>Champion</option></optgroup>
+        <optgroup label="Mage"><option>High Wizard</option><option>Professor</option></optgroup>
+        <optgroup label="Archer"><option>Sniper</option><option>Performer</option></optgroup>
+        <optgroup label="Doram"><option>Summoner</option></optgroup>
+      </select>
+      <select class="cf-select" onchange="_communityFilter.type=this.value;loadCommunityBuilds()">
+        <option value="">All Types</option>
+        <option>DPS</option><option>Tank</option><option>Support</option>
+        <option>Hybrid</option><option>PvE</option><option>PvP</option>
+      </select>
+      <select class="cf-select" onchange="_communityFilter.sort=this.value;loadCommunityBuilds()">
+        <option value="likes">Most Liked</option>
+        <option value="recent">Most Recent</option>
+      </select>
+    </div>
+    <div id="community-builds-list"><div style="color:var(--text3);font-size:12px;padding:16px">Loading...</div></div>`;
+
+  try {
+    const res = await fetch('/api/builds/community?'+params);
+    const data = await res.json();
+    const listEl = document.getElementById('community-builds-list');
+    if (!data.builds?.length) {
+      listEl.innerHTML = `<div class="social-empty"><div class="social-empty-icon">🌐</div>No community builds yet.<br><span style="font-size:11px">Save a build and share it to be the first!</span></div>`;
+      return;
+    }
+    listEl.innerHTML = `<div class="build-cards">${data.builds.map(b=>renderBuildCard(b,false)).join('')}</div>`;
+  } catch(err) {
+    document.getElementById('community-builds-list').innerHTML = '<div style="color:var(--red2);font-size:12px;padding:16px">Failed to load.</div>';
+  }
+}
+
+// ── Build Card ────────────────────────────────────────────────────────────────
+function renderBuildCard(b, isMine) {
+  const avatarUrl = getAvatarUrlFromData(b.discord_id, b.avatar);
+  const displayName = b.ign || b.user_ign || b.username;
+  const buildName = b.name || `${b.class} ${b.types.join('/')} Build`;
+  const typeTags = b.types.map(t=>`<span class="build-type-tag">${t}</span>`).join('');
+  const likeCount = b.like_count || 0;
+  const commentCount = b.comment_count || 0;
+
+  let actions = `<button class="bc-btn bc-btn-import" onclick="importCommunityBuild(${b.id})">📋 Import</button>`;
+
+  if (isMine) {
+    const shareLabel = b.is_public ? '🌐 Shared' : '🌐 Share';
+    const shareClass = b.is_public ? 'bc-btn bc-btn-shared' : 'bc-btn bc-btn-share';
+    actions += `<button class="${shareClass}" onclick="toggleBuildPublic(${b.id},${!b.is_public},this)">${shareLabel}</button>`;
+    actions += `<button class="bc-btn bc-btn-delete" onclick="deleteBuild(${b.id},this)">🗑 Delete</button>`;
+  }
+
+  actions += `<button class="bc-like-btn${b.user_liked?' liked':''}" id="like-btn-${b.id}" onclick="toggleLike(${b.id},this)">👍 <span id="like-count-${b.id}">${likeCount}</span></button>`;
+  actions += `<span class="bc-meta">${commentCount} comment${commentCount!==1?'s':''}</span>`;
+  actions += `<button class="bc-btn" style="margin-left:auto" onclick="toggleComments(${b.id})">💬 Comments</button>`;
+
+  return `<div class="build-card" id="build-card-${b.id}">
+    <div class="build-card-hdr">
+      <img class="build-card-avatar" src="${avatarUrl}" alt="">
+      <div>
+        <div class="build-card-user">${b.username}${b.ign?` <span class="build-card-ign">(${b.ign})</span>`:''}</div>
+      </div>
+      <span class="build-card-name">${buildName}</span>
+      <span class="build-card-class">${b.class}</span>
+    </div>
+    <div class="build-card-types">${typeTags}</div>
+    ${b.notes?`<div style="font-size:11px;color:var(--text3);margin-top:6px">${b.notes}</div>`:''}
+    <div class="build-card-actions">${actions}</div>
+    <div class="build-comments" id="comments-${b.id}">
+      <div class="comment-list" id="comment-list-${b.id}"></div>
+      ${_authUser?`<div class="comment-input-row">
+        <input class="comment-input" id="comment-inp-${b.id}" placeholder="Add a comment..." maxlength="500" onkeydown="if(event.key==='Enter')postComment(${b.id})">
+        <button class="comment-submit" onclick="postComment(${b.id})">Send</button>
+      </div>`:'<div style="font-size:11px;color:var(--text3)">Login to comment</div>'}
+    </div>
+  </div>`;
+}
+
+async function toggleBuildPublic(id, makePublic, btn) {
+  const res = await fetch(`/api/builds/${id}`, {method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_public:makePublic})});
+  if (res.ok) {
+    btn.textContent = makePublic ? '🌐 Shared' : '🌐 Share';
+    btn.className = makePublic ? 'bc-btn bc-btn-shared' : 'bc-btn bc-btn-share';
+    btn.onclick = ()=>toggleBuildPublic(id,!makePublic,btn);
+  }
+}
+
+async function deleteBuild(id, btn) {
+  if (!confirm('Delete this build?')) return;
+  const res = await fetch(`/api/builds/${id}`, {method:'DELETE'});
+  if (res.ok) document.getElementById('build-card-'+id)?.remove();
+}
+
+async function toggleLike(id, btn) {
+  if (!_authUser) { loginWithDiscord(); return; }
+  const res = await fetch(`/api/builds/${id}/like`, {method:'POST'});
+  const data = await res.json();
+  btn.classList.toggle('liked', data.liked);
+  const countEl = document.getElementById('like-count-'+id);
+  if (countEl) countEl.textContent = parseInt(countEl.textContent)+(data.liked?1:-1);
+}
+
+async function toggleComments(id) {
+  const el = document.getElementById('comments-'+id);
+  if (!el) return;
+  const open = el.classList.toggle('open');
+  if (open && !el.dataset.loaded) {
+    el.dataset.loaded='1';
+    await loadComments(id);
+  }
+}
+
+async function loadComments(id) {
+  const listEl = document.getElementById('comment-list-'+id);
+  if (!listEl) return;
+  const res = await fetch(`/api/builds/${id}/comments`);
+  const data = await res.json();
+  listEl.innerHTML = data.comments.map(c=>`
+    <div class="comment-item">
+      <img class="comment-avatar" src="${getAvatarUrlFromData(c.discord_id,c.avatar)}" alt="">
+      <div class="comment-body">
+        <div class="comment-user">${c.username}${c.ign?` (${c.ign})`:''}</div>
+        <div class="comment-text">${c.content}</div>
+      </div>
+    </div>`).join('') || '<div style="font-size:11px;color:var(--text3)">No comments yet.</div>';
+}
+
+async function postComment(id) {
+  const inp = document.getElementById('comment-inp-'+id);
+  const content = inp?.value?.trim();
+  if (!content) return;
+  const res = await fetch(`/api/builds/${id}/comments`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});
+  if (res.ok) { inp.value=''; await loadComments(id); }
+}
+
+async function importCommunityBuild(id) {
+  // Fetch the build's statues and import as current build
+  try {
+    const res = await fetch('/api/builds/community?limit=200');
+    const data = await res.json();
+    const build = data.builds.find(b=>b.id===id);
+    if (!build?.statues) return;
+    state.myBuild = {statues: build.statues.map(st=>({type:st.type,slots:st.slots.map(s=>({f:s.f,lv:s.lv}))}))};
+    try{localStorage.setItem('rooc_mybuild',JSON.stringify(state.myBuild));}catch(e){}
+    if(build.pool_inventory) {
+      POOLS.forEach(p=>{state.pools[p.name]=build.pool_inventory[p.name]||0;});
+      try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
+    }
+    updateMyBuildBanner();
+    renderPoolReadonly();
+    showGsToast('✓ Build imported to My Current Build!');
+  } catch(err) {
+    console.error(err);
+  }
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 let _authUser = null;
 
@@ -2553,6 +2983,8 @@ function renderGS(){
 
   // Compute totals
   gsComputeTotal();
+  // Load character profile
+  loadCharProfile();
 }
 
 function gatherMBData(){
@@ -2619,7 +3051,7 @@ function saveAll(){
 function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
 function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();closeInvCalc();closeMyBuild();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();closeInvCalc();closeMyBuild();closeSaveBuildModal();}});
 </script>
 <!-- Inventory Calculator Modal -->
 <div class="modal-overlay" id="inv-calc-overlay" onclick="handleInvCalcOverlay(event)">
@@ -2634,6 +3066,51 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();close
     </div>
     <div id="inv-calc-summary" style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"></div>
     <button class="inv-submit-btn" onclick="applyInvCalc()">✓ Submit — Fill Pool Inventory with Unspent Copies</button>
+  </div>
+</div>
+
+<!-- Save Build Modal -->
+<div class="modal-overlay" id="save-build-overlay" onclick="handleSaveBuildOverlay(event)">
+  <div class="save-build-modal">
+    <button class="modal-close" onclick="closeSaveBuildModal()">×</button>
+    <div class="modal-title" style="text-align:left;margin-bottom:14px">💾 Save Build</div>
+    <div class="sbm-field">
+      <label class="sbm-label">Build Name <span style="color:var(--text3)">(optional)</span></label>
+      <input id="sbm-name" class="sbm-input" type="text" placeholder="e.g. PvP Burst Build" maxlength="100">
+    </div>
+    <div class="sbm-field">
+      <label class="sbm-label">Class <span style="color:var(--red2)">*</span></label>
+      <select id="sbm-class" class="sbm-select">
+        <option value="">— select class —</option>
+        <optgroup label="Swordsman"><option>Lord Knight</option><option>Paladin</option></optgroup>
+        <optgroup label="Thief"><option>Assassin Cross</option><option>Stalker</option></optgroup>
+        <optgroup label="Merchant"><option>Mastersmith</option><option>Biochemist</option></optgroup>
+        <optgroup label="Acolyte"><option>High Priest</option><option>Champion</option></optgroup>
+        <optgroup label="Mage"><option>High Wizard</option><option>Professor</option></optgroup>
+        <optgroup label="Archer"><option>Sniper</option><option>Performer</option></optgroup>
+        <optgroup label="Doram"><option>Summoner</option></optgroup>
+      </select>
+    </div>
+    <div class="sbm-field">
+      <label class="sbm-label">Type <span style="color:var(--red2)">*</span> <span style="color:var(--text3);font-weight:400">(select all that apply)</span></label>
+      <div class="sbm-types" id="sbm-types">
+        <div class="sbm-type-chip" onclick="toggleSbmType(this,'DPS')">DPS</div>
+        <div class="sbm-type-chip" onclick="toggleSbmType(this,'Tank')">Tank</div>
+        <div class="sbm-type-chip" onclick="toggleSbmType(this,'Support')">Support</div>
+        <div class="sbm-type-chip" onclick="toggleSbmType(this,'Hybrid')">Hybrid</div>
+        <div class="sbm-type-chip" onclick="toggleSbmType(this,'PvE')">PvE</div>
+        <div class="sbm-type-chip" onclick="toggleSbmType(this,'PvP')">PvP</div>
+      </div>
+    </div>
+    <div class="sbm-field">
+      <label class="sbm-label">Notes <span style="color:var(--text3)">(optional)</span></label>
+      <textarea id="sbm-notes" class="sbm-input" rows="2" placeholder="Tips or context for this build..." maxlength="500" style="resize:vertical"></textarea>
+    </div>
+    <div id="sbm-error" style="color:var(--red2);font-size:11px;margin-bottom:8px;display:none"></div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button onclick="confirmSaveBuild()" style="flex:1;padding:9px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer">💾 Save Build</button>
+      <button onclick="closeSaveBuildModal()" style="padding:9px 20px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);font-size:12px;cursor:pointer">Cancel</button>
+    </div>
   </div>
 </div>
 
