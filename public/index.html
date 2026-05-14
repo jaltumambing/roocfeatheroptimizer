@@ -535,7 +535,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.1.4</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.1.6</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1778,7 +1778,6 @@ function renderResults(areaId,results,expandedSet,sfx){
       let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <button onclick="saveResultAsCurrentBuild(${i},'${sfx}');event.stopPropagation()" class="save-as-current-btn" title="Sync this build to Get Started tab — updates My Build feathers, pool inventory, and stat comparison">⚡ Set as Active Build</button>
         <button onclick="openSaveBuildModal(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid var(--gold);border-radius:12px;color:var(--gold);font-size:10px;font-weight:600;cursor:pointer" title="Save this build to your profile (requires Discord login) — add a name, class, and type tags">💾 Save to Profile</button>
-        <button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer" title="Copy this build into the My Current Build comparison — does not update pool inventory">📋 Compare vs My Build</button>
       </div>`;
       // ATK statues row + DEF statues row
       const renderStatueCard=(st,si)=>{
@@ -2457,16 +2456,18 @@ function saveResultAsCurrentBuild(i, sfx) {
   state.myBuild = { statues: build.statues.map(st=>({type:st.type, slots:st.slots.map(s=>({f:s.f, lv:s.lv}))})) };
   try { localStorage.setItem('rooc_mybuild', JSON.stringify(state.myBuild)); } catch(e) {}
 
-  // 2. Update pool inventory — set to build's poolUsed
-  if (build.poolUsed) {
-    POOLS.forEach(p => { state.pools[p.name] = build.poolUsed[p.name]||0; });
-    try { localStorage.setItem('rooc_pools', JSON.stringify(state.pools)); } catch(e) {}
-  }
+  // 2. Unslotted = total pool inventory minus what this build consumes
+  const unslotted = {};
+  POOLS.forEach(p => {
+    const total = state.pools[p.name] || 0;
+    const used  = (build.poolUsed && build.poolUsed[p.name]) || 0;
+    unslotted[p.name] = Math.max(0, total - used);
+  });
+  try { localStorage.setItem('rooc_unslotted', JSON.stringify(unslotted)); } catch(e) {}
+  try { localStorage.setItem('rooc_pools', JSON.stringify(state.pools)); } catch(e) {}
 
-  // 3. Update unslotted feathers to 0 (all copies now in build)
-  const emptyUnslotted = {};
-  POOLS.forEach(p => { emptyUnslotted[p.name] = 0; });
-  try { localStorage.setItem('rooc_unslotted', JSON.stringify(emptyUnslotted)); } catch(e) {}
+  // 3. Sync to server
+  syncProfileToServer({ my_build: state.myBuild, unslotted });
 
   // 4. Re-render everything
   updateMyBuildBanner();
@@ -2477,7 +2478,7 @@ function saveResultAsCurrentBuild(i, sfx) {
   const gsPane = document.getElementById('pane-gs');
   if (gsPane?.classList.contains('on')) renderGS();
 
-  showGsToast('✓ Current build updated!');
+  showGsToast('✓ Active build synced!');
 }
 
 // ── Social Tab ────────────────────────────────────────────────────────────────
