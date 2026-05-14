@@ -6,6 +6,7 @@ const { Pool } = require('pg');
 const fetch = require('node-fetch');
 
 const app = express();
+app.set('trust proxy', 1); // Trust Railway's proxy
 app.use(express.json());
 
 // ── Database ──────────────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ app.use(session({
     maxAge: 30 * 24 * 60 * 60 * 1000,
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   },
 }));
 
