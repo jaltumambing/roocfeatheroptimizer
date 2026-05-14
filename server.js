@@ -32,9 +32,17 @@ async function initDB() {
       discriminator VARCHAR(10),
       avatar VARCHAR(200),
       ign VARCHAR(100),
+      my_build JSONB,
+      unslotted JSONB,
+      char_profile JSONB,
+      inv_grid JSONB,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS my_build JSONB;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS unslotted JSONB;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS char_profile JSONB;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS inv_grid JSONB;
 
     CREATE TABLE IF NOT EXISTS builds (
       id SERIAL PRIMARY KEY,
@@ -172,6 +180,54 @@ app.post('/auth/ign', requireAuth, async (req, res) => {
   await pool.query('UPDATE users SET ign=$1 WHERE id=$2', [ign||null, req.session.user.id]);
   req.session.user.ign = ign || null;
   res.json({ ok: true });
+});
+
+// ── Profile Data (cloud sync) ─────────────────────────────────────────────────
+
+// Get saved profile data (my_build, unslotted, char_profile, inv_grid)
+app.get('/api/profile/data', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT my_build, unslotted, char_profile, inv_grid FROM users WHERE id=$1',
+      [req.session.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json({
+      my_build:     rows[0].my_build     || null,
+      unslotted:    rows[0].unslotted    || null,
+      char_profile: rows[0].char_profile || null,
+      inv_grid:     rows[0].inv_grid     || null,
+    });
+  } catch (err) {
+    console.error('profile/data GET error:', err);
+    res.status(500).json({ error: 'Failed to load profile data' });
+  }
+});
+
+// Save profile data (my_build, unslotted, char_profile, inv_grid) — partial updates OK
+app.post('/api/profile/data', requireAuth, async (req, res) => {
+  try {
+    const { my_build, unslotted, char_profile, inv_grid } = req.body;
+    await pool.query(`
+      UPDATE users SET
+        my_build     = COALESCE($1::jsonb, my_build),
+        unslotted    = COALESCE($2::jsonb, unslotted),
+        char_profile = COALESCE($3::jsonb, char_profile),
+        inv_grid     = COALESCE($4::jsonb, inv_grid),
+        updated_at   = NOW()
+      WHERE id=$5
+    `, [
+      my_build     != null ? JSON.stringify(my_build)     : null,
+      unslotted    != null ? JSON.stringify(unslotted)    : null,
+      char_profile != null ? JSON.stringify(char_profile) : null,
+      inv_grid     != null ? JSON.stringify(inv_grid)     : null,
+      req.session.user.id,
+    ]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('profile/data POST error:', err);
+    res.status(500).json({ error: 'Failed to save profile data' });
+  }
 });
 
 // ── Builds API ────────────────────────────────────────────────────────────────
