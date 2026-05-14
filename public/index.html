@@ -56,9 +56,10 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:var(--text);font-size:13px;line-height:1.5;background:var(--bg);min-height:100vh}
 .app{max-width:1400px;margin:0 auto;padding:0 0 40px}
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--bg2)}
 
 /* Header */
-.hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg2);position:sticky;top:0;z-index:100}
+.hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg2)}
 .hdr-title{font-size:18px;font-weight:600;letter-spacing:-.3px}
 .hdr-title span{color:var(--gold)}
 .hdr-sub{font-size:11px;color:var(--text3);margin-left:4px}
@@ -113,7 +114,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 /* Sliders - 5 step priority */
 .slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:16px}
-.sl-group{grid-column:1/-1;margin-top:10px;margin-bottom:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding-bottom:4px;border-bottom:1px solid var(--border2)}
+.sl-group{grid-column:1/-1;margin-top:12px;margin-bottom:6px;font-size:11px;font-weight:700;letter-spacing:.2px;color:var(--text);padding:4px 0 5px;border-bottom:2px solid var(--border)}
 .sl-group:first-child{margin-top:0}
 .sl-row{display:flex;align-items:center;gap:8px}
 .sl-name{font-size:11px;color:var(--text2);min-width:115px}
@@ -393,6 +394,66 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .ad-mid-run{display:none;text-align:center;padding:10px;margin:8px 0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm)}
 .ad-mid-run.on{display:block}
 
+/* ── Get Started Tab ──────────────────────────────────────────────────────── */
+.gs-section{margin-bottom:20px}
+.gs-section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.gs-section-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:.2px}
+.gs-section-sub{font-size:11px;color:var(--text3)}
+.gs-statues-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.gs-statue{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;min-width:0}
+.gs-statue-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.gs-statue-lbl{font-size:11px;font-weight:700;color:var(--text2)}
+.gs-statue-setinfo{margin-left:auto;display:flex;align-items:center;gap:4px}
+.gs-slots{display:flex;flex-direction:column;gap:4px}
+.gs-slot{display:grid;grid-template-columns:1fr 52px;gap:6px;align-items:center}
+.gs-slot-sel{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;padding:4px 6px;outline:none;cursor:pointer;transition:border-color .15s}
+.gs-slot-sel:focus{border-color:#38bdf8}
+.gs-slot-lv{width:52px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;padding:4px 6px;text-align:center;outline:none;transition:border-color .15s}
+.gs-slot-lv:focus{border-color:#38bdf8}
+/* Unslotted feathers */
+.gs-unslotted-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.gs-pool-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.gs-pool-name{font-size:11px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px}
+.gs-pool-inp{width:100%;padding:5px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-weight:600;text-align:center;outline:none;transition:border-color .15s}
+.gs-pool-inp:focus{border-color:#38bdf8}
+/* Total Pool */
+.gs-total-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.gs-total-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.gs-total-name{font-size:10px;font-weight:700;color:var(--text3);display:flex;align-items:center;gap:6px}
+.gs-total-val{font-size:16px;font-weight:700;color:var(--gold)}
+.gs-total-breakdown{font-size:9px;color:var(--text3)}
+/* Action buttons */
+.gs-btn-row{display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px solid var(--border);margin-top:4px;flex-wrap:wrap}
+.gs-btn{padding:9px 20px;border:none;border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.gs-btn-mybuild{background:#38bdf8;color:#0f1117}
+.gs-btn-mybuild:hover{background:#7dd3fc}
+.gs-btn-unslotted{background:transparent;border:1px solid #38bdf8;color:#38bdf8}
+.gs-btn-unslotted:hover{background:#38bdf8;color:#0f1117}
+.gs-btn-saveall{background:var(--gold);color:#000}
+.gs-btn-saveall:hover{background:var(--gold2)}
+.gs-saved-toast{font-size:11px;color:var(--green3);opacity:0;transition:opacity .3s;margin-left:8px}
+.gs-saved-toast.show{opacity:1}
+.gs-collapsible-hdr{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:8px}
+.gs-collapsible-hdr:hover{opacity:.85}
+.gs-caret{font-size:10px;transition:transform .15s;color:var(--text3);margin-left:2px;display:inline-block}
+.gs-caret.open{transform:rotate(90deg)}
+.gs-collapsible-body{display:none}
+.gs-collapsible-body.open{display:block}
+/* Pool display on Optimizer (read-only) */
+.pool-readonly{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px}
+.pool-ro-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;display:flex;justify-content:space-between;align-items:center}
+.pool-ro-name{font-size:11px;font-weight:700;color:var(--text2)}
+.pool-ro-val{font-size:14px;font-weight:700;color:var(--gold)}
+
+/* ── Auth ───────────────────────────────────────────────────────────────────── */
+.auth-btn{padding:4px 14px;background:#5865F2;border:none;border-radius:20px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:8px;display:inline-flex;align-items:center;gap:6px}
+.auth-btn:hover{background:#4752c4}
+.auth-user{display:inline-flex;align-items:center;gap:7px;margin-left:8px;cursor:pointer;padding:3px 10px 3px 3px;border-radius:20px;border:1px solid var(--border);transition:border-color .15s}
+.auth-user:hover{border-color:#5865F2}
+.auth-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.auth-username{font-size:11px;font-weight:600;color:var(--text)}
+.auth-logout{font-size:10px;color:var(--text3);margin-left:2px}
+
 </style>
 </head>
 <body>
@@ -409,24 +470,93 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 <div class="app">
 
-<div class="hdr">
+<div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v2.8.3 · Raven's Hour + Prestige + Plunder</span><button class="mybuild-btn" id="mybuild-hdr-btn" onclick="openMyBuild()">📋 My Build</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.0.3</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
-  <div class="tab on" onclick="showTab('opt')">Optimizer</div>
+  <div class="tab on" onclick="showTab('gs')">Get Started</div>
+  <div class="tab" onclick="showTab('opt')">Optimizer</div>
   <div class="tab" onclick="showTab('sf')">Smart Filter</div>
 </div>
+</div>
 
-<div id="pane-opt" class="pane on">
-  <div class="sec-row"><span class="sec">Pool Inventory</span><button class="inv-calc-btn" onclick="openInvCalc()">🧮 Calculate from feather levels</button></div>
-  <div class="pool-grid" id="pool-grid"></div>
+<div id="pane-gs" class="pane on">
 
-  <div class="sec-row">
+  <!-- HOW TO USE -->
+  <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--text3);line-height:1.7">
+    <strong style="color:var(--text2);display:block;margin-bottom:4px">🚀 How to use</strong>
+    <span style="color:var(--text2)">1.</span> Fill in <strong style="color:var(--text)">My Build</strong> — select the feathers currently inserted in each of your 10 statues and their levels.<br>
+    <span style="color:var(--text2)">2.</span> Add your <strong style="color:var(--text)">Unslotted Feathers</strong> — spare Lv1 copies sitting in your inventory not yet inserted into any statue.<br>
+    <span style="color:var(--text2)">3.</span> Click <strong style="color:var(--text)">Save All</strong>, then head to the <strong style="color:var(--text)">Optimizer</strong> tab and run it.
+  </div>
+
+  <!-- MY BUILD SECTION -->
+  <div class="gs-section">
+    <div class="gs-collapsible-hdr" onclick="gsToggle('gs-mybuild-body','gs-mybuild-caret')" style="border-bottom:2px solid var(--border);margin-bottom:8px">
+      <span class="gs-section-title">📋 My Build</span>
+      <span class="gs-section-sub" style="margin-left:6px">Enter your current feathers and levels for each statue</span>
+      <span class="gs-caret open" id="gs-mybuild-caret">▶</span>
+    </div>
+    <div class="gs-collapsible-body open" id="gs-mybuild-body">
+      <div class="gs-collapsible-hdr" onclick="gsToggle('gs-atk-body','gs-atk-caret')">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#e8705e">⚔ ATK Statues</span>
+        <span class="gs-caret open" id="gs-atk-caret">▶</span>
+      </div>
+      <div class="gs-collapsible-body open" id="gs-atk-body">
+        <div class="gs-statues-grid" id="gs-atk-grid"></div>
+      </div>
+      <div class="gs-collapsible-hdr" style="margin-top:8px" onclick="gsToggle('gs-def-body','gs-def-caret')">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#4fa06a">🛡 DEF Statues</span>
+        <span class="gs-caret open" id="gs-def-caret">▶</span>
+      </div>
+      <div class="gs-collapsible-body open" id="gs-def-body">
+        <div class="gs-statues-grid" id="gs-def-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNSLOTTED FEATHERS SECTION -->
+  <div class="gs-section">
+    <div class="gs-collapsible-hdr" onclick="gsToggle('gs-unslotted-body','gs-unslotted-caret')">
+      <span class="gs-section-title">🪶 Unslotted Feathers</span>
+      <span class="gs-section-sub" style="margin-left:4px">Spare Lv1 copies not yet inserted into any statue</span>
+      <span class="gs-caret open" id="gs-unslotted-caret">▶</span>
+    </div>
+    <div class="gs-collapsible-body open" id="gs-unslotted-body">
+      <div class="gs-unslotted-grid" id="gs-unslotted-grid"></div>
+    </div>
+  </div>
+
+  <!-- TOTAL POOL SECTION -->
+  <div class="gs-section">
+    <div class="gs-section-hdr">
+      <span class="gs-section-title">📊 Total Pool</span>
+      <span class="gs-section-sub">Auto-computed · Used by the Optimizer</span>
+    </div>
+    <div class="gs-total-grid" id="gs-total-grid"></div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="gs-btn-row">
+    <button class="gs-btn gs-btn-mybuild" onclick="saveMB()">💾 Save My Build</button>
+    <button class="gs-btn gs-btn-unslotted" onclick="saveUnslotted()">💾 Save Unslotted Feathers</button>
+    <button class="gs-btn gs-btn-saveall" onclick="saveAll()">✓ Save All</button>
+    <span class="gs-saved-toast" id="gs-toast">Saved!</span>
+  </div>
+
+</div>
+
+<div id="pane-opt" class="pane">
+  <div class="sec-row"><span class="sec">Pool Inventory</span><span style="font-size:10px;color:var(--text3);margin-left:8px">Set in <strong style="color:#38bdf8;cursor:pointer" onclick="showTab('gs')">Get Started</strong></span></div>
+  <div class="pool-readonly" id="pool-readonly-opt"></div>
+
+  <div class="sec-row" style="cursor:pointer" onclick="gsToggle('opt-stat-priority-body','opt-stat-priority-caret')">
     <span class="sec">Stat Priority</span>
-    <div class="tooltip-wrap">
+    <span class="gs-caret open" id="opt-stat-priority-caret" style="margin-left:6px">▶</span>
+    <div class="tooltip-wrap" onclick="event.stopPropagation()" style="margin-left:4px">
       <div class="tooltip-btn" tabindex="0">?</div>
       <div class="tooltip-box">
         <b>How stat priority works</b>
@@ -441,9 +571,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
       </div>
     </div>
   </div>
-  <div class="preset-row" id="presets"></div>
-  <div id="preset-desc" class="preset-desc"></div>
-  <div class="slider-grid" id="slider-grid"></div>
+  <div class="gs-collapsible-body open" id="opt-stat-priority-body">
+    <div class="preset-row" id="presets"></div>
+    <div id="preset-desc" class="preset-desc"></div>
+    <div class="slider-grid" id="slider-grid"></div>
+  </div>
 
   <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P), <strong>Raven's Prestige</strong> (3Y+2P), and <strong>Raven's Plunder</strong> (2Y+3P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
 
@@ -509,12 +641,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 
 <div id="pane-sf" class="pane">
-  <div class="sec-row"><span class="sec">Pool Inventory</span><button class="inv-calc-btn" onclick="openInvCalc()">🧮 Calculate from feather levels</button></div>
-  <div class="pool-grid" id="pool-grid3"></div>
+  <div class="sec-row"><span class="sec">Pool Inventory</span><span style="font-size:10px;color:var(--text3);margin-left:8px">Set in <strong style="color:#38bdf8;cursor:pointer" onclick="showTab('gs')">Get Started</strong></span></div>
+  <div class="pool-readonly" id="pool-readonly-sf"></div>
 
-  <div class="sec-row">
+  <div class="sec-row" style="cursor:pointer" onclick="gsToggle('sf-stat-priority-body','sf-stat-priority-caret')">
     <span class="sec">Stat Priority</span>
-    <div class="tooltip-wrap">
+    <span class="gs-caret open" id="sf-stat-priority-caret" style="margin-left:6px">▶</span>
+    <div class="tooltip-wrap" onclick="event.stopPropagation()" style="margin-left:4px">
       <div class="tooltip-btn" tabindex="0">?</div>
       <div class="tooltip-box">
         <b>How Smart Filter works</b>
@@ -523,9 +656,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
       </div>
     </div>
   </div>
+  <div class="gs-collapsible-body open" id="sf-stat-priority-body">
   <div class="preset-row" id="sf-presets"></div>
   <div id="sf-preset-desc" class="preset-desc"></div>
   <div class="slider-grid" id="sf-slider-grid"></div>
+  </div>
 
   <div class="sec-row" style="margin-top:4px">
     <span class="sec">Stat Filters</span>
@@ -630,12 +765,12 @@ const FEATHERS=[
   {name:'Truth', r:'Purple',t:'MIX',pool:'90SF Purple'},
 ];
 const POOLS=[
-  {name:'25SF Purple',r:'Purple',members:['Valor','Faith','Glory','Soul','Virtue','Mercy','Justice','Grace']},
   {name:'Light/Dark', r:'Yellow',members:['Dark','Light']},
+  {name:'Time/Space', r:'Yellow',members:['Divine','Nature','Space','Time']},
   {name:'Day/Night',  r:'Yellow',members:['Day','Night']},
-  {name:'Time/Space', r:'Yellow',members:['Nature','Divine','Space','Time']},
   {name:'Sky/Terra',  r:'Yellow',members:['Sky','Terra']},
   {name:'90SF Purple',r:'Purple',members:['Order','Truth']},
+  {name:'25SF Purple',r:'Purple',members:['Faith','Glory','Grace','Justice','Mercy','Soul','Valor','Virtue']},
 ];
 const LEVELCOST={};
 (function(){
@@ -841,13 +976,17 @@ function calcStatueResult(slots,type){
   return{stats:comp.valid?applySetBonus(raw,type,tier,comp.set):{...raw},tier,comp};
 }
 const WEIGHT_META={
-  _atkGroup:{group:'ATK Stats'},
-  ATK:{label:'ATK (PATK+MATK)'},IgnorePDEF:{label:'Ignore PDEF'},IgnoreMDEF:{label:'Ignore MDEF'},PDMG:{label:'PDMG'},MDMG:{label:'MDMG'},
-  _defGroup:{group:'DEF Stats'},
-  PDEF:{label:'PDEF'},MDEF:{label:'MDEF'},HP:{label:'HP'},PDMGRed:{label:'PDMG Reduction'},MDMGRed:{label:'MDMG Reduction'},
-  _pveGroup:{group:'PvE'},
+  _atkGroup:{group:'⚔ ATK Stats'},
+  ATK:{label:'ATK (PATK+MATK)'},
+  IgnorePDEF:{label:'Ignore PDEF'},IgnoreMDEF:{label:'Ignore MDEF'},
+  PDMG:{label:'PDMG%'},MDMG:{label:'MDMG%'},
+  _defGroup:{group:'🛡 DEF Stats'},
+  HP:{label:'HP'},
+  PDEF:{label:'PDEF'},MDEF:{label:'MDEF'},
+  PDMGRed:{label:'PDMG Reduction'},MDMGRed:{label:'MDMG Reduction'},
+  _pveGroup:{group:'🌿 PvE'},
   PvEDMG:{label:'PvE DMG Bonus'},PvEDMGRed:{label:'PvE DMG Reduction'},
-  _pvpGroup:{group:'PvP'},
+  _pvpGroup:{group:'⚡ PvP'},
   PvPDMG:{label:'PvP DMG Bonus'},PvPDMGRed:{label:'PvP DMG Reduction'},
 };
 // 0=Ignore 1=Nice to have 2=Important 3=Priority 4=Must maximize
@@ -1698,10 +1837,11 @@ function exportCSV(results){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='feather-builds.csv';a.click();
 }
 function showTab(id){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['opt','sf'][i]===id));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['gs','opt','sf'][i]===id));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
   document.getElementById('pane-'+id).classList.add('on');
   if(id==='sf'){renderSliders('sf-slider-grid','sf-presets','sf-preset-desc','weightsS','activePresetS');renderMinMaxGrid('sf-filter-grid','sfFiltersMin','sfFiltersMax');}
+  if(id==='gs'){renderGS();}
 }
 function setStatus(t,warn){
   const el=document.getElementById('status-txt');
@@ -1734,7 +1874,7 @@ function showProg(v){
   if(adEl) adEl.classList.toggle('on',v);
 }
 function setProg(v){document.getElementById('prog-fill').style.width=v+'%';}
-renderPools();renderSliders('slider-grid','presets','preset-desc','weights','activePreset');renderMinMaxGrid('opt-filter-grid','optFiltersMin','optFiltersMax');loadMyBuild();updateMyBuildBanner();
+renderSliders('slider-grid','presets','preset-desc','weights','activePreset');renderMinMaxGrid('opt-filter-grid','optFiltersMin','optFiltersMax');renderGS();renderPoolReadonly();setTimeout(()=>{loadAndSyncMyBuild();},0);
 
 // ── Inventory Calculator ──────────────────────────────────────────────────────
 const INV_LS_KEY='rooc_inv_grid';
@@ -1866,8 +2006,15 @@ function featherOptionsFor(type){
 function loadMyBuild(){
   try{
     const saved=JSON.parse(localStorage.getItem(MB_LS_KEY));
-    if(saved&&saved.statues) state.myBuild=saved;
+    if(saved&&saved.statues){
+      state.myBuild=saved;
+    }
   }catch(e){}
+}
+
+function loadAndSyncMyBuild(){
+  loadMyBuild();
+  if(state.myBuild) updateMyBuildBanner();
 }
 
 function saveMyBuild(){
@@ -1918,8 +2065,7 @@ function importBuildAsMyBuild(i,sfx){
   try{localStorage.setItem(MB_LS_KEY,JSON.stringify(state.myBuild));}catch(e){}
   updateMyBuildBanner();
   // Flash the header button
-  const btn=document.getElementById('mybuild-hdr-btn');
-  if(btn){btn.classList.add('active');setTimeout(()=>btn.classList.remove('active'),1500);}
+  // My Build header button removed — no flash needed
   // Re-render results to show deltas
   const expandedSet=sfx==='s'?state.expandedS:state.expanded;
   renderResults(sfx==='s'?'sf-results-area':'results-area',results,expandedSet,sfx);
@@ -2122,6 +2268,354 @@ function closeMyBuild(){
 function handleMyBuildOverlay(e){if(e.target===document.getElementById('mybuild-overlay'))closeMyBuild();}
 // ──────────────────────────────────────────────────────────────────────────────
 
+// ── Auth ──────────────────────────────────────────────────────────────────────
+let _authUser = null;
+
+function getAvatarUrl(user) {
+  if (!user.avatar) return 'https://cdn.discordapp.com/embed/avatars/0.png';
+  return `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png?size=64`;
+}
+
+function renderAuthArea() {
+  const el = document.getElementById('auth-area');
+  if (!el) return;
+  if (_authUser) {
+    el.innerHTML = `<div class="auth-user" onclick="logoutUser()" title="Click to logout">
+      <img class="auth-avatar" src="${getAvatarUrl(_authUser)}" alt="avatar">
+      <span class="auth-username">${_authUser.username}</span>
+      <span class="auth-logout">logout</span>
+    </div>`;
+  } else {
+    el.innerHTML = `<button class="auth-btn" onclick="loginWithDiscord()">
+      <svg width="14" height="14" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.55 58.55 0 0 0 45.8 1a40.44 40.44 0 0 0-1.8 3.7 54.23 54.23 0 0 0-16.3 0A40.44 40.44 0 0 0 25.9 1 58.48 58.48 0 0 0 11.6 4.9C1.7 19.7-1 34.2.3 48.4a58.72 58.72 0 0 0 18 9.1 43.9 43.9 0 0 0 3.8-6.2 38.35 38.35 0 0 1-6-2.9c.5-.4 1-.7 1.5-1.1a41.87 41.87 0 0 0 35.8 0c.5.4 1 .7 1.5 1.1a38.35 38.35 0 0 1-6 2.9 43.9 43.9 0 0 0 3.8 6.2 58.56 58.56 0 0 0 18-9.1c1.5-16.4-2.6-30.7-10.6-43.4zM23.7 39.8c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.2 6.4 7.2c0 4-2.8 7.2-6.4 7.2zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.2 6.4 7.2c0 4-2.8 7.2-6.4 7.2z"/></svg>
+      Login with Discord
+    </button>`;
+  }
+}
+
+function loginWithDiscord() {
+  window.location.href = '/auth/discord';
+}
+
+async function logoutUser() {
+  await fetch('/auth/logout', { method: 'POST' });
+  _authUser = null;
+  renderAuthArea();
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch('/auth/me');
+    const data = await res.json();
+    if (data.loggedIn) {
+      _authUser = data.user;
+    }
+  } catch (e) {
+    // Running locally without backend — ignore
+  }
+  renderAuthArea();
+
+  // Handle redirect params
+  const params = new URLSearchParams(window.location.search);
+  const authResult = params.get('auth');
+  if (authResult === 'success' && _authUser) {
+    // Clean URL
+    window.history.replaceState({}, '', '/');
+  } else if (authResult === 'error') {
+    window.history.replaceState({}, '', '/');
+    console.warn('Discord auth failed');
+  }
+}
+
+// Run on load
+checkAuth();
+// ──────────────────────────────────────────────────────────────────────────────
+
+// ── Get Started Tab ───────────────────────────────────────────────────────────
+const GS_MB_KEY='rooc_mybuild';
+const GS_UNSLOTTED_KEY='rooc_unslotted';
+
+// Pool order constant for dropdowns (matches new POOLS order)
+const POOL_ORDER=['Light/Dark','Time/Space','Day/Night','Sky/Terra','90SF Purple','25SF Purple'];
+
+function gsToggle(bodyId, caretId){
+  const body=document.getElementById(bodyId);
+  const caret=document.getElementById(caretId);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(caret)caret.classList.toggle('open',open);
+}
+
+function featherOptgroupsFor(type){
+  // Returns HTML string of <optgroup> elements filtered by statue type
+  let html='<option value="">— select feather —</option>';
+  POOLS.forEach(p=>{
+    const valid=FEATHERS.filter(f=>f.pool===p.name&&(f.t===type||f.t==='MIX'));
+    if(!valid.length)return;
+    html+=`<optgroup label="${p.name}">`;
+    // Already sorted alphabetically in POOLS.members
+    valid.sort((a,b)=>a.name.localeCompare(b.name)).forEach(f=>{
+      html+=`<option value="${f.name}">${f.name}</option>`;
+    });
+    html+='</optgroup>';
+  });
+  return html;
+}
+
+function gsComputeTotal(){
+  // For each pool: sum costAt(feather,lv) for all feather slots in myBuild + unslotted copies
+  const totals={};
+  POOLS.forEach(p=>{totals[p.name]={spent:0,unslotted:0};});
+
+  // From My Build statues
+  for(let si=0;si<10;si++){
+    const type=si<5?'ATK':'DEF';
+    for(let sl=0;sl<5;sl++){
+      const sel=document.getElementById(`gs-sel-${si}-${sl}`);
+      const lv=document.getElementById(`gs-lv-${si}-${sl}`);
+      if(!sel||!sel.value)continue;
+      const fname=sel.value;
+      const flv=Math.min(20,Math.max(1,parseInt(lv?.value)||1));
+      const f=FEATHERS.find(x=>x.name===fname);
+      if(f) totals[f.pool].spent+=costAt(fname,flv);
+    }
+  }
+
+  // From Unslotted Feathers
+  POOLS.forEach(p=>{
+    const inp=document.getElementById(`gs-unslotted-${p.name.replace(/\//g,'-').replace(/ /g,'-')}`);
+    totals[p.name].unslotted=Math.max(0,parseInt(inp?.value)||0);
+  });
+
+  // Update Total Pool display
+  const grid=document.getElementById('gs-total-grid');
+  if(grid){
+    let html='';
+    POOLS.forEach(p=>{
+      const {spent,unslotted}=totals[p.name];
+      const total=spent+unslotted;
+      html+=`<div class="gs-total-card">
+        <div class="gs-total-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}" style="font-size:8px">${p.r}</span></div>
+        <div class="gs-total-val">${total}</div>
+        <div class="gs-total-breakdown">${spent} spent · ${unslotted} unslotted</div>
+      </div>`;
+    });
+    grid.innerHTML=html;
+  }
+
+  // Sync to state.pools (feeds optimizer)
+  POOLS.forEach(p=>{
+    const {spent,unslotted}=totals[p.name];
+    state.pools[p.name]=spent+unslotted;
+  });
+
+  // Update read-only pool displays on other tabs
+  renderPoolReadonly();
+}
+
+function renderPoolReadonly(){
+  ['pool-readonly-opt','pool-readonly-sf'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    let html='';
+    POOLS.forEach(p=>{
+      html+=`<div class="pool-ro-card">
+        <div class="pool-ro-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}" style="font-size:8px;margin-left:4px">${p.r}</span></div>
+        <div class="pool-ro-val">${state.pools[p.name]||0}</div>
+      </div>`;
+    });
+    el.innerHTML=html;
+  });
+}
+
+function gsSlotChanged(si,sl){
+  // Update set badge
+  const slots=[];
+  for(let s=0;s<5;s++){
+    const sel=document.getElementById(`gs-sel-${si}-${s}`);
+    const lv=document.getElementById(`gs-lv-${si}-${s}`);
+    slots.push({f:sel?.value||'',lv:parseInt(lv?.value)||1});
+  }
+  const hdr=document.getElementById(`gs-setinfo-${si}`);
+  if(hdr){
+    if(slots.every(s=>s.f)){
+      const comp=checkSet(slots.map(s=>({f:s.f})));
+      const filledLevels=slots.filter(s=>s.f).map(s=>s.lv);
+      const tier=filledLevels.length?Math.min(...filledLevels):1;
+      const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
+      hdr.innerHTML=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
+    } else {
+      hdr.innerHTML='';
+    }
+  }
+  gsComputeTotal();
+}
+
+function gsSelChanged(si,sl){
+  const sel=document.getElementById(`gs-sel-${si}-${sl}`);
+  const lv=document.getElementById(`gs-lv-${si}-${sl}`);
+  if(sel&&!sel.value&&lv) lv.value=0;
+  gsSlotChanged(si,sl);
+}
+
+function renderGSStatue(si,savedSlots){
+  const type=si<5?'ATK':'DEF';
+  const labels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+  const opts=featherOptgroupsFor(type);
+
+  let setInfo='';
+  if(savedSlots&&savedSlots.every(s=>s.f)){
+    const comp=checkSet(savedSlots.map(s=>({f:s.f})));
+    const filledLevels=savedSlots.filter(s=>s.f).map(s=>s.lv);
+    const tier=filledLevels.length?Math.min(...filledLevels):1;
+    const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
+    setInfo=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
+  }
+
+  let html=`<div class="gs-statue">
+    <div class="gs-statue-hdr">
+      <span class="gs-statue-lbl">${labels[si]}</span>
+      <span class="gs-statue-setinfo" id="gs-setinfo-${si}">${setInfo}</span>
+    </div>
+    <div class="gs-slots">`;
+
+  for(let sl=0;sl<5;sl++){
+    const saved=savedSlots?savedSlots[sl]:null;
+    const selVal=saved?.f||'';
+    const lvVal=saved?.f?saved.lv:0;
+    html+=`<div class="gs-slot">
+      <select id="gs-sel-${si}-${sl}" class="gs-slot-sel" onchange="gsSelChanged(${si},${sl})">${opts.replace(`value="${selVal}"`,`value="${selVal}" selected`)}</select>
+      <input id="gs-lv-${si}-${sl}" class="gs-slot-lv" type="number" min="0" max="20" value="${lvVal}" placeholder="Lv" oninput="gsSlotChanged(${si},${sl})">
+    </div>`;
+  }
+  html+=`</div></div>`;
+  return html;
+}
+
+function renderGSUnslotted(savedUnslotted){
+  const grid=document.getElementById('gs-unslotted-grid');
+  if(!grid)return;
+  let html='';
+  POOLS.forEach(p=>{
+    const safeId=p.name.replace(/\//g,'-').replace(/ /g,'-');
+    const val=savedUnslotted?.[p.name]||0;
+    html+=`<div class="gs-pool-card">
+      <div class="gs-pool-name">${p.name}<span class="${p.r==='Yellow'?'badge-y':'badge-p'}" style="font-size:8px">${p.r}</span></div>
+      <input id="gs-unslotted-${safeId}" class="gs-pool-inp" type="number" min="0" max="99999"
+        value="${val||''}" placeholder="0" oninput="gsComputeTotal()">
+    </div>`;
+  });
+  grid.innerHTML=html;
+}
+
+function renderGS(){
+  // Load saved data
+  let savedMB=null, savedUnslotted=null;
+  try{
+    const mb=localStorage.getItem(GS_MB_KEY);
+    if(mb) savedMB=JSON.parse(mb);
+  }catch(e){}
+  try{
+    const us=localStorage.getItem(GS_UNSLOTTED_KEY);
+    if(us) savedUnslotted=JSON.parse(us);
+  }catch(e){}
+
+  // Migrate old rooc_pools if new system not set up yet
+  if(!savedUnslotted){
+    try{
+      const oldPools=localStorage.getItem('rooc_pools');
+      if(oldPools){
+        const d=JSON.parse(oldPools);
+        savedUnslotted={};
+        POOLS.forEach(p=>{if(d[p.name]) savedUnslotted[p.name]=d[p.name];});
+      }
+    }catch(e){}
+  }
+
+  // Render ATK statues (0-4)
+  const atkGrid=document.getElementById('gs-atk-grid');
+  if(atkGrid){
+    let html='';
+    for(let si=0;si<5;si++) html+=renderGSStatue(si,savedMB?.statues?.[si]?.slots);
+    atkGrid.innerHTML=html;
+  }
+
+  // Render DEF statues (5-9)
+  const defGrid=document.getElementById('gs-def-grid');
+  if(defGrid){
+    let html='';
+    for(let si=5;si<10;si++) html+=renderGSStatue(si,savedMB?.statues?.[si]?.slots);
+    defGrid.innerHTML=html;
+  }
+
+  // Render unslotted
+  renderGSUnslotted(savedUnslotted);
+
+  // Compute totals
+  gsComputeTotal();
+}
+
+function gatherMBData(){
+  const statues=[];
+  for(let si=0;si<10;si++){
+    const type=si<5?'ATK':'DEF';
+    const slots=[];
+    for(let sl=0;sl<5;sl++){
+      const sel=document.getElementById(`gs-sel-${si}-${sl}`);
+      const lv=document.getElementById(`gs-lv-${si}-${sl}`);
+      const f=sel?.value||'';
+      const lvv=f?Math.min(20,Math.max(1,parseInt(lv?.value)||1)):0;
+      slots.push({f,lv:lvv});
+    }
+    statues.push({type,slots});
+  }
+  return{statues};
+}
+
+function gatherUnslottedData(){
+  const d={};
+  POOLS.forEach(p=>{
+    const safeId=p.name.replace(/\//g,'-').replace(/ /g,'-');
+    const inp=document.getElementById(`gs-unslotted-${safeId}`);
+    d[p.name]=Math.max(0,parseInt(inp?.value)||0);
+  });
+  return d;
+}
+
+function showToast(){
+  const t=document.getElementById('gs-toast');
+  if(!t)return;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function saveMB(){
+  const mb=gatherMBData();
+  try{localStorage.setItem(GS_MB_KEY,JSON.stringify(mb));}catch(e){}
+  // Also sync to state.myBuild for comparison
+  state.myBuild=mb;
+  updateMyBuildBanner();
+  if(state.results.length) renderResults('results-area',state.results,state.expanded,'');
+  showToast();
+}
+
+function saveUnslotted(){
+  const us=gatherUnslottedData();
+  try{localStorage.setItem(GS_UNSLOTTED_KEY,JSON.stringify(us));}catch(e){}
+  try{
+    // Also update rooc_pools for backwards compat
+    const pools={};POOLS.forEach(p=>{pools[p.name]=state.pools[p.name]||0;});
+    localStorage.setItem('rooc_pools',JSON.stringify(pools));
+  }catch(e){}
+  showToast();
+}
+
+function saveAll(){
+  saveMB();
+  saveUnslotted();
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
 function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
@@ -2147,8 +2641,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();close
   <a href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Join the Discord</a>
   <span class="sep">·</span>
   Bug reports &amp; feedback welcome
-  <span class="sep">·</span>
-  Free forever for the ROOC community
 </div>
 
 <!-- Bottom Banner Ad -->
