@@ -246,7 +246,6 @@ app.get('/api/builds/community', async (req, res) => {
     const params = [];
     if (cls) { params.push(cls); where.push(`b.class=$${params.length}`); }
     if (type) { params.push(type); where.push(`$${params.length}=ANY(b.types)`); }
-    const orderBy = sort==='recent' ? 'b.created_at DESC' : 'like_count DESC, b.created_at DESC';
     params.push(parseInt(limit)); params.push(parseInt(offset));
     const { rows } = await pool.query(`
       SELECT b.*, u.username, u.avatar, u.discord_id, u.ign as user_ign,
@@ -254,7 +253,7 @@ app.get('/api/builds/community', async (req, res) => {
         (SELECT COUNT(*) FROM build_comments WHERE build_id=b.id)::int AS comment_count
       FROM builds b JOIN users u ON b.user_id=u.id
       WHERE ${where.join(' AND ')}
-      ORDER BY ${orderBy}
+      ORDER BY ${sort==='recent' ? 'b.created_at DESC' : '(SELECT COUNT(*) FROM build_likes WHERE build_id=b.id) DESC, b.created_at DESC'}
       LIMIT $${params.length-1} OFFSET $${params.length}
     `, params);
     res.json({ builds: rows });
