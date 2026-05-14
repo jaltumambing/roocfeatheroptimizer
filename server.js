@@ -272,11 +272,12 @@ app.patch('/api/builds/:id', requireAuth, async (req, res) => {
     const { rows } = await pool.query(`
       UPDATE builds SET
         name=COALESCE($1,name), notes=COALESCE($2,notes),
-        is_public=COALESCE($3,is_public), ign=COALESCE($4,ign),
+        is_public=CASE WHEN $3::boolean IS NOT NULL THEN $3::boolean ELSE is_public END,
+        ign=COALESCE($4,ign),
         class=COALESCE($5,class), types=COALESCE($6,types),
         updated_at=NOW()
       WHERE id=$7 AND user_id=$8 RETURNING *
-    `, [name, notes, is_public, ign, cls, types, req.params.id, req.session.user.id]);
+    `, [name, notes, is_public != null ? is_public : null, ign, cls, types, req.params.id, req.session.user.id]);
     if (!rows.length) return res.status(404).json({ error: 'Build not found' });
     res.json({ ok: true, build: rows[0] });
   } catch (err) {
