@@ -531,7 +531,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.1.0</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.1.2</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1770,45 +1770,45 @@ function renderResults(areaId,results,expandedSet,sfx){
       }));
       // which feathers used/unused per pool
       const usedFeathers=new Set(build.statues.flatMap(st=>st.slots.map(s=>s.f)));
-      let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px">
-        <button onclick="saveResultAsCurrentBuild(${i},'${sfx}');event.stopPropagation()" class="save-as-current-btn">✓ Save as Current Build</button>
-        <button onclick="openSaveBuildModal(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid var(--gold);border-radius:12px;color:var(--gold);font-size:10px;font-weight:600;cursor:pointer">💾 Save Build</button>
-        <button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer">📋 Use as My Build</button>
+      let detail=`<div class="detail-panel"><div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button onclick="saveResultAsCurrentBuild(${i},'${sfx}');event.stopPropagation()" class="save-as-current-btn" title="Sync this build to Get Started tab — updates My Build feathers, pool inventory, and stat comparison">⚡ Set as Active Build</button>
+        <button onclick="openSaveBuildModal(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid var(--gold);border-radius:12px;color:var(--gold);font-size:10px;font-weight:600;cursor:pointer" title="Save this build to your profile (requires Discord login) — add a name, class, and type tags">💾 Save to Profile</button>
+        <button onclick="importBuildAsMyBuild(${i},'${sfx}');event.stopPropagation()" style="padding:4px 14px;background:transparent;border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-size:10px;font-weight:600;cursor:pointer" title="Copy this build into the My Current Build comparison — does not update pool inventory">📋 Compare vs My Build</button>
       </div>`;
-      // per-statue rows with set bonus + feather bonuses overview
-      build.statues.forEach((st,si)=>{
-        const {raw,withBonus,withBonusNoFlats,comp,tier}=getStatueStats(st.slots,st.type);
+      // ATK statues row + DEF statues row
+      const renderStatueCard=(st,si)=>{
+        const {withBonusNoFlats,comp,tier}=getStatueStats(st.slots,st.type);
         const setBonusRows=getSetBonusStats(comp.set,st.type,tier);
         const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':comp.valid?'set-valid':'set-invalid';
-        detail+=`<div class="statue-detail">`;
-        // Header: label + tier + set badge
-        detail+=`<div class="statue-detail-hdr">
-          <span style="font-size:12px;font-weight:700;color:var(--text2)">${statueLabels[si]}</span>
-          <span class="tier-b">T${tier}</span>
-          <span class="set-b ${badgeCls}">${comp.name}</span>
-        </div>`;
-        // Feather chips
-        detail+=`<div class="statue-detail-slots">`;
-        st.slots.forEach(sl=>{
+        const chips=st.slots.filter(s=>s.f).map(sl=>{
           const f=FEATHERS.find(x=>x.name===sl.f);
           const above=sl.lv>(sl.floor||st.tier);
-          detail+=`<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;
-        });
-        detail+=`</div>`;
-        // Two-column: Set Stat | Feather Bonuses Overview
-        detail+=`<div class="statue-bonus-grid">`;
-        // Left: Set Stat (active set bonus)
-        detail+=`<div class="statue-bonus-col">
-          <div class="bonus-col-hdr set">Set Stat — T${tier}</div>
-          <div class="bonus-rows-grid">${setBonusRows.length?setBonusRows.map(r=>`<div class="bonus-row"><span class="bonus-n">${r.label}</span><span class="bonus-v pos">${r.val}</span></div>`).join(''):'<div class="bonus-row"><span class="bonus-n" style="color:var(--text3)">No active set bonus</span></div>'}</div>
-        </div>`;
-        // Right: Feather Bonuses Overview (raw + set applied)
-        detail+=`<div class="statue-bonus-col">
-          <div class="bonus-col-hdr total">Feather Bonuses Overview</div>
+          return `<span class="f-chip ${f?.r==='Yellow'?'f-yellow':'f-purple'}">${sl.f} <span style="opacity:.7">Lv${sl.lv}${above?'↑':''}</span></span>`;
+        }).join('');
+        const setStatHtml=setBonusRows.length?setBonusRows.map(r=>`<div class="bonus-row"><span class="bonus-n">${r.label}</span><span class="bonus-v pos">${r.val}</span></div>`).join(''):'<span style="font-size:10px;color:var(--text3)">—</span>';
+        return `<div class="statue-detail" style="flex:1;min-width:0">
+          <div class="statue-detail-hdr">
+            <span style="font-size:11px;font-weight:700;color:var(--text2)">${statueLabels[si]}</span>
+            <span class="tier-b">T${tier}</span>
+            <span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>
+          </div>
+          <div class="statue-detail-slots" style="margin-bottom:8px">${chips}</div>
+          <div class="bonus-col-hdr set" style="margin-bottom:4px">Set Stat — T${tier}</div>
+          <div class="bonus-rows-grid" style="margin-bottom:8px">${setStatHtml}</div>
+          <div class="bonus-col-hdr total" style="margin-bottom:4px">Feather Bonuses</div>
           ${renderStatueBonusRows(withBonusNoFlats)}
         </div>`;
-        detail+=`</div></div>`;
-      });
+      };
+      // ATK row
+      detail+=`<div style="margin-bottom:8px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#e8705e;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">⚔ ATK Statues</div>
+        <div style="display:flex;gap:8px">${build.statues.slice(0,5).map((st,si)=>renderStatueCard(st,si)).join('')}</div>
+      </div>`;
+      // DEF row
+      detail+=`<div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#4fa06a;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">🛡 DEF Statues</div>
+        <div style="display:flex;gap:8px">${build.statues.slice(5,10).map((st,si)=>renderStatueCard(st,si+5)).join('')}</div>
+      </div>`;
       // pool utilization section
       detail+=`<div class="pool-util-section">`;
       POOLS.forEach(p=>{
@@ -2502,6 +2502,7 @@ async function loadMyBuilds() {
       el.innerHTML = `<div class="social-empty"><div class="social-empty-icon">📋</div>No saved builds yet.<br><span style="font-size:11px">Expand any optimizer result and click 💾 Save Build.</span></div>`;
       return;
     }
+    data.builds.forEach(b=>_buildCache[b.id]=b);
     el.innerHTML = `<div class="build-cards">${data.builds.map(b=>renderBuildCard(b,true)).join('')}</div>`;
   } catch(err) {
     el.innerHTML = '<div style="color:var(--red2);font-size:12px;padding:16px">Failed to load builds.</div>';
@@ -2552,6 +2553,7 @@ async function loadCommunityBuilds() {
       listEl.innerHTML = `<div class="social-empty"><div class="social-empty-icon">🌐</div>No community builds yet.<br><span style="font-size:11px">Save a build and share it to be the first!</span></div>`;
       return;
     }
+    data.builds.forEach(b=>_buildCache[b.id]=b);
     listEl.innerHTML = `<div class="build-cards">${data.builds.map(b=>renderBuildCard(b,false)).join('')}</div>`;
   } catch(err) {
     document.getElementById('community-builds-list').innerHTML = '<div style="color:var(--red2);font-size:12px;padding:16px">Failed to load.</div>';
@@ -2561,26 +2563,69 @@ async function loadCommunityBuilds() {
 // ── Build Card ────────────────────────────────────────────────────────────────
 function renderBuildCard(b, isMine) {
   const avatarUrl = getAvatarUrlFromData(b.discord_id, b.avatar);
-  const displayName = b.ign || b.user_ign || b.username;
   const buildName = b.name || `${b.class} ${b.types.join('/')} Build`;
   const typeTags = b.types.map(t=>`<span class="build-type-tag">${t}</span>`).join('');
   const likeCount = b.like_count || 0;
   const commentCount = b.comment_count || 0;
 
-  let actions = `<button class="bc-btn bc-btn-import" onclick="importCommunityBuild(${b.id})">📋 Import</button>`;
+  // Feather detail section
+  let featherDetail = '';
+  if (b.statues?.length) {
+    const statueLabels=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+    featherDetail = `<div class="build-feather-detail" id="feather-detail-${b.id}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">`;
+    // ATK statues
+    featherDetail += `<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#e8705e;margin-bottom:6px">⚔ ATK Statues</div>`;
+    featherDetail += `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px">`;
+    b.statues.slice(0,5).forEach((st,si)=>{
+      const tier=Math.min(...st.slots.filter(s=>s.f).map(s=>s.lv));
+      const comp=checkSet(st.slots.map(s=>({f:s.f})));
+      const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':'set-invalid';
+      featherDetail+=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+          <span style="font-size:10px;font-weight:700;color:var(--text2)">${statueLabels[si]}</span>
+          <span class="tier-b" style="font-size:9px">T${tier}</span>
+          <span class="set-b ${badgeCls}" style="font-size:8px">${comp.name}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          ${st.slots.filter(s=>s.f).map(s=>{const f=FEATHERS.find(x=>x.name===s.f);return`<span style="font-size:10px;padding:1px 4px;border-radius:3px;border:1px solid;${f?.r==='Yellow'?'background:#1a1200;color:#c9a227;border-color:#8a6c10':'background:#1a0a2e;color:#9b7fd4;border-color:#5b3fa0'}">${s.f} <span style="opacity:.6">Lv${s.lv}</span></span>`;}).join('')}
+        </div>
+      </div>`;
+    });
+    featherDetail += `</div>`;
+    // DEF statues
+    featherDetail += `<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#4fa06a;margin-bottom:6px">🛡 DEF Statues</div>`;
+    featherDetail += `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">`;
+    b.statues.slice(5,10).forEach((st,si)=>{
+      const tier=Math.min(...st.slots.filter(s=>s.f).map(s=>s.lv));
+      const comp=checkSet(st.slots.map(s=>({f:s.f})));
+      const badgeCls=comp.set==='RH'?'set-rh':comp.set==='RP'?'set-rp':comp.set==='RD'?'set-rd':'set-invalid';
+      featherDetail+=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+          <span style="font-size:10px;font-weight:700;color:var(--text2)">${statueLabels[si+5]}</span>
+          <span class="tier-b" style="font-size:9px">T${tier}</span>
+          <span class="set-b ${badgeCls}" style="font-size:8px">${comp.name}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          ${st.slots.filter(s=>s.f).map(s=>{const f=FEATHERS.find(x=>x.name===s.f);return`<span style="font-size:10px;padding:1px 4px;border-radius:3px;border:1px solid;${f?.r==='Yellow'?'background:#1a1200;color:#c9a227;border-color:#8a6c10':'background:#1a0a2e;color:#9b7fd4;border-color:#5b3fa0'}">${s.f} <span style="opacity:.6">Lv${s.lv}</span></span>`;}).join('')}
+        </div>
+      </div>`;
+    });
+    featherDetail += `</div></div>`;
+  }
 
+  let actions = `<button class="bc-btn bc-btn-import" onclick="importCommunityBuild(${b.id},event)">📋 Import</button>`;
   if (isMine) {
     const shareLabel = b.is_public ? '🌐 Shared' : '🌐 Share';
     const shareClass = b.is_public ? 'bc-btn bc-btn-shared' : 'bc-btn bc-btn-share';
-    actions += `<button class="${shareClass}" onclick="toggleBuildPublic(${b.id},${!b.is_public},this)">${shareLabel}</button>`;
-    actions += `<button class="bc-btn bc-btn-delete" onclick="deleteBuild(${b.id},this)">🗑 Delete</button>`;
+    actions += `<button class="${shareClass}" id="share-btn-${b.id}" onclick="toggleBuildPublic(${b.id},${!b.is_public},this);event.stopPropagation()">${shareLabel}</button>`;
+    actions += `<button class="bc-btn bc-btn-delete" onclick="deleteBuild(${b.id},this);event.stopPropagation()">🗑 Delete</button>`;
   }
-
-  actions += `<button class="bc-like-btn${b.user_liked?' liked':''}" id="like-btn-${b.id}" onclick="toggleLike(${b.id},this)">👍 <span id="like-count-${b.id}">${likeCount}</span></button>`;
+  actions += `<button class="bc-like-btn${b.user_liked?' liked':''}" id="like-btn-${b.id}" onclick="toggleLike(${b.id},this);event.stopPropagation()">👍 <span id="like-count-${b.id}">${likeCount}</span></button>`;
   actions += `<span class="bc-meta">${commentCount} comment${commentCount!==1?'s':''}</span>`;
-  actions += `<button class="bc-btn" style="margin-left:auto" onclick="toggleComments(${b.id})">💬 Comments</button>`;
+  actions += `<button class="bc-btn" style="margin-left:auto" onclick="toggleComments(${b.id});event.stopPropagation()">💬 Comments</button>`;
+  actions += `<span style="font-size:10px;color:var(--text3);margin-left:4px" id="expand-caret-${b.id}">▶ Details</span>`;
 
-  return `<div class="build-card" id="build-card-${b.id}">
+  return `<div class="build-card" id="build-card-${b.id}" onclick="toggleBuildCardExpand(${b.id})" style="cursor:pointer">
     <div class="build-card-hdr">
       <img class="build-card-avatar" src="${avatarUrl}" alt="">
       <div>
@@ -2591,8 +2636,9 @@ function renderBuildCard(b, isMine) {
     </div>
     <div class="build-card-types">${typeTags}</div>
     ${b.notes?`<div style="font-size:11px;color:var(--text3);margin-top:6px">${b.notes}</div>`:''}
-    <div class="build-card-actions">${actions}</div>
-    <div class="build-comments" id="comments-${b.id}">
+    ${featherDetail}
+    <div class="build-card-actions" onclick="event.stopPropagation()">${actions}</div>
+    <div class="build-comments" id="comments-${b.id}" onclick="event.stopPropagation()">
       <div class="comment-list" id="comment-list-${b.id}"></div>
       ${_authUser?`<div class="comment-input-row">
         <input class="comment-input" id="comment-inp-${b.id}" placeholder="Add a comment..." maxlength="500" onkeydown="if(event.key==='Enter')postComment(${b.id})">
@@ -2602,12 +2648,31 @@ function renderBuildCard(b, isMine) {
   </div>`;
 }
 
+function toggleBuildCardExpand(id) {
+  const detail = document.getElementById('feather-detail-'+id);
+  const caret = document.getElementById('expand-caret-'+id);
+  if (!detail) return;
+  const open = detail.style.display === 'none';
+  detail.style.display = open ? 'block' : 'none';
+  if (caret) caret.textContent = open ? '▼ Details' : '▶ Details';
+}
+
 async function toggleBuildPublic(id, makePublic, btn) {
-  const res = await fetch(`/api/builds/${id}`, {method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_public:makePublic})});
-  if (res.ok) {
-    btn.textContent = makePublic ? '🌐 Shared' : '🌐 Share';
-    btn.className = makePublic ? 'bc-btn bc-btn-shared' : 'bc-btn bc-btn-share';
-    btn.onclick = ()=>toggleBuildPublic(id,!makePublic,btn);
+  try {
+    const res = await fetch(`/api/builds/${id}`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({is_public:makePublic})
+    });
+    if (res.ok) {
+      btn.textContent = makePublic ? '🌐 Shared' : '🌐 Share';
+      btn.className = makePublic ? 'bc-btn bc-btn-shared' : 'bc-btn bc-btn-share';
+      btn.onclick = (e)=>{toggleBuildPublic(id,!makePublic,btn);e.stopPropagation();};
+      if (_buildCache[id]) _buildCache[id].is_public = makePublic;
+      showGsToast(makePublic ? '✓ Build shared to community!' : '✓ Build set to private');
+    }
+  } catch(err) {
+    showGsToast('Failed to update build');
   }
 }
 
@@ -2659,25 +2724,21 @@ async function postComment(id) {
   if (res.ok) { inp.value=''; await loadComments(id); }
 }
 
-async function importCommunityBuild(id) {
-  // Fetch the build's statues and import as current build
-  try {
-    const res = await fetch('/api/builds/community?limit=200');
-    const data = await res.json();
-    const build = data.builds.find(b=>b.id===id);
-    if (!build?.statues) return;
-    state.myBuild = {statues: build.statues.map(st=>({type:st.type,slots:st.slots.map(s=>({f:s.f,lv:s.lv}))}))};
-    try{localStorage.setItem('rooc_mybuild',JSON.stringify(state.myBuild));}catch(e){}
-    if(build.pool_inventory) {
-      POOLS.forEach(p=>{state.pools[p.name]=build.pool_inventory[p.name]||0;});
-      try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
-    }
-    updateMyBuildBanner();
-    renderPoolReadonly();
-    showGsToast('✓ Build imported to My Current Build!');
-  } catch(err) {
-    console.error(err);
+const _buildCache = {}; // id -> build data
+
+async function importCommunityBuild(id, evt) {
+  if(evt) evt.stopPropagation();
+  const build = _buildCache[id];
+  if (!build?.statues) { showGsToast('Build data not available'); return; }
+  state.myBuild = {statues: build.statues.map(st=>({type:st.type,slots:st.slots.map(s=>({f:s.f,lv:s.lv}))}))};
+  try{localStorage.setItem('rooc_mybuild',JSON.stringify(state.myBuild));}catch(e){}
+  if(build.pool_inventory) {
+    POOLS.forEach(p=>{state.pools[p.name]=build.pool_inventory[p.name]||0;});
+    try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
   }
+  updateMyBuildBanner();
+  renderPoolReadonly();
+  showGsToast('✓ Build imported!');
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
