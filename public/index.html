@@ -535,7 +535,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.1.8</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.0</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -641,6 +641,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <button class="gs-btn gs-btn-mybuild" onclick="saveMB()">💾 Save My Build</button>
     <button class="gs-btn gs-btn-unslotted" onclick="saveUnslotted()">💾 Save Unslotted Feathers</button>
     <button class="gs-btn gs-btn-saveall" onclick="saveAll()">✓ Save All</button>
+    <button class="gs-btn" onclick="openSaveBuildModalFromGS()" style="background:transparent;border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;" title="Save your current My Build to Social › My Saved Builds (requires Discord login)">📤 Save to Profile</button>
     <span class="gs-saved-toast" id="gs-toast">Saved!</span>
     <span class="gs-sync-indicator" id="gs-sync-indicator"></span>
   </div>
@@ -742,7 +743,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <!-- My Build Modal -->
 <div class="modal-overlay" id="mybuild-overlay" onclick="handleMyBuildOverlay(event)">
   <div class="mb-modal-box">
-    <button class="modal-close" onclick="closeMyBuild()" title="Close">×</button>
+    <button class="modal-close" onclick="confirmCloseMyBuild()" title="Close">×</button>
     <div>
       <div class="modal-title" style="text-align:left;margin-bottom:2px">📋 My Current Build</div>
       <div class="modal-sub" style="text-align:left;margin-bottom:0;line-height:1.5">Enter your current feathers and levels. Once saved, results will show stat deltas vs your build. You can also import any optimizer result directly.</div>
@@ -1953,7 +1954,7 @@ function closeInvCalc(){
   document.getElementById('inv-calc-overlay').classList.remove('on');
   document.body.style.overflow='';
 }
-function handleInvCalcOverlay(e){if(e.target===document.getElementById('inv-calc-overlay'))closeInvCalc();}
+function handleInvCalcOverlay(e){/* outside click disabled */}
 
 function invCellChange(name,lv,val){
   const n=Math.max(0,parseInt(val)||0);
@@ -2310,7 +2311,7 @@ function closeMyBuild(){
   document.getElementById('mybuild-overlay').classList.remove('on');
   document.body.style.overflow='';
 }
-function handleMyBuildOverlay(e){if(e.target===document.getElementById('mybuild-overlay'))closeMyBuild();}
+function handleMyBuildOverlay(e){/* outside click disabled */}
 // ──────────────────────────────────────────────────────────────────────────────
 
 // ── Character Profile (Get Started) ──────────────────────────────────────────
@@ -2384,14 +2385,51 @@ function openSaveBuildModal(i, sfx) {
   document.body.style.overflow = 'hidden';
 }
 
+function openSaveBuildModalFromGS() {
+  if (!_authUser) { loginWithDiscord(); return; }
+  // Gather current My Build from GS tab (save first to ensure latest data)
+  const mb = gatherMBData();
+  if (!mb || !mb.statues || mb.statues.every(st => st.slots.every(s => !s.f))) {
+    showGsToast('⚠ Fill in My Build first');
+    return;
+  }
+  // Snapshot build + pool inventory
+  _saveBuildCtx = { build: { statues: mb.statues }, poolInventory: {...state.pools} };
+  // Pre-fill from character profile
+  const cp = getCharProfile();
+  const nameEl = document.getElementById('sbm-name');
+  const clsEl = document.getElementById('sbm-class');
+  const errEl = document.getElementById('sbm-error');
+  if (nameEl) nameEl.value = '';
+  if (clsEl && cp.cls) clsEl.value = cp.cls;
+  if (errEl) { errEl.style.display='none'; errEl.textContent=''; }
+  document.querySelectorAll('.sbm-type-chip').forEach(el => {
+    el.classList.toggle('on', cp.types.includes(el.textContent.trim()));
+  });
+  document.getElementById('sbm-notes').value = '';
+  document.getElementById('save-build-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
 function closeSaveBuildModal() {
   document.getElementById('save-build-overlay').classList.remove('on');
   document.body.style.overflow = '';
   _saveBuildCtx = null;
 }
 
+
+function confirmCloseMyBuild() {
+  if (confirm('Close without saving? Any unsaved changes will be lost.')) closeMyBuild();
+}
+function confirmCloseInvCalc() {
+  if (confirm('Close without saving? Any unsaved changes will be lost.')) closeInvCalc();
+}
+function confirmCloseSaveBuild() {
+  if (confirm('Close without saving? Your build details will be lost.')) closeSaveBuildModal();
+}
+
 function handleSaveBuildOverlay(e) {
-  if (e.target === document.getElementById('save-build-overlay')) closeSaveBuildModal();
+  /* outside click disabled */
 }
 
 function toggleSbmType(el, type) {
@@ -3239,12 +3277,12 @@ function saveAll(){
 function openDonate(){document.getElementById('donate-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDonate(){document.getElementById('donate-overlay').classList.remove('on');document.body.style.overflow='';}
 function handleOverlayClick(e){if(e.target===document.getElementById('donate-overlay'))closeDonate();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();closeInvCalc();closeMyBuild();closeSaveBuildModal();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();}});
 </script>
 <!-- Inventory Calculator Modal -->
 <div class="modal-overlay" id="inv-calc-overlay" onclick="handleInvCalcOverlay(event)">
   <div class="inv-modal-box">
-    <button class="modal-close" onclick="closeInvCalc()" title="Close">×</button>
+    <button class="modal-close" onclick="confirmCloseInvCalc()" title="Close">×</button>
     <div class="modal-title" style="text-align:left;margin-bottom:6px">🧮 Inventory Calculator</div>
     <div class="inv-note">
       <strong>How to use:</strong> Each column is a feather pool. Each row is a level. Enter how many feathers you own from that pool at that level — e.g. if you have 1 Sky at Lv8 and 2 Terra at Lv8, enter <strong>3</strong> in Sky/Terra · Lv8. The calculator adds up all copies consumed by your existing feathers. Hit <strong>Submit</strong> to fill Pool Inventory with those totals.
@@ -3260,7 +3298,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();close
 <!-- Save Build Modal -->
 <div class="modal-overlay" id="save-build-overlay" onclick="handleSaveBuildOverlay(event)">
   <div class="save-build-modal">
-    <button class="modal-close" onclick="closeSaveBuildModal()">×</button>
+    <button class="modal-close" onclick="confirmCloseSaveBuild()" title="Close">×</button>
     <div class="modal-title" style="text-align:left;margin-bottom:14px">💾 Save Build</div>
     <div class="sbm-field">
       <label class="sbm-label">Build Name <span style="color:var(--text3)">(optional)</span></label>
