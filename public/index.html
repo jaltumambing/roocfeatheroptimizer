@@ -535,7 +535,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.1.7</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.1.8</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -2362,7 +2362,11 @@ let _saveBuildCtx = null; // {buildIdx, sfx}
 
 function openSaveBuildModal(i, sfx) {
   if (!_authUser) { loginWithDiscord(); return; }
-  _saveBuildCtx = {i, sfx};
+  // Snapshot the build immediately so re-running optimizer can't change what gets saved
+  const results = sfx==='s' ? state.sfResults : state.results;
+  const build = results[i];
+  if (!build) return;
+  _saveBuildCtx = { build, poolInventory: {...state.pools} };
   // Pre-fill from character profile
   const cp = getCharProfile();
   const nameEl = document.getElementById('sbm-name');
@@ -2403,8 +2407,7 @@ async function confirmSaveBuild() {
   if (!types.length) { errEl.textContent='Please select at least one type.'; errEl.style.display='block'; return; }
   errEl.style.display='none';
 
-  const results = _saveBuildCtx.sfx==='s' ? state.sfResults : state.results;
-  const build = results[_saveBuildCtx.i];
+  const { build, poolInventory } = _saveBuildCtx;
   if (!build) return;
 
   const cp = getCharProfile();
@@ -2415,7 +2418,7 @@ async function confirmSaveBuild() {
     types,
     notes: document.getElementById('sbm-notes').value.trim()||null,
     statues: build.statues,
-    pool_inventory: state.pools,
+    pool_inventory: poolInventory,
   };
 
   try {
