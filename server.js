@@ -313,7 +313,7 @@ app.get('/api/builds/community', async (req, res) => {
     const offsetIdx = params.push(parseInt(offset));
 
     const { rows } = await pool.query(`
-      SELECT b.*, u.username, u.avatar, u.discord_id, u.ign as user_ign,
+      SELECT b.*, u.username, u.avatar, u.discord_id,
         (SELECT COUNT(*) FROM build_likes WHERE build_id=b.id)::int AS like_count,
         (SELECT COUNT(*) FROM build_comments WHERE build_id=b.id)::int AS comment_count
       FROM builds b JOIN users u ON b.user_id=u.id
