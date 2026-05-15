@@ -298,25 +298,33 @@ app.delete('/api/builds/:id', requireAuth, async (req, res) => {
 // Get community builds (public only)
 app.get('/api/builds/community', async (req, res) => {
   try {
-    const { class: cls, type, sort='likes', offset=0, limit=20 } = req.query;
+    const { class: cls, type, offset=0, limit=20 } = req.query;
+    // Sanitise sort — only accept known values to prevent injection
+    const sort = req.query.sort === 'recent' ? 'recent' : 'likes';
+    const orderBy = sort === 'recent'
+      ? 'b.created_at DESC'
+      : '(SELECT COUNT(*) FROM build_likes WHERE build_id=b.id) DESC, b.created_at DESC';
+
     let where = ['b.is_public=true'];
     const params = [];
     if (cls) { params.push(cls); where.push(`b.class=$${params.length}`); }
     if (type) { params.push(type); where.push(`$${params.length}=ANY(b.types)`); }
-    params.push(parseInt(limit)); params.push(parseInt(offset));
+    const limitIdx  = params.push(parseInt(limit));
+    const offsetIdx = params.push(parseInt(offset));
+
     const { rows } = await pool.query(`
       SELECT b.*, u.username, u.avatar, u.discord_id, u.ign as user_ign,
         (SELECT COUNT(*) FROM build_likes WHERE build_id=b.id)::int AS like_count,
         (SELECT COUNT(*) FROM build_comments WHERE build_id=b.id)::int AS comment_count
       FROM builds b JOIN users u ON b.user_id=u.id
       WHERE ${where.join(' AND ')}
-      ORDER BY ${sort==='recent' ? 'b.created_at DESC' : '(SELECT COUNT(*) FROM build_likes WHERE build_id=b.id) DESC, b.created_at DESC'}
-      LIMIT $${params.length-1} OFFSET $${params.length}
+      ORDER BY ${orderBy}
+      LIMIT $${limitIdx} OFFSET $${offsetIdx}
     `, params);
     res.json({ builds: rows });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch community builds' });
+    console.error('community builds error:', err);
+    res.status(500).json({ error: 'Failed to fetch community builds', detail: err.message });
   }
 });
 
