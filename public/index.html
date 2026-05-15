@@ -535,7 +535,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.0</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.1</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -698,6 +698,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <div class="filter-grid" id="opt-filter-grid"></div>
   </div>
 
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+    <span style="font-size:11px;font-weight:700;color:var(--text2)">Sets:</span>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);cursor:pointer" title="Raven's Hour (4Y+1P) — Highest ATK multiplier. Best raw damage output at every budget. Recommended for most builds.">
+      <input type="checkbox" id="set-filter-RH" checked> Raven's Hour <span style="color:var(--text3);font-size:10px">(4Y+1P)</span>
+    </label>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);cursor:pointer" title="Raven's Prestige (3Y+2P) — Balanced ATK and DEF bonuses. Good middle-ground option.">
+      <input type="checkbox" id="set-filter-RP" checked> Raven's Prestige <span style="color:var(--text3);font-size:10px">(3Y+2P)</span>
+    </label>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);cursor:pointer" title="Raven's Plunder (2Y+3P) — Lower ATK multiplier but more DEF stats on ATK statues. Costs more copies than Raven's Hour for the same tier. Useful for hybrid/tank builds or when Purple inventory is abundant.">
+      <input type="checkbox" id="set-filter-RD" checked> Raven's Plunder <span style="color:var(--text3);font-size:10px">(2Y+3P)</span>
+    </label>
+    <span id="set-filter-warning" style="font-size:10px;color:var(--gold);display:none">⚠ Results may not be optimal — some sets excluded</span>
+  </div>
   <div class="run-row">
     <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
     <label style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px">
@@ -1298,6 +1311,10 @@ function buildRaizarStatues(atkSlots,defSlots,atkSet,defSet,floorT){
 }
 
 function runRaizarMode(){
+  const _rAllowed=getAllowedSets();
+  const _rOrigATK=[...COMBOS_ATK];const _rOrigDEF=[...COMBOS_DEF];
+  COMBOS_ATK.length=0;_rOrigATK.filter(c=>_rAllowed.has(c.set)).forEach(c=>COMBOS_ATK.push(c));
+  COMBOS_DEF.length=0;_rOrigDEF.filter(c=>_rAllowed.has(c.set)).forEach(c=>COMBOS_DEF.push(c));
   const weights=state.weights;
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
@@ -1351,17 +1368,43 @@ function runRaizarMode(){
       setProg(100);
       _timer.stop(`✦ Raizar Mode: ${results.length} uniform build${results.length!==1?'s':''}`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
+    COMBOS_ATK.length=0;_rOrigATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_rOrigDEF.forEach(c=>COMBOS_DEF.push(c));
     document.getElementById('raizar-btn').disabled=false;
     document.getElementById('run-btn').disabled=false;
     setTimeout(()=>showProg(false),600);
   },30);
 }
+
+function getAllowedSets() {
+  const rh = document.getElementById('set-filter-RH')?.checked !== false;
+  const rp = document.getElementById('set-filter-RP')?.checked !== false;
+  const rd = document.getElementById('set-filter-RD')?.checked !== false;
+  const warn = document.getElementById('set-filter-warning');
+  const allOn = rh && rp && rd;
+  if (warn) warn.style.display = allOn ? 'none' : 'inline';
+  const allowed = new Set();
+  if (rh) allowed.add('RH');
+  if (rp) allowed.add('RP');
+  if (rd) allowed.add('RD');
+  if (!allowed.size) { allowed.add('RH'); allowed.add('RP'); allowed.add('RD'); } // fallback
+  return allowed;
+}
+
+function filterCombosBySet(combos, allowed) {
+  return combos.filter(c => allowed.has(c.set));
+}
+
 function runOptimizer(){
   const weights=state.weights;
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat priority > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
+  // Apply set filter
+  const _allowedSets=getAllowedSets();
+  const _origATK=[...COMBOS_ATK];const _origDEF=[...COMBOS_DEF];
+  COMBOS_ATK.length=0;_origATK.filter(c=>_allowedSets.has(c.set)).forEach(c=>COMBOS_ATK.push(c));
+  COMBOS_DEF.length=0;_origDEF.filter(c=>_allowedSets.has(c.set)).forEach(c=>COMBOS_DEF.push(c));
   document.getElementById('run-btn').disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
@@ -1392,6 +1435,7 @@ function runOptimizer(){
       state.results=topN;state.expanded.clear();renderResults('results-area',state.results,state.expanded,'');setProg(100);
       _timer.stop(`Found ${topN.length} builds`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
+    COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));
     document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
   },30);
 }
@@ -2717,7 +2761,7 @@ function renderBuildCard(b, isMine) {
   actions += `<button class="bc-like-btn${b.user_liked?' liked':''}" id="like-btn-${b.id}" onclick="toggleLike(${b.id},this);event.stopPropagation()">👍 <span id="like-count-${b.id}">${likeCount}</span></button>`;
   actions += `<span class="bc-meta">${commentCount} comment${commentCount!==1?'s':''}</span>`;
   actions += `<button class="bc-btn" style="margin-left:auto" onclick="toggleComments(${b.id});event.stopPropagation()">💬 Comments</button>`;
-  actions += `<span style="font-size:10px;color:var(--text3);margin-left:4px" id="expand-caret-${b.id}">▶ Details</span>`;
+  actions += `<button onclick="toggleBuildCardExpand(${b.id});event.stopPropagation()" style="margin-left:4px;background:none;border:none;cursor:pointer;font-size:10px;color:var(--text3);padding:0" id="expand-caret-${b.id}">▶ Details</button>`;
 
   return `<div class="build-card" id="build-card-${b.id}" onclick="toggleBuildCardExpand(${b.id})" style="cursor:pointer">
     <div class="build-card-hdr">
