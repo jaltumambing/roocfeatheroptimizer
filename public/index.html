@@ -535,7 +535,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.3</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.4</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -3389,6 +3389,46 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDonate();}});
   <a href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Join the Discord</a>
   <span class="sep">·</span>
   Bug reports &amp; feedback welcome
+</div>
+
+<!-- Static content for search engines and AdSense policy compliance -->
+<div style="max-width:900px;margin:32px auto 48px;padding:0 20px;color:var(--text2);font-size:13px;line-height:1.8">
+
+  <h2 style="color:var(--text);font-size:16px;font-weight:700;margin-bottom:12px">About the ROOC Feather Optimizer</h2>
+  <p style="margin-bottom:16px">The ROOC Feather Optimizer is a free build planning tool for <strong style="color:var(--text)">Ragnarok Origin Classic</strong>. It helps players find the most efficient feather combinations for their ATK and DEF statues based on their actual pool inventory and chosen stat priorities. No guesswork — just enter your feather counts, set your priorities, and let the optimizer do the math.</p>
+
+  <h2 style="color:var(--text);font-size:16px;font-weight:700;margin-bottom:12px;margin-top:24px">How It Works</h2>
+  <p style="margin-bottom:12px">Feathers in Ragnarok Origin Classic are slotted into 10 statues — 5 ATK and 5 DEF. Each statue holds 5 feathers, and the combination of Yellow and Purple feathers determines which Raven's set bonus you receive:</p>
+  <ul style="margin-bottom:16px;padding-left:20px">
+    <li style="margin-bottom:6px"><strong style="color:var(--gold)">Raven's Hour (4Y + 1P)</strong> — Highest ATK multiplier. Best raw damage output at every inventory size. Recommended for most DPS builds.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--gold)">Raven's Prestige (3Y + 2P)</strong> — Balanced ATK and DEF bonuses. A versatile middle-ground option for hybrid builds.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--gold)">Raven's Plunder (2Y + 3P)</strong> — More Purple feathers provide stronger DEF stats on ATK statues. Best for tank or utility-focused builds with large Purple inventories.</li>
+  </ul>
+  <p style="margin-bottom:16px">The optimizer scores thousands of feather configurations against your personal stat weights — you decide whether PATK, IgnorePDEF, HP, PDMGRed, PvE DMG, or PvP DMG matters most. Results are sorted by score and show exact feather assignments, resonance tier, set bonuses, and total stat output for all 10 statues.</p>
+
+  <h2 style="color:var(--text);font-size:16px;font-weight:700;margin-bottom:12px;margin-top:24px">Feather Pools</h2>
+  <p style="margin-bottom:12px">Feathers are grouped into 6 pools. Your total copies per pool limits what the optimizer can assign:</p>
+  <ul style="margin-bottom:16px;padding-left:20px">
+    <li style="margin-bottom:6px"><strong style="color:var(--text)">Light/Dark</strong> — Yellow MIX feathers. Provide PATK, MATK, PvPDMG, and PvPDMGRed.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--text)">Time/Space</strong> — Yellow ATK/DEF feathers. Provide IgnorePDEF, IgnoreMDEF, PDMG, MDMG, HP, and PvE stats.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--text)">Day/Night</strong> — Yellow ATK/DEF feathers. Provide IgnorePDEF, IgnoreMDEF, PvEDMG, PDEF, and PvEDMGRed.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--text)">Sky/Terra</strong> — Yellow ATK/DEF feathers. Provide PATK, MATK, IgnorePDEF, IgnoreMDEF, and HP.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--text)">90SF Purple</strong> — Purple MIX feathers (Order, Truth). Provide PDEF, MDEF, PDMG%, MDMG%, and IgnorePDEF/MDEF.</li>
+    <li style="margin-bottom:6px"><strong style="color:var(--text)">25SF Purple</strong> — Purple ATK/DEF feathers (Valor, Faith, Glory, Justice, Grace, Soul, Virtue, Mercy). Provide specialized ATK or DEF stats depending on feather type.</li>
+  </ul>
+
+  <h2 style="color:var(--text);font-size:16px;font-weight:700;margin-bottom:12px;margin-top:24px">Getting Started</h2>
+  <ol style="margin-bottom:16px;padding-left:20px">
+    <li style="margin-bottom:6px">Go to the <strong style="color:var(--text)">Get Started</strong> tab and enter your current feather levels in <em>My Build</em> and any spare copies in <em>Unslotted Feathers</em>. The Total Pool is computed automatically.</li>
+    <li style="margin-bottom:6px">Go to the <strong style="color:var(--text)">Optimizer</strong> tab, set your stat priorities using the sliders, and click <em>Run Optimizer</em>.</li>
+    <li style="margin-bottom:6px">Review the ranked results. Click any result to expand the full feather breakdown across all 10 statues.</li>
+    <li style="margin-bottom:6px">Click <strong style="color:var(--text)">⚡ Set as Active Build</strong> to apply a result to your Get Started tab, or <strong style="color:var(--text)">💾 Save to Profile</strong> to publish it to the Social tab (requires Discord login).</li>
+  </ol>
+
+  <h2 style="color:var(--text);font-size:16px;font-weight:700;margin-bottom:12px;margin-top:24px">Community &amp; Sharing</h2>
+  <p style="margin-bottom:16px">Log in with Discord to save builds to your profile and share them in the <strong style="color:var(--text)">Community Builds</strong> section. Browse other players' builds, filter by class and build type, like your favorites, and leave comments. Builds can be imported directly into your own optimizer with one click.</p>
+
+  <p style="font-size:11px;color:var(--text3);margin-top:24px">ROOC Feather Optimizer is a fan-made tool and is not affiliated with Gravity or the official Ragnarok Origin Classic team. All game data is sourced from community research and in-game verification.</p>
 </div>
 
 <!-- Ad slot placeholder -->
