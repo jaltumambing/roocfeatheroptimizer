@@ -54,6 +54,16 @@
   --purple:#5b3fa0;--purple2:#9b7fd4;--purple3:#c4b5fd;
   --radius:8px;--radius-sm:5px;
 }
+[data-theme="light"]{
+  --bg:#f0f2f5;--bg2:#ffffff;--bg3:#e8eaed;
+  --border:#d0d7de;--border2:#e1e4e8;
+  --text:#1c2329;--text2:#57606a;--text3:#8c959f;
+  --gold:#7d5a00;--gold2:#5a3e00;--gold3:#f0d060;
+  --blue:#0969da;--blue2:#0550ae;
+  --red:#d1242f;--red2:#c0392b;--red3:#ff8182;
+  --green:#1a7f37;--green2:#116329;--green3:#1a7f37;
+  --purple:#6639ba;--purple2:#4f2dc8;--purple3:#8250df;
+}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:var(--text);font-size:13px;line-height:1.5;background:var(--bg);min-height:100vh}
 .app{max-width:1400px;margin:0 auto;padding:0 0 40px}
 .sticky-nav{position:sticky;top:0;z-index:100;background:var(--bg2)}
@@ -535,7 +545,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.6</span><div id="auth-area"></div><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.7</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -642,6 +652,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <button class="gs-btn gs-btn-unslotted" onclick="saveUnslotted()">💾 Save Unslotted Feathers</button>
     <button class="gs-btn gs-btn-saveall" onclick="saveAll()">✓ Save All</button>
     <button class="gs-btn" onclick="openSaveBuildModalFromGS()" style="background:transparent;border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;" title="Save your current My Build to Social › My Saved Builds (requires Discord login)">📤 Save to Profile</button>
+    <button onclick="clearMyBuild()" title="Clear all feather slots in My Build" style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;transition:all .15s" onmouseover="this.style.borderColor='var(--red2)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Clear My Build</button>
+    <button onclick="clearUnslotted()" title="Clear all unslotted feather counts" style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;transition:all .15s" onmouseover="this.style.borderColor='var(--red2)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Clear Unslotted</button>
     <span class="gs-saved-toast" id="gs-toast">Saved!</span>
     <span class="gs-sync-indicator" id="gs-sync-indicator"></span>
   </div>
@@ -3093,7 +3105,7 @@ async function loadProfileFromServer() {
 }
 
 // Run on load
-checkAuth();
+checkAuth();applyTheme();
 // ──────────────────────────────────────────────────────────────────────────────
 
 // ── Get Started Tab ───────────────────────────────────────────────────────────
@@ -3354,6 +3366,50 @@ function showToast(){
   if(!t)return;
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function toggleTheme(){
+  const html=document.documentElement;
+  const isLight=html.getAttribute('data-theme')==='light';
+  html.setAttribute('data-theme',isLight?'dark':'light');
+  document.getElementById('theme-toggle').textContent=isLight?'🌙':'☀️';
+  try{localStorage.setItem('rooc_theme',isLight?'dark':'light');}catch(e){}
+}
+function applyTheme(){
+  const saved=localStorage.getItem('rooc_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  const btn=document.getElementById('theme-toggle');
+  if(btn)btn.textContent=saved==='light'?'☀️':'🌙';
+}
+
+function clearMyBuild(){
+  if(!confirm('Clear all feather slots in My Build?'))return;
+  for(let si=0;si<10;si++)for(let sl=0;sl<5;sl++){
+    const sel=document.getElementById(`gs-sel-${si}-${sl}`);
+    const lv=document.getElementById(`gs-lv-${si}-${sl}`);
+    if(sel)sel.value='';
+    if(lv)lv.value='0';
+  }
+  state.myBuild={statues:Array.from({length:10},(_,i)=>({type:i<5?'ATK':'DEF',slots:Array(5).fill(null).map(()=>({f:'',lv:0}))}))};
+  try{localStorage.setItem('rooc_mybuild',JSON.stringify(state.myBuild));}catch(e){}
+  gsComputeTotal();
+  updateMyBuildBanner();
+  if(_authUser)syncProfileToServer({my_build:state.myBuild});
+  showGsToast('Cleared!');
+}
+
+function clearUnslotted(){
+  if(!confirm('Clear all unslotted feather counts?'))return;
+  POOLS.forEach(p=>{
+    const safeId=p.name.replace(/\//g,'-').replace(/ /g,'-');
+    const inp=document.getElementById(`gs-unslotted-${safeId}`);
+    if(inp)inp.value='0';
+  });
+  const empty={};POOLS.forEach(p=>{empty[p.name]=0;});
+  try{localStorage.setItem('rooc_unslotted',JSON.stringify(empty));}catch(e){}
+  gsComputeTotal();
+  if(_authUser)syncProfileToServer({unslotted:empty});
+  showGsToast('Cleared!');
 }
 
 function saveMB(){
