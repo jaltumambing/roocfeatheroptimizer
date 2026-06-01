@@ -545,7 +545,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.7</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.8</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1029,7 +1029,7 @@ function applySetBonus(raw,type,tier,setName){
       s.PATK+=b.patkFlat;
       s.MATK+=b.matkFlat;
     } else if(setName==='RP'){
-      // RP ATK: atkMult on ATK stats + defMult on DEF stats + pvpDmgBonus + patkFlat/matkFlat
+      // RP ATK: atkMult on ATK stats only + pvpDmgBonus + patkFlat/matkFlat (no defMult)
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
       s.MATK=Math.floor(s.MATK*(1+b.atkMult));
       s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
@@ -1040,10 +1040,6 @@ function applySetBonus(raw,type,tier,setName){
       s.PvPDMG+=b.pvpDmgBonus;
       s.PATK+=b.patkFlat;
       s.MATK+=b.matkFlat;
-      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
-      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
-      s.PDMGRed=s.PDMGRed*(1+b.defMult);
-      s.MDMGRed=s.MDMGRed*(1+b.defMult);
     } else if(setName==='RD'){
       // RD ATK: atkMult on ATK stats, pveMult on PvEDMG, pvpDmgBonus+patkFlat+matkFlat flat
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
@@ -1768,7 +1764,7 @@ function applySetBonusNoFlats(raw,type,tier,setName){
       s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
       s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
     } else if(setName==='RP'){
-      // RP ATK no-flats: atkMult on ATK stats + defMult on DEF stats
+      // RP ATK no-flats: atkMult on ATK stats only (no defMult)
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
       s.MATK=Math.floor(s.MATK*(1+b.atkMult));
       s.IgnorePDEF=Math.floor(s.IgnorePDEF*(1+b.atkMult));
@@ -1776,10 +1772,6 @@ function applySetBonusNoFlats(raw,type,tier,setName){
       s.PDMG=s.PDMG*(1+b.atkMult);
       s.MDMG=s.MDMG*(1+b.atkMult);
       s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
-      s.PDEF=Math.floor(s.PDEF*(1+b.defMult));
-      s.MDEF=Math.floor(s.MDEF*(1+b.defMult));
-      s.PDMGRed=s.PDMGRed*(1+b.defMult);
-      s.MDMGRed=s.MDMGRed*(1+b.defMult);
     } else if(setName==='RE'){
       // RE ATK no-flats: atkMult on ATK stats only
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
