@@ -545,7 +545,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.8</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.9</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -928,8 +928,8 @@ const RH_DEF={};
 // Raven's Prestige (3Y+2P) - ATK statue
 // Cols: pvpDmgBonus(flat), patkFlat, matkFlat, pveMult%, defMult%  — NO atkMult
 const RP_ATK={};
-[[1,9,12,12,0.30,0.10],[2,12,16,16,0.33,0.11],[3,15,20,20,0.36,0.12],[4,18,24,24,0.39,0.13],[5,21,28,28,0.42,0.14],[6,24,32,32,0.45,0.15],[7,27,36,36,0.48,0.16],[8,30,40,40,0.51,0.17],[9,33,44,44,0.54,0.18],[10,36,48,48,0.60,0.20],[11,39,50,50,0.62,0.21],[12,42,52,52,0.64,0.22],[13,45,54,54,0.66,0.23],[14,48,56,56,0.68,0.24],[15,51,58,58,0.70,0.25],[16,54,60,60,0.72,0.26],[17,57,62,62,0.74,0.27],[18,60,64,64,0.76,0.28],[19,63,66,66,0.78,0.29],[20,66,68,68,0.80,0.30]]
-.forEach(([t,pvpBonus,patkFlat,matkFlat,pveM,defM])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,patkFlat,matkFlat,pveMult:pveM,defMult:defM};});
+[[1,9,12,12,0.10,0.30,0.10],[2,12,16,16,0.11,0.33,0.11],[3,15,20,20,0.12,0.36,0.12],[4,18,24,24,0.13,0.39,0.13],[5,21,28,28,0.14,0.42,0.14],[6,24,32,32,0.15,0.45,0.15],[7,27,36,36,0.16,0.48,0.16],[8,30,40,40,0.17,0.51,0.17],[9,33,44,44,0.18,0.54,0.18],[10,36,48,48,0.20,0.60,0.20],[11,39,50,50,0.21,0.62,0.21],[12,42,52,52,0.22,0.64,0.22],[13,45,54,54,0.23,0.66,0.23],[14,48,56,56,0.24,0.68,0.24],[15,51,58,58,0.25,0.70,0.25],[16,54,60,60,0.26,0.72,0.26],[17,57,62,62,0.27,0.74,0.27],[18,60,64,64,0.28,0.76,0.28],[19,63,66,66,0.29,0.78,0.29],[20,66,68,68,0.30,0.80,0.30]]
+.forEach(([t,pvpBonus,patkFlat,matkFlat,atkM,pveM,defM])=>{RP_ATK[t]={pvpDmgBonus:pvpBonus,patkFlat,matkFlat,atkMult:atkM,pveMult:pveM,defMult:defM};});
 
 // Raven's Prestige (3Y+2P) - DEF statue
 // Cols: hpFlat, pvpDmgBonus(flat), pveMult%, defMult%  — NO atkMult
