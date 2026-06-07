@@ -545,7 +545,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.12</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.13</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -2625,6 +2625,14 @@ function saveResultAsCurrentBuild(i, sfx) {
   });
   try { localStorage.setItem('rooc_unslotted', JSON.stringify(unslotted)); } catch(e) {}
   try { localStorage.setItem('rooc_pools', JSON.stringify(state.pools)); } catch(e) {}
+
+  // 2b. Update in-memory state.unslotted and GS input fields so gsComputeTotal is accurate
+  POOLS.forEach(p => {
+    state.unslotted[p.name] = unslotted[p.name];
+    const safeId = p.name.replace(/\//g,'-').replace(/ /g,'-');
+    const inp = document.getElementById(`gs-unslotted-${safeId}`);
+    if (inp) inp.value = unslotted[p.name];
+  });
 
   // 3. Sync to server
   syncProfileToServer({ my_build: state.myBuild, unslotted });
