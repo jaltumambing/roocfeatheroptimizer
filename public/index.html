@@ -545,7 +545,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.13</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.14</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -726,6 +726,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     </label>
     <span id="set-filter-warning" style="font-size:10px;color:var(--gold);display:none">⚠ Results may not be optimal — some sets excluded</span>
   </div>
+
+  <!-- Feather Lock -->
+  <div style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none" onclick="toggleLockPanel()">
+      <span style="font-size:11px;font-weight:700;color:var(--text2)">🔒 Lock Feathers</span>
+      <span id="lock-panel-caret" style="font-size:10px;color:var(--text3)">▶ expand</span>
+      <span id="lock-active-badge" style="display:none;font-size:10px;background:var(--gold3);color:var(--gold2);border-radius:10px;padding:1px 7px;font-weight:700">active</span>
+    </div>
+    <div id="lock-panel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);font-size:11px">
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:700;color:var(--text2);margin-bottom:6px">⚔ ATK Statues</div>
+          <div style="color:var(--text3);font-size:10px;margin-bottom:4px">Yellow (ATK/MIX)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px" id="lock-atk-yellow"></div>
+          <div style="color:var(--text3);font-size:10px;margin-bottom:4px">Purple (ATK/MIX)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px" id="lock-atk-purple"></div>
+        </div>
+        <div>
+          <div style="font-weight:700;color:var(--text2);margin-bottom:6px">🛡 DEF Statues</div>
+          <div style="color:var(--text3);font-size:10px;margin-bottom:4px">Yellow (DEF/MIX)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px" id="lock-def-yellow"></div>
+          <div style="color:var(--text3);font-size:10px;margin-bottom:4px">Purple (DEF/MIX)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px" id="lock-def-purple"></div>
+        </div>
+      </div>
+      <div id="lock-conflict-warn" style="display:none;margin-top:8px;font-size:10px;color:var(--red2)">⚠ Locked feathers exceed available slots for one or more sets — those sets will return no results.</div>
+      <button onclick="clearAllLocks()" style="margin-top:10px;background:transparent;border:1px solid var(--border);color:var(--text3);font-size:10px;padding:3px 10px;border-radius:var(--radius-sm);cursor:pointer">Clear All Locks</button>
+    </div>
+  </div>
+
   <div class="run-row">
     <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
     <label style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px">
@@ -1364,8 +1394,8 @@ function buildRaizarStatues(atkSlots,defSlots,atkSet,defSet,floorT){
 function runRaizarMode(){
   const _rAllowed=getAllowedSets();
   const _rOrigATK=[...COMBOS_ATK];const _rOrigDEF=[...COMBOS_DEF];
-  COMBOS_ATK.length=0;_rOrigATK.filter(c=>_rAllowed.has(c.set)).forEach(c=>COMBOS_ATK.push(c));
-  COMBOS_DEF.length=0;_rOrigDEF.filter(c=>_rAllowed.has(c.set)).forEach(c=>COMBOS_DEF.push(c));
+  COMBOS_ATK.length=0;filterCombosByLocks(_rOrigATK.filter(c=>_rAllowed.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
+  COMBOS_DEF.length=0;filterCombosByLocks(_rOrigDEF.filter(c=>_rAllowed.has(c.set)),_lockedDEF).forEach(c=>COMBOS_DEF.push(c));
   const weights=state.weights;
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
@@ -1426,6 +1456,111 @@ function runRaizarMode(){
   },30);
 }
 
+
+// ── Feather Lock ─────────────────────────────────────────────────────────────
+const _lockedATK = new Set();
+const _lockedDEF = new Set();
+
+function initLockPanels() {
+  const atkY = FEATHERS.filter(f=>f.r==='Yellow'&&(f.t==='ATK'||f.t==='MIX'));
+  const atkP = FEATHERS.filter(f=>f.r==='Purple'&&(f.t==='ATK'||f.t==='MIX'));
+  const defY = FEATHERS.filter(f=>f.r==='Yellow'&&(f.t==='DEF'||f.t==='MIX'));
+  const defP = FEATHERS.filter(f=>f.r==='Purple'&&(f.t==='DEF'||f.t==='MIX'));
+
+  function renderChips(containerId, feathers, lockSet) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = feathers.map(f => {
+      const on = lockSet.has(f.name);
+      return `<button onclick="toggleLock('${f.name}','${lockSet===_lockedATK?'ATK':'DEF'}')" 
+        id="lock-chip-${containerId}-${f.name}"
+        style="padding:2px 8px;border-radius:10px;font-size:10px;cursor:pointer;font-weight:600;
+               background:${on?'var(--gold3)':'var(--bg3)'};
+               border:1px solid ${on?'var(--gold)':'var(--border)'};
+               color:${on?'var(--gold2)':'var(--text2)'}">${f.name}</button>`;
+    }).join('');
+  }
+
+  renderChips('lock-atk-yellow', atkY, _lockedATK);
+  renderChips('lock-atk-purple', atkP, _lockedATK);
+  renderChips('lock-def-yellow', defY, _lockedDEF);
+  renderChips('lock-def-purple', defP, _lockedDEF);
+  updateLockBadge();
+}
+
+function toggleLock(name, type) {
+  const lockSet = type === 'ATK' ? _lockedATK : _lockedDEF;
+  if (lockSet.has(name)) lockSet.delete(name); else lockSet.add(name);
+  saveLocks();
+  initLockPanels();
+  checkLockConflicts();
+}
+
+function clearAllLocks() {
+  _lockedATK.clear(); _lockedDEF.clear();
+  saveLocks(); initLockPanels(); checkLockConflicts();
+}
+
+function saveLocks() {
+  try {
+    localStorage.setItem('rooc_locked_atk', JSON.stringify([..._lockedATK]));
+    localStorage.setItem('rooc_locked_def', JSON.stringify([..._lockedDEF]));
+  } catch(e) {}
+}
+
+function loadLocks() {
+  try {
+    const a = JSON.parse(localStorage.getItem('rooc_locked_atk')||'[]');
+    const d = JSON.parse(localStorage.getItem('rooc_locked_def')||'[]');
+    a.forEach(n=>_lockedATK.add(n));
+    d.forEach(n=>_lockedDEF.add(n));
+  } catch(e) {}
+}
+
+function updateLockBadge() {
+  const badge = document.getElementById('lock-active-badge');
+  if (badge) badge.style.display = (_lockedATK.size||_lockedDEF.size) ? 'inline' : 'none';
+}
+
+function checkLockConflicts() {
+  updateLockBadge();
+  const warn = document.getElementById('lock-conflict-warn');
+  if (!warn) return;
+  // Conflict: locked purples > max purples in any enabled set
+  const allowedSets = getAllowedSets();
+  const maxP = { RH:1, RP:2, RD:3, RE:4 };
+  const atkP = [..._lockedATK].filter(n=>FEATHERS.find(f=>f.name===n&&f.r==='Purple'));
+  const defP = [..._lockedDEF].filter(n=>FEATHERS.find(f=>f.name===n&&f.r==='Purple'));
+  const atkY = [..._lockedATK].filter(n=>FEATHERS.find(f=>f.name===n&&f.r==='Yellow'));
+  const defY = [..._lockedDEF].filter(n=>FEATHERS.find(f=>f.name===n&&f.r==='Yellow'));
+  let conflict = false;
+  for (const set of allowedSets) {
+    const mp = maxP[set]||1, my = 5-(mp);
+    if (atkP.length > mp || atkY.length > my) { conflict = true; break; }
+    if (defP.length > mp || defY.length > my) { conflict = true; break; }
+  }
+  warn.style.display = conflict ? 'block' : 'none';
+}
+
+function toggleLockPanel() {
+  const panel = document.getElementById('lock-panel');
+  const caret = document.getElementById('lock-panel-caret');
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  caret.textContent = open ? '▶ expand' : '▼ collapse';
+  if (!open) initLockPanels();
+}
+
+function filterCombosByLocks(combos, lockSet) {
+  if (!lockSet.size) return combos;
+  return combos.filter(c => {
+    const all = new Set([...c.yellows, ...c.purples]);
+    for (const locked of lockSet) { if (!all.has(locked)) return false; }
+    return true;
+  });
+}
+
 function getAllowedSets() {
   const rh = document.getElementById('set-filter-RH')?.checked !== false;
   const rp = document.getElementById('set-filter-RP')?.checked !== false;
@@ -1453,11 +1588,12 @@ function runOptimizer(){
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
-  // Apply set filter
+  // Apply set filter + lock filter
   const _allowedSets=getAllowedSets();
   const _origATK=[...COMBOS_ATK];const _origDEF=[...COMBOS_DEF];
-  COMBOS_ATK.length=0;_origATK.filter(c=>_allowedSets.has(c.set)).forEach(c=>COMBOS_ATK.push(c));
-  COMBOS_DEF.length=0;_origDEF.filter(c=>_allowedSets.has(c.set)).forEach(c=>COMBOS_DEF.push(c));
+  COMBOS_ATK.length=0;filterCombosByLocks(_origATK.filter(c=>_allowedSets.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
+  COMBOS_DEF.length=0;filterCombosByLocks(_origDEF.filter(c=>_allowedSets.has(c.set)),_lockedDEF).forEach(c=>COMBOS_DEF.push(c));
+  if(!COMBOS_ATK.length||!COMBOS_DEF.length){COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));setStatus('No valid combos match your locked feathers. Locks ignored.',true);document.getElementById('run-btn').disabled=false;return;}
   document.getElementById('run-btn').disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
@@ -3110,7 +3246,7 @@ async function loadProfileFromServer() {
 }
 
 // Run on load
-checkAuth();applyTheme();
+checkAuth();applyTheme();loadLocks();updateLockBadge();
 // ──────────────────────────────────────────────────────────────────────────────
 
 // ── Get Started Tab ───────────────────────────────────────────────────────────
