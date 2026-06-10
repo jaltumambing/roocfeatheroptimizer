@@ -201,6 +201,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .col-grp-def{color:#4fa06a}
 .col-grp-pve{color:#7fb5d4}
 .col-grp-pvp{color:#9b7fd4}
+.col-grp-primary{color:#86efac}
 /* Pool utilization bars */
 .pool-util-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px}
 .pool-util-row{display:flex;flex-direction:column;gap:3px}
@@ -545,7 +546,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.14</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.15</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1820,14 +1821,15 @@ function renderFilterResults(){
 }
 function toggleFilterBuild(i){if(state.expandedF.has(i))state.expandedF.delete(i);else state.expandedF.add(i);renderFilterResults();}
 // Table state
-const tblState={sortCol:'score',sortDir:-1,groups:{atk:true,def:true,pve:false,pvp:false}};
+const tblState={sortCol:'score',sortDir:-1,groups:{atk:true,def:true,pve:false,pvp:false,primary:false}};
 const COL_GROUPS={
   atk:{label:'ATK',cols:['PATK','MATK','IgnorePDEF','IgnoreMDEF','PDMG','MDMG'],cls:'col-grp-atk'},
   def:{label:'DEF',cols:['PDEF','MDEF','HP','PDMGRed','MDMGRed'],cls:'col-grp-def'},
   pve:{label:'PvE',cols:['PvEDMG','PvEDMGRed'],cls:'col-grp-pve'},
   pvp:{label:'PvP',cols:['PvPDMG','PvPDMGRed'],cls:'col-grp-pvp'},
+  primary:{label:'Primary',cols:['STR','INT','DEX','VIT'],cls:'col-grp-primary'},
 };
-const COL_LABELS={PATK:'PATK',MATK:'MATK',IgnorePDEF:'Ign.PDEF',IgnoreMDEF:'Ign.MDEF',PDMG:'PDMG',MDMG:'MDMG',PDEF:'PDEF',MDEF:'MDEF',HP:'HP',PDMGRed:'PDMGRed',MDMGRed:'MDMGRed',PvEDMG:'PvEDMG',PvEDMGRed:'PvEDMGRed',PvPDMG:'PvPDMG',PvPDMGRed:'PvPDMGRed'};
+const COL_LABELS={PATK:'PATK',MATK:'MATK',IgnorePDEF:'Ign.PDEF',IgnoreMDEF:'Ign.MDEF',PDMG:'PDMG',MDMG:'MDMG',PDEF:'PDEF',MDEF:'MDEF',HP:'HP',PDMGRed:'PDMGRed',MDMGRed:'MDMGRed',PvEDMG:'PvEDMG',PvEDMGRed:'PvEDMGRed',PvPDMG:'PvPDMG',PvPDMGRed:'PvPDMGRed',STR:'STR',INT:'INT',DEX:'DEX',VIT:'VIT'};
 function getVisibleCols(){const c=[];Object.entries(COL_GROUPS).forEach(([g,m])=>{if(tblState.groups[g])m.cols.forEach(k=>c.push({k,g,cls:m.cls}));});return c;}
 function getSetBonusStats(setCode,type,tier){
   // Returns object of set bonus stats at this tier
@@ -1977,7 +1979,10 @@ function renderResults(areaId,results,expandedSet,sfx){
   const visCols=getVisibleCols();
   // toolbar
   let toolbar=`<div class="res-toolbar"><span class="res-toolbar-lbl">Columns:</span>`;
-  Object.entries(COL_GROUPS).forEach(([g,m])=>{toolbar+=`<span class="col-toggle ${tblState.groups[g]?'on':''}" onclick="toggleColGroup('${g}','${areaId}','${sfx}')">${m.label}</span>`;});
+  Object.entries(COL_GROUPS).forEach(([g,m])=>{
+    const tip=g==='primary'?' title="STR/INT/DEX/VIT shown for reference only — not included in scoring. Actual substats vary by class."':'';
+    toolbar+=`<span class="col-toggle ${tblState.groups[g]?'on':''}"${tip} onclick="toggleColGroup('${g}','${areaId}','${sfx}')">${m.label}</span>`;
+  });
   toolbar+=`<button class="csv-btn" onclick="exportCSV(${sfx==='2'?'state.results2':sfx==='s'?'state.sfResults':'state.results'})">⬇ CSV</button></div>`;
   // header
   let thead=`<tr><th>#</th><th onclick="sortTable('score','${areaId}','${sfx}')">Score${tblState.sortCol==='score'?(tblState.sortDir<0?' ↓':' ↑'):''}</th><th>Tiers</th>`;
