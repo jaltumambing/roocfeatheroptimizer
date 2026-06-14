@@ -546,7 +546,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.15</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v3.2.18</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -1058,6 +1058,7 @@ function applySetBonus(raw,type,tier,setName){
       s.MDMG=s.MDMG*(1+b.atkMult);
       s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
       s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
+      s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
       s.PvPDMG+=b.pvpDmgBonus;
       s.PATK+=b.patkFlat;
       s.MATK+=b.matkFlat;
@@ -1397,6 +1398,14 @@ function runRaizarMode(){
   const _rOrigATK=[...COMBOS_ATK];const _rOrigDEF=[...COMBOS_DEF];
   COMBOS_ATK.length=0;filterCombosByLocks(_rOrigATK.filter(c=>_rAllowed.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
   COMBOS_DEF.length=0;filterCombosByLocks(_rOrigDEF.filter(c=>_rAllowed.has(c.set)),_lockedDEF).forEach(c=>COMBOS_DEF.push(c));
+  if(!COMBOS_ATK.length||!COMBOS_DEF.length){
+    COMBOS_ATK.length=0;_rOrigATK.forEach(c=>COMBOS_ATK.push(c));
+    COMBOS_DEF.length=0;_rOrigDEF.forEach(c=>COMBOS_DEF.push(c));
+    setStatus('No valid combos match your locked feathers. Locks ignored.',true);
+    document.getElementById('raizar-btn').disabled=false;
+    document.getElementById('run-btn').disabled=false;
+    return;
+  }
   const weights=state.weights;
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat weight > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
@@ -1847,11 +1856,11 @@ function getSetBonusStats(setCode,type,tier){
   if(b.hpFlat)    rows.push({label:'Max HP',val:'+'+b.hpFlat});
   if(b.pvpDmgBonus) rows.push({label:'PvP DMG Bonus',val:'+'+b.pvpDmgBonus});
   if(b.pvpDmgRed)   rows.push({label:'PvP DMG Red.',val:'+'+b.pvpDmgRed});
-  // Multipliers
-  if(b.atkMult)   rows.push({label:'Attack Stats',val:'+'+(b.atkMult*100).toFixed(0)+'%'});
-  if(b.pveMult)   rows.push({label:'PvE Stats',   val:'+'+(b.pveMult*100).toFixed(0)+'%'});
-  if(b.pvpMult)   rows.push({label:'PvP Stats',   val:'+'+(b.pvpMult*100).toFixed(0)+'%'});
-  if(b.defMult)   rows.push({label:'Defense Stats',val:'+'+(b.defMult*100).toFixed(0)+'%'});
+  // Multipliers — only show relevant ones per statue type
+  if(b.atkMult && type==='ATK') rows.push({label:'Attack Stats',val:'+'+(b.atkMult*100).toFixed(0)+'%'});
+  if(b.pveMult)                 rows.push({label:'PvE Stats',   val:'+'+(b.pveMult*100).toFixed(0)+'%'});
+  if(b.pvpMult)                 rows.push({label:'PvP Stats',   val:'+'+(b.pvpMult*100).toFixed(0)+'%'});
+  if(b.defMult && type==='DEF') rows.push({label:'Defense Stats',val:'+'+(b.defMult*100).toFixed(0)+'%'});
   return rows;
 }
 function applySetBonusNoFlats(raw,type,tier,setName){
@@ -1905,6 +1914,7 @@ function applySetBonusNoFlats(raw,type,tier,setName){
       s.MDMG=s.MDMG*(1+b.atkMult);
       s.PvEDMG=Math.floor(s.PvEDMG*(1+b.pveMult));
       s.PvPDMG=Math.floor(s.PvPDMG*(1+b.pvpMult));
+      s.PvPDMGRed=Math.floor(s.PvPDMGRed*(1+b.pvpMult));
     } else if(setName==='RP'){
       // RP ATK no-flats: atkMult on ATK stats only (no defMult)
       s.PATK=Math.floor(s.PATK*(1+b.atkMult));
