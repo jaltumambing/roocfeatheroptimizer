@@ -565,6 +565,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .nu-statue-count{font-size:11px;color:var(--text3);margin-top:8px}
 .nu-mini-btn{background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
 .nu-mini-btn:hover{border-color:var(--red2);color:var(--red2)}
+.nu-running{display:flex;align-items:center;gap:10px;justify-content:center;padding:28px;font-size:13px;color:var(--text2)}
+.nu-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;display:inline-block;animation:nuspin .7s linear infinite}
+@keyframes nuspin{to{transform:rotate(360deg)}}
 .gs-statue-locked{font-size:9px;color:var(--gold2);background:var(--gold3);padding:1px 6px;border-radius:8px;margin-left:auto;font-weight:700}
 </style>
 </head>
@@ -715,8 +718,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 
   <div class="gs-section-btns" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px">
-    <button class="gs-btn gs-btn-mybuild" onclick="saveMB()">💾 Save My Build</button>
-    <button onclick="clearMyBuild()" title="Clear all feather slots in My Build" style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;transition:all .15s" onmouseover="this.style.borderColor='var(--red2)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Clear My Build</button>
+    <button class="gs-btn gs-btn-mybuild" onclick="saveMB();btnFlash(this,'Saved!')">💾 Save My Build</button>
+    <button onclick="if(clearMyBuild())btnFlash(this,'Cleared!')" title="Clear all feather slots in My Build" style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;transition:all .15s" onmouseover="this.style.borderColor='var(--red2)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Clear My Build</button>
   </div>
 
   <!-- UNSLOTTED FEATHERS SECTION -->
@@ -732,8 +735,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 
   <div class="gs-section-btns" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px">
-    <button class="gs-btn gs-btn-unslotted" onclick="saveUnslotted()">💾 Save Unslotted Feathers</button>
-    <button onclick="clearUnslotted()" title="Clear all unslotted feather counts" style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;transition:all .15s" onmouseover="this.style.borderColor='var(--red2)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Clear Unslotted</button>
+    <button class="gs-btn gs-btn-unslotted" onclick="saveUnslotted();btnFlash(this,'Saved!')">💾 Save Unslotted Feathers</button>
+    <button onclick="if(clearUnslotted())btnFlash(this,'Cleared!')" title="Clear all unslotted feather counts" style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px;transition:all .15s" onmouseover="this.style.borderColor='var(--red2)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Clear Unslotted</button>
   </div>
 
   <!-- TOTAL POOL SECTION -->
@@ -746,7 +749,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 
   <div class="gs-section-btns" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-    <button class="gs-btn gs-btn-saveall" onclick="saveAll()">✓ Save All</button>
+    <button class="gs-btn gs-btn-saveall" onclick="saveAll();btnFlash(this,'All saved!')">✓ Save All</button>
     <button class="gs-btn" onclick="openSaveBuildModalFromGS()" style="background:transparent;border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);padding:6px 14px" title="Save your current My Build to Social › My Saved Builds (requires Discord login)">📤 Save to Profile</button>
     <span class="gs-saved-toast" id="gs-toast">Saved!</span>
     <span class="gs-sync-indicator" id="gs-sync-indicator"></span>
@@ -1700,7 +1703,7 @@ function runOptimizer(opts){
   const _origATK=[...COMBOS_ATK];const _origDEF=[...COMBOS_DEF];
   COMBOS_ATK.length=0;filterCombosByLocks(_origATK.filter(c=>_allowedSets.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
   COMBOS_DEF.length=0;filterCombosByLocks(_origDEF.filter(c=>_allowedSets.has(c.set)),_lockedDEF).forEach(c=>COMBOS_DEF.push(c));
-  if(!COMBOS_ATK.length||!COMBOS_DEF.length){COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));setStatus('No valid combos match your locked feathers. Locks ignored.',true);var _gb=document.getElementById(runBtnId);if(_gb)_gb.disabled=false;return;}
+  if(!COMBOS_ATK.length||!COMBOS_DEF.length){COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));setStatus('No valid combos match your locked feathers. Locks ignored.',true);var _gb=document.getElementById(runBtnId);if(_gb)_gb.disabled=false;if(opts.onDone)opts.onDone();return;}
   document.getElementById('run-btn').disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
@@ -1732,7 +1735,7 @@ function runOptimizer(opts){
       _timer.stop(`Found ${topN.length} builds`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));
-    if(_runBtn)_runBtn.disabled=false;setTimeout(()=>showProg(false),600);
+    if(_runBtn)_runBtn.disabled=false;if(opts.onDone)opts.onDone();setTimeout(()=>showProg(false),600);
   },30);
 }
 const PCT_STATS=new Set(['PDMG','MDMG','PDMGRed','MDMGRed']);
@@ -2475,6 +2478,7 @@ function clearMyBuild(){
   try{localStorage.removeItem(MB_LS_KEY);}catch(e){}
   renderMyBuildModal();
   updateMyBuildBanner();
+  return true;
 }
 
 function importBuildAsMyBuild(i,sfx){
@@ -3480,6 +3484,22 @@ function relocateFeatherEntry(toNew){
   }
 }
 
+// Button confirmation flash — temporarily shows a success label on the clicked button
+function btnFlash(el, msg){
+  if(!el)return;
+  if(el._flashT){ clearTimeout(el._flashT); }
+  if(el._flashOrig===undefined){
+    el._flashOrig={html:el.innerHTML,color:el.style.color,border:el.style.borderColor,bg:el.style.background};
+  }
+  const o=el._flashOrig;
+  el.innerHTML='✓ '+(msg||'Done');
+  el.style.color='#4fa06a'; el.style.borderColor='#4fa06a'; el.style.background='rgba(79,160,106,.12)';
+  el._flashT=setTimeout(()=>{
+    el.innerHTML=o.html; el.style.color=o.color; el.style.borderColor=o.border; el.style.background=o.bg;
+    el._flashOrig=undefined; el._flashT=null;
+  },1600);
+}
+
 // Relocate the Stat Priority section (presets + sliders) into Step C (and back)
 function relocatePriority(toNew){
   const blk=document.getElementById('opt-priority-block');
@@ -3504,7 +3524,12 @@ function runNewOptimizer(){
   if(!Object.values(weights).some(v=>v>0)){ msg('Pick a priority preset (or set a stat) in step C first.'); return; }
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){ msg('Enter your feathers &amp; inventory in step B first.'); return; }
-  runOptimizer({nATK,nDEF,resultsAreaId:'nu-results-body',runBtnId:'nu-run-btn',maxResults:20});
+  // Running state — clear visual indicator while the optimizer works
+  if(area) area.innerHTML='<div class="nu-running"><span class="nu-spinner"></span> Finding your best builds…</div>';
+  const btn=document.getElementById('nu-run-btn');
+  if(btn){ btn._label=btn.innerHTML; btn.innerHTML='⏳ Running…'; btn.disabled=true; }
+  const onDone=()=>{ const b=document.getElementById('nu-run-btn'); if(b){ b.innerHTML=b._label||'✦ See my builds'; b.disabled=false; } };
+  runOptimizer({nATK,nDEF,resultsAreaId:'nu-results-body',runBtnId:'nu-run-btn',maxResults:20,onDone});
 }
 
 
@@ -3869,7 +3894,7 @@ function applyTheme(){
 }
 
 function clearMyBuild(){
-  if(!confirm('Clear all feather slots in My Build?'))return;
+  if(!confirm('Clear all feather slots in My Build?'))return false;
   for(let si=0;si<10;si++)for(let sl=0;sl<5;sl++){
     const sel=document.getElementById(`gs-sel-${si}-${sl}`);
     const lv=document.getElementById(`gs-lv-${si}-${sl}`);
@@ -3885,7 +3910,7 @@ function clearMyBuild(){
 }
 
 function clearUnslotted(){
-  if(!confirm('Clear all unslotted feather counts?'))return;
+  if(!confirm('Clear all unslotted feather counts?'))return false;
   POOLS.forEach(p=>{
     const safeId=p.name.replace(/\//g,'-').replace(/ /g,'-');
     const inp=document.getElementById(`gs-unslotted-${safeId}`);
@@ -3896,6 +3921,7 @@ function clearUnslotted(){
   gsComputeTotal();
   if(_authUser)syncProfileToServer({unslotted:empty});
   showGsToast('Cleared!');
+  return true;
 }
 
 function saveMB(){
