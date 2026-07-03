@@ -538,7 +538,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 
 /* ── New UI (Phase 2 shell) ─────────────────────────────────────────── */
-.nu-pane{max-width:820px;margin:0 auto;padding:16px 0 60px}
+.nu-pane{max-width:1360px;margin:0 auto;padding:16px 20px 60px}
 .nu-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
 .nu-step-hdr{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .nu-step-letter{width:22px;height:22px;border-radius:5px;background:var(--gold3);color:var(--gold2);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
@@ -562,6 +562,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .nu-statue-chip[data-atk="true"].on{background:rgba(232,112,94,.15);color:#e8705e;border-color:#e8705e}
 .nu-statue-chip[data-atk="false"].on{background:rgba(79,160,106,.15);color:#4fa06a;border-color:#4fa06a}
 .nu-statue-count{font-size:11px;color:var(--text3);margin-top:8px}
+.nu-mini-btn{background:transparent;border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
+.nu-mini-btn:hover{border-color:var(--red2);color:var(--red2)}
+.gs-statue-locked{font-size:9px;color:var(--gold2);background:var(--gold3);padding:1px 6px;border-radius:8px;margin-left:auto;font-weight:700}
 </style>
 </head>
 <body>
@@ -603,6 +606,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
       <div class="nu-step-hdr"><span class="nu-step-letter">B</span><span class="nu-step-title">Your feathers &amp; inventory</span></div>
       <div class="nu-step-desc">Enter the feathers in each unlocked statue, their levels, and any spare copies.</div>
       <div id="nu-step-b-body" class="nu-step-body"><div class="nu-placeholder">Feather &amp; inventory entry loads here (Phase 3)</div></div>
+      <div class="nu-stepb-actions" style="margin-left:30px;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="clearMyBuild()" class="nu-mini-btn">✕ Clear My Build</button>
+        <button onclick="clearUnslotted()" class="nu-mini-btn">✕ Clear Unslotted</button>
+      </div>
     </div>
 
     <!-- Step C: priorities (wired in Phase 4) -->
@@ -3411,7 +3418,25 @@ function toggleStatue(i){
   statuesEnabled[i]=!statuesEnabled[i];
   saveStatuesEnabled();
   renderStatueToggles();
+  applyStatueDisabledStyles();
+  if(typeof gsComputeTotal==='function') gsComputeTotal();
   updateNuRunBtn();
+}
+
+// Grey out + lock the My Build cards for disabled statues (New UI only)
+function applyStatueDisabledStyles(){
+  const nuActive=(getUIMode()==='new' && isOwner());
+  for(let si=0;si<10;si++){
+    const card=document.getElementById('gs-statue-'+si);
+    const lock=document.getElementById('gs-statue-locked-'+si);
+    const disabled=nuActive && statuesEnabled[si]===false;
+    if(card){
+      card.style.opacity=disabled?'0.4':'';
+      card.style.pointerEvents=disabled?'none':'';
+      card.style.filter=disabled?'grayscale(1)':'';
+    }
+    if(lock) lock.style.display=disabled?'inline':'none';
+  }
 }
 
 function getEnabledCounts(){
@@ -3487,8 +3512,9 @@ function applyUIMode(){
   if (mode === 'new'){
     relocateFeatherEntry(true);
     if(typeof renderGS==='function') renderGS();
-    if(typeof gsComputeTotal==='function') gsComputeTotal();
     renderStatueToggles();
+    applyStatueDisabledStyles();
+    if(typeof gsComputeTotal==='function') gsComputeTotal();
     updateNuRunBtn();
   } else {
     relocateFeatherEntry(false);
@@ -3561,8 +3587,10 @@ function gsComputeTotal(){
   const totals={};
   POOLS.forEach(p=>{totals[p.name]={spent:0,unslotted:0};});
 
-  // From My Build statues
+  // From My Build statues (skip statues disabled in New UI)
+  const _nuActive=(typeof getUIMode==='function' && getUIMode()==='new' && typeof isOwner==='function' && isOwner());
   for(let si=0;si<10;si++){
+    if(_nuActive && typeof statuesEnabled!=='undefined' && statuesEnabled[si]===false) continue;
     const type=si<5?'ATK':'DEF';
     for(let sl=0;sl<5;sl++){
       const sel=document.getElementById(`gs-sel-${si}-${sl}`);
@@ -3666,10 +3694,11 @@ function renderGSStatue(si,savedSlots){
     setInfo=`<span class="tier-b">T${tier}</span><span class="set-b ${badgeCls}" style="font-size:9px">${comp.name}</span>`;
   }
 
-  let html=`<div class="gs-statue">
+  let html=`<div class="gs-statue" id="gs-statue-${si}">
     <div class="gs-statue-hdr">
       <span class="gs-statue-lbl">${labels[si]}</span>
       <span class="gs-statue-setinfo" id="gs-setinfo-${si}">${setInfo}</span>
+      <span class="gs-statue-locked" id="gs-statue-locked-${si}" style="display:none">🔒 locked</span>
     </div>
     <div class="gs-slots">`;
 
@@ -3749,6 +3778,8 @@ function renderGS(){
   gsComputeTotal();
   // Load character profile
   loadCharProfile();
+  // Reapply New UI disabled-statue styling if applicable
+  if(typeof applyStatueDisabledStyles==='function') applyStatueDisabledStyles();
 }
 
 function gatherMBData(){
