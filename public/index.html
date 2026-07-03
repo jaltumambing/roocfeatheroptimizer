@@ -538,7 +538,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 
 /* ── New UI (Phase 2 shell) ─────────────────────────────────────────── */
-.nu-pane{max-width:1360px;margin:0 auto;padding:16px 20px 60px}
+.nu-pane{max-width:none;margin:0;padding:16px 20px 60px}
 .nu-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
 .nu-step-hdr{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .nu-step-letter{width:22px;height:22px;border-radius:5px;background:var(--gold3);color:var(--gold2);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
@@ -757,6 +757,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div class="sec-row"><span class="sec">Pool Inventory</span><span style="font-size:10px;color:var(--text3);margin-left:8px">Set in <strong style="color:#38bdf8;cursor:pointer" onclick="showTab('gs')">Get Started</strong></span></div>
   <div class="pool-readonly" id="pool-readonly-opt"></div>
 
+  <div id="opt-priority-anchor" style="display:none"></div>
+  <div id="opt-priority-block">
   <div class="sec-row" style="cursor:pointer" onclick="gsToggle('opt-stat-priority-body','opt-stat-priority-caret')">
     <span class="sec">Stat Priority</span>
     <span class="gs-caret open" id="opt-stat-priority-caret" style="margin-left:6px">▶</span>
@@ -780,6 +782,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <div id="preset-desc" class="preset-desc"></div>
     <div class="slider-grid" id="slider-grid"></div>
   </div>
+  </div><!-- /opt-priority-block -->
 
   <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P), <strong>Raven's Prestige</strong> (3Y+2P), and <strong>Raven's Plunder</strong> (2Y+3P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
 
@@ -3466,11 +3469,30 @@ function relocateFeatherEntry(toNew){
   }
 }
 
+// Relocate the Stat Priority section (presets + sliders) into Step C (and back)
+function relocatePriority(toNew){
+  const blk=document.getElementById('opt-priority-block');
+  if(!blk)return;
+  if(toNew){
+    const dest=document.getElementById('nu-step-c-body');
+    if(dest && blk.parentNode!==dest){ dest.innerHTML=''; dest.appendChild(blk); }
+  } else {
+    const anchor=document.getElementById('opt-priority-anchor');
+    if(anchor && blk.parentNode!==anchor.parentNode){ anchor.parentNode.insertBefore(blk, anchor.nextSibling); }
+  }
+}
+
 // Run from the New UI: same engine, enabled-statue counts, results into nu-results-body
 function runNewOptimizer(){
   const {nATK,nDEF}=getEnabledCounts();
-  // Ensure pools are synced from the (relocated) feather-entry inputs
   if(typeof gsComputeTotal==='function') gsComputeTotal();
+  const area=document.getElementById('nu-results-body');
+  function msg(t){ if(area) area.innerHTML='<div class="nu-placeholder">'+t+'</div>'; }
+  if(nATK+nDEF===0){ msg('Enable at least one statue in step A.'); return; }
+  const weights=state.weights;
+  if(!Object.values(weights).some(v=>v>0)){ msg('Pick a priority preset (or set a stat) in step C first.'); return; }
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){ msg('Enter your feathers &amp; inventory in step B first.'); return; }
   runOptimizer({nATK,nDEF,resultsAreaId:'nu-results-body',runBtnId:'nu-run-btn',maxResults:20});
 }
 
@@ -3511,13 +3533,18 @@ function applyUIMode(){
   // Phase 3: relocate feather-entry + render Step A depending on mode
   if (mode === 'new'){
     relocateFeatherEntry(true);
+    relocatePriority(true);
     if(typeof renderGS==='function') renderGS();
+    if(typeof renderSliders==='function') renderSliders('slider-grid','presets','preset-desc','weights','activePreset');
     renderStatueToggles();
     applyStatueDisabledStyles();
     if(typeof gsComputeTotal==='function') gsComputeTotal();
     updateNuRunBtn();
   } else {
     relocateFeatherEntry(false);
+    relocatePriority(false);
+    if(typeof applyStatueDisabledStyles==='function') applyStatueDisabledStyles();
+    if(typeof gsComputeTotal==='function') gsComputeTotal();
   }
 }
 
