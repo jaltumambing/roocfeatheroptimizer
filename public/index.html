@@ -546,7 +546,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v3.2.22</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v4.0.0-dev</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><button id="ui-switcher" onclick="toggleUIMode()" title="Switch between Classic and New UI" style="display:none;background:transparent;border:1px solid var(--gold);border-radius:var(--radius-sm);color:var(--gold2);font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;transition:all .15s;line-height:1">✨ New UI</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs">
@@ -556,6 +556,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 </div>
 
+<div id="new-ui-root" style="display:none">
+  <!-- New UI (Phase 1: empty shell, owner-gated). Built out in later phases. -->
+  <div style="max-width:800px;margin:40px auto;padding:32px;border:1px dashed var(--border);border-radius:var(--radius);text-align:center;color:var(--text3)">
+    <div style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:8px">✨ New UI — under construction</div>
+    <div style="font-size:12px">This is the redesigned interface. Only visible to you for now.<br>Switch back to Classic anytime using the header button.</div>
+  </div>
+</div>
+
+<div id="classic-ui-root">
 <div id="pane-gs" class="pane on">
 
   <!-- CHARACTER PROFILE -->
@@ -797,6 +806,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div class="social-pane on" id="social-my-builds"></div>
   <div class="social-pane" id="social-community"></div>
 </div>
+</div><!-- /classic-ui-root -->
 
 
 <!-- My Build Modal -->
@@ -3117,6 +3127,7 @@ function getAvatarUrl(user) {
 
 function renderAuthArea() {
   const el = document.getElementById('auth-area');
+  if (typeof initUISwitcher === 'function') initUISwitcher();
   if (!el) return;
   if (_authUser) {
     el.innerHTML = `<div class="auth-user" onclick="logoutUser()" title="Click to logout">
@@ -3250,6 +3261,50 @@ async function loadProfileFromServer() {
   } catch(e) {
     console.warn('Failed to load profile from server:', e);
   }
+}
+
+
+// ── UI Switcher (Phase 1) ─────────────────────────────────────────────────────
+// New UI is owner-gated until finalized. Classic remains the built-in fallback.
+const OWNER_DISCORD_ID = '550233480265728013';
+const UIMODE_KEY = 'rooc_ui_mode';
+
+function isOwner(){ return !!(_authUser && _authUser.discord_id === OWNER_DISCORD_ID); }
+
+function getUIMode(){
+  try { return localStorage.getItem(UIMODE_KEY) || 'classic'; } catch(e){ return 'classic'; }
+}
+function setUIMode(mode){
+  try { localStorage.setItem(UIMODE_KEY, mode); } catch(e){}
+}
+
+function applyUIMode(){
+  // Only the owner may render the new UI. Everyone else is always classic.
+  const mode = (isOwner() && getUIMode() === 'new') ? 'new' : 'classic';
+  const newRoot = document.getElementById('new-ui-root');
+  const classicRoot = document.getElementById('classic-ui-root');
+  if (newRoot && classicRoot){
+    newRoot.style.display = mode === 'new' ? 'block' : 'none';
+    classicRoot.style.display = mode === 'new' ? 'none' : 'block';
+  }
+  const btn = document.getElementById('ui-switcher');
+  if (btn){
+    btn.textContent = mode === 'new' ? '↩ Classic UI' : '✨ New UI';
+  }
+}
+
+function toggleUIMode(){
+  if (!isOwner()) return; // safety: non-owners can't toggle
+  const next = getUIMode() === 'new' ? 'classic' : 'new';
+  setUIMode(next);
+  applyUIMode();
+}
+
+// Reveal the switcher only for the owner; refresh mode after auth resolves.
+function initUISwitcher(){
+  const btn = document.getElementById('ui-switcher');
+  if (btn) btn.style.display = isOwner() ? 'inline-block' : 'none';
+  applyUIMode();
 }
 
 // Run on load
