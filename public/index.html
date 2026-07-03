@@ -554,6 +554,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .nu-drawer-teaser{margin-top:6px;font-size:11px;color:var(--text3)}
 .nu-pro{font-size:9px;font-weight:800;background:rgba(180,120,255,.15);color:#b478ff;border-radius:8px;padding:1px 6px;margin:0 1px}
 .nu-results-hdr{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+.nu-statue-group{margin-bottom:12px}
+.nu-statue-glabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:6px}
+.nu-statue-row{display:flex;gap:6px;flex-wrap:wrap}
+.nu-statue-chip{font-size:12px;padding:5px 12px;border-radius:16px;background:var(--bg3);color:var(--text3);border:1px solid var(--border);cursor:pointer;font-weight:600;transition:all .12s}
+.nu-statue-chip.on{background:var(--gold3);color:var(--gold2);border-color:var(--gold)}
+.nu-statue-chip[data-atk="true"].on{background:rgba(232,112,94,.15);color:#e8705e;border-color:#e8705e}
+.nu-statue-chip[data-atk="false"].on{background:rgba(79,160,106,.15);color:#4fa06a;border-color:#4fa06a}
+.nu-statue-count{font-size:11px;color:var(--text3);margin-top:8px}
 </style>
 </head>
 <body>
@@ -605,7 +613,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     </div>
 
     <!-- Primary action -->
-    <button class="nu-run-btn" id="nu-run-btn" disabled title="Wired in a later phase">✦ See my builds</button>
+    <button class="nu-run-btn" id="nu-run-btn" onclick="runNewOptimizer()">✦ See my builds</button>
 
     <!-- Advanced tools drawer (wired in Phase 4/5) -->
     <div class="nu-drawer">
@@ -676,6 +684,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 
   <!-- MY BUILD SECTION -->
+  <div id="gs-feather-entry-anchor" style="display:none"></div>
+  <div id="gs-feather-entry">
   <div class="gs-section">
     <div class="gs-collapsible-hdr" onclick="gsToggle('gs-mybuild-body','gs-mybuild-caret')" style="border-bottom:2px solid var(--border);margin-bottom:8px">
       <span class="gs-section-title">📋 My Build</span>
@@ -720,6 +730,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     </div>
     <div class="gs-total-grid" id="gs-total-grid"></div>
   </div>
+  </div><!-- /gs-feather-entry -->
 
   <!-- ACTION BUTTONS -->
   <div class="gs-btn-row">
@@ -1299,10 +1310,11 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
   const allTypes=[...atkTiers.map(()=>'ATK'),...defTiers.map(()=>'DEF')];
   const allTiers=[...atkTiers,...defTiers];
   const poolUsed={};POOLS.forEach(p=>{poolUsed[p.name]=0;});
+  if(!allTypes.length)return null;
 
   // Phase 1: per statue, score all combos via cache, sort, pick best feasible
   const chosen=[];
-  for(let si=0;si<10;si++){
+  for(let si=0;si<allTypes.length;si++){
     const type=allTypes[si];
     const floorLv=allTiers[si];
     const combos=type==='ATK'?COMBOS_ATK:COMBOS_DEF;
@@ -1365,10 +1377,12 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
     }
   });
 
-  // Assemble statues
-  const statueSlots=Array.from({length:10},(_,i)=>slots.filter(s=>s.si===i));
+  // Assemble statues (respect actual enabled count, not a fixed 10)
+  const N=allTypes.length;
+  const nATK=atkTiers.length;
+  const statueSlots=Array.from({length:N},(_,i)=>slots.filter(s=>s.si===i));
   const statues=[];
-  for(let si=0;si<10;si++){
+  for(let si=0;si<N;si++){
     const my=statueSlots[si];
     statues.push({type:allTypes[si],slots:my.map(s=>({f:s.name,lv:s.lv,floor:s.floor})),tier:allTiers[si]});
   }
@@ -1376,8 +1390,8 @@ function buildExhaustive(atkTiers,defTiers,poolBudgets,weights){
     const r=calcStatueResult(st.slots,st.type);
     return sum+(r?scoreFromStatsNorm(r.stats,weights):0);
   },0);
-  const atkT=statues.slice(0,5).map(st=>Math.min(...st.slots.map(s=>s.lv)));
-  const defT=statues.slice(5,10).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+  const atkT=statues.slice(0,nATK).map(st=>Math.min(...st.slots.map(s=>s.lv)));
+  const defT=statues.slice(nATK).map(st=>Math.min(...st.slots.map(s=>s.lv)));
   return{statues,score,atkTiers:atkT,defTiers:defT};
 }
 function raizarSurplus(atkCombo,defCombo,floorT,poolBudgets){
@@ -1472,7 +1486,7 @@ function runRaizarMode(){
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
   document.getElementById('raizar-btn').disabled=true;
-  document.getElementById('run-btn').disabled=true;
+  const _runBtn=document.getElementById(runBtnId); if(_runBtn)_runBtn.disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
   const _timer=startTimer();
@@ -1509,7 +1523,8 @@ function runRaizarMode(){
       }
       setProg(85);
       const seen=new Set();
-      const maxResults=Math.max(1,parseInt(document.getElementById('results-count').value)||20);
+      const _rcEl=document.getElementById('results-count');
+      const maxResults=maxResultsOverride!=null?maxResultsOverride:Math.max(1,parseInt(_rcEl&&_rcEl.value)||20);
       const results=cands.filter(c=>{
         const fp=c.statues[0].slots.map(s=>s.f).join('+')+'/'+c.statues[5].slots.map(s=>s.f).join('+')+'/'+c.atkTiers[0]+'/'+c.defTiers[0];
         if(seen.has(fp))return false;seen.add(fp);return true;
@@ -1652,8 +1667,15 @@ function filterCombosBySet(combos, allowed) {
   return combos.filter(c => allowed.has(c.set));
 }
 
-function runOptimizer(){
+function runOptimizer(opts){
+  opts=opts||{};
+  const nATK=(opts.nATK!=null)?opts.nATK:5;
+  const nDEF=(opts.nDEF!=null)?opts.nDEF:5;
+  const resultsAreaId=opts.resultsAreaId||'results-area';
+  const runBtnId=opts.runBtnId||'run-btn';
+  const maxResultsOverride=opts.maxResults;
   const weights=state.weights;
+  if(nATK+nDEF===0){setStatus('Enable at least one statue.',true);return;}
   if(!Object.values(weights).some(v=>v>0)){setStatus('Set at least one stat priority > 0.',true);return;}
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
@@ -1663,7 +1685,7 @@ function runOptimizer(){
   const _origATK=[...COMBOS_ATK];const _origDEF=[...COMBOS_DEF];
   COMBOS_ATK.length=0;filterCombosByLocks(_origATK.filter(c=>_allowedSets.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
   COMBOS_DEF.length=0;filterCombosByLocks(_origDEF.filter(c=>_allowedSets.has(c.set)),_lockedDEF).forEach(c=>COMBOS_DEF.push(c));
-  if(!COMBOS_ATK.length||!COMBOS_DEF.length){COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));setStatus('No valid combos match your locked feathers. Locks ignored.',true);document.getElementById('run-btn').disabled=false;return;}
+  if(!COMBOS_ATK.length||!COMBOS_DEF.length){COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));setStatus('No valid combos match your locked feathers. Locks ignored.',true);var _gb=document.getElementById(runBtnId);if(_gb)_gb.disabled=false;return;}
   document.getElementById('run-btn').disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
@@ -1672,7 +1694,7 @@ function runOptimizer(){
     try{
       const cands=[];let _done=0;
       const _total=(()=>{let n=20+400;for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/5))){n+=3*7+3*7+2;}}for(let top=20;top>=2;top--){n+=1+7+7;}return n+1;})();
-      function add(aT,dT){_done++;if(_done%8===0)_timer.update(_done,_total);const r=buildFromTiersNorm(aT,dT,poolBudgets,weights);if(r)cands.push(r);}
+      function add(aT,dT){_done++;if(_done%8===0)_timer.update(_done,_total);const r=buildFromTiersNorm(aT.slice(0,nATK),dT.slice(0,nDEF),poolBudgets,weights);if(r)cands.push(r);}
       for(let t=1;t<=20;t++) add([t,t,t,t,t],[t,t,t,t,t]);setProg(15);
       for(let at=1;at<=20;at++) for(let dt=1;dt<=20;dt++) add([at,at,at,at,at],[dt,dt,dt,dt,dt]);setProg(35);
       for(let h=20;h>=2;h--){for(let l=1;l<h;l+=Math.max(1,Math.floor(h/6))){
@@ -1691,11 +1713,11 @@ function runOptimizer(){
       const seen=new Set();
       const deduped=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score);
       const topN=applyMinMaxFilters(deduped,state.optFiltersMin,state.optFiltersMax).slice(0,maxResults);
-      state.results=topN;state.expanded.clear();renderResults('results-area',state.results,state.expanded,'');setProg(100);
+      state.results=topN;state.expanded.clear();renderResults(resultsAreaId,state.results,state.expanded,'');setProg(100);
       _timer.stop(`Found ${topN.length} builds`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));
-    document.getElementById('run-btn').disabled=false;setTimeout(()=>showProg(false),600);
+    if(_runBtn)_runBtn.disabled=false;setTimeout(()=>showProg(false),600);
   },30);
 }
 const PCT_STATS=new Set(['PDMG','MDMG','PDMGRed','MDMGRed']);
@@ -3321,11 +3343,110 @@ async function loadProfileFromServer() {
     }
 
     // Re-render Get Started tab with loaded data
+    if (data.statues_enabled != null) {
+      try {
+        const arr = typeof data.statues_enabled === 'string' ? JSON.parse(data.statues_enabled) : data.statues_enabled;
+        if (Array.isArray(arr) && arr.length === 10) {
+          statuesEnabled = arr.map(v => v !== false);
+          try { localStorage.setItem(STATUES_ENABLED_KEY, JSON.stringify(statuesEnabled)); } catch(e) {}
+        }
+      } catch(e) {}
+    }
     renderGS();
     updateMyBuildBanner();
+    // Refresh New UI Step A if it's showing
+    if (typeof renderStatueToggles === 'function' && document.getElementById('nu-step-a-body')) {
+      renderStatueToggles(); updateNuRunBtn();
+    }
   } catch(e) {
     console.warn('Failed to load profile from server:', e);
   }
+}
+
+
+
+// ── New UI · Phase 3 (statue on/off + feather-entry relocation + run) ─────────
+const STATUES_ENABLED_KEY = 'rooc_statues_enabled';
+let statuesEnabled = Array(10).fill(true); // 0-4 ATK, 5-9 DEF
+
+function loadStatuesEnabled(){
+  try{
+    const raw = localStorage.getItem(STATUES_ENABLED_KEY);
+    if(raw){ const a=JSON.parse(raw); if(Array.isArray(a)&&a.length===10) statuesEnabled=a.map(v=>v!==false); }
+  }catch(e){}
+}
+let _statuesSyncTimeout=null;
+function saveStatuesEnabled(){
+  try{ localStorage.setItem(STATUES_ENABLED_KEY, JSON.stringify(statuesEnabled)); }catch(e){}
+  // Debounced server sync (only if logged in)
+  if(_authUser){
+    clearTimeout(_statuesSyncTimeout);
+    _statuesSyncTimeout=setTimeout(()=>{
+      fetch('/api/profile/data',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({statues_enabled:JSON.stringify(statuesEnabled)})}).catch(()=>{});
+    },800);
+  }
+}
+
+const NU_STATUE_LABELS=['ATK 1','ATK 2','ATK 3','ATK 4','ATK 5','DEF 1','DEF 2','DEF 3','DEF 4','DEF 5'];
+function renderStatueToggles(){
+  const el=document.getElementById('nu-step-a-body');
+  if(!el)return;
+  function chip(i){
+    const on=statuesEnabled[i];
+    const isATK=i<5;
+    return `<button onclick="toggleStatue(${i})" class="nu-statue-chip${on?' on':''}" data-atk="${isATK}">${NU_STATUE_LABELS[i]}${on?' ✓':''}</button>`;
+  }
+  let html='<div class="nu-statue-group"><div class="nu-statue-glabel">⚔ Attack</div><div class="nu-statue-row">';
+  for(let i=0;i<5;i++) html+=chip(i);
+  html+='</div></div><div class="nu-statue-group"><div class="nu-statue-glabel">🛡 Defense</div><div class="nu-statue-row">';
+  for(let i=5;i<10;i++) html+=chip(i);
+  html+='</div></div>';
+  const nOn=statuesEnabled.filter(Boolean).length;
+  html+=`<div class="nu-statue-count">${nOn} of 10 statues enabled</div>`;
+  el.innerHTML=html;
+}
+
+function toggleStatue(i){
+  statuesEnabled[i]=!statuesEnabled[i];
+  saveStatuesEnabled();
+  renderStatueToggles();
+  updateNuRunBtn();
+}
+
+function getEnabledCounts(){
+  let nATK=0,nDEF=0;
+  for(let i=0;i<5;i++) if(statuesEnabled[i]) nATK++;
+  for(let i=5;i<10;i++) if(statuesEnabled[i]) nDEF++;
+  return {nATK,nDEF};
+}
+
+function updateNuRunBtn(){
+  const btn=document.getElementById('nu-run-btn');
+  if(!btn)return;
+  const {nATK,nDEF}=getEnabledCounts();
+  btn.disabled=(nATK+nDEF===0);
+}
+
+// Node relocation: move the tested classic feather-entry into Step B (and back)
+function relocateFeatherEntry(toNew){
+  const fe=document.getElementById('gs-feather-entry');
+  if(!fe)return;
+  if(toNew){
+    const dest=document.getElementById('nu-step-b-body');
+    if(dest && fe.parentNode!==dest){ dest.innerHTML=''; dest.appendChild(fe); }
+  } else {
+    const anchor=document.getElementById('gs-feather-entry-anchor');
+    if(anchor && fe.parentNode!==anchor.parentNode){ anchor.parentNode.insertBefore(fe, anchor.nextSibling); }
+  }
+}
+
+// Run from the New UI: same engine, enabled-statue counts, results into nu-results-body
+function runNewOptimizer(){
+  const {nATK,nDEF}=getEnabledCounts();
+  // Ensure pools are synced from the (relocated) feather-entry inputs
+  if(typeof gsComputeTotal==='function') gsComputeTotal();
+  runOptimizer({nATK,nDEF,resultsAreaId:'nu-results-body',runBtnId:'nu-run-btn',maxResults:20});
 }
 
 
@@ -3362,6 +3483,16 @@ function applyUIMode(){
   if (btn){
     btn.textContent = mode === 'new' ? '↩ Classic UI' : '✨ New UI';
   }
+  // Phase 3: relocate feather-entry + render Step A depending on mode
+  if (mode === 'new'){
+    relocateFeatherEntry(true);
+    if(typeof renderGS==='function') renderGS();
+    if(typeof gsComputeTotal==='function') gsComputeTotal();
+    renderStatueToggles();
+    updateNuRunBtn();
+  } else {
+    relocateFeatherEntry(false);
+  }
 }
 
 // New UI tab switching (Optimizer / Social)
@@ -3391,7 +3522,7 @@ function initUISwitcher(){
 }
 
 // Run on load
-checkAuth();applyTheme();loadLocks();updateLockBadge();
+loadStatuesEnabled();checkAuth();applyTheme();loadLocks();updateLockBadge();
 // ──────────────────────────────────────────────────────────────────────────────
 
 // ── Get Started Tab ───────────────────────────────────────────────────────────
