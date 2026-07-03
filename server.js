@@ -43,6 +43,10 @@ async function initDB() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS unslotted JSONB;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS char_profile JSONB;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS inv_grid JSONB;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS statues_enabled TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_since TIMESTAMP;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_source TEXT;
 
     CREATE TABLE IF NOT EXISTS builds (
       id SERIAL PRIMARY KEY,
@@ -95,6 +99,15 @@ app.use(session({
 // ── Auth middleware ───────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
   if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });
+  next();
+}
+
+// Owner-only gate — reads Discord ID from the server-side session, never the client.
+const OWNER_DISCORD_ID = '550233480265728013';
+function requireOwner(req, res, next) {
+  if (!req.session.user || req.session.user.discord_id !== OWNER_DISCORD_ID) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
   next();
 }
 
@@ -153,6 +166,8 @@ app.get('/auth/callback', async (req, res) => {
       id: rows[0].id, discord_id: rows[0].discord_id,
       username: rows[0].username, discriminator: rows[0].discriminator,
       avatar: rows[0].avatar, ign: rows[0].ign,
+      is_premium: rows[0].is_premium === true,
+      is_owner: rows[0].discord_id === OWNER_DISCORD_ID,
     };
     res.redirect('/?auth=success');
   } catch (err) {
@@ -161,9 +176,15 @@ app.get('/auth/callback', async (req, res) => {
   }
 });
 
-app.get('/auth/me', (req, res) => {
-  if (req.session.user) res.json({ loggedIn: true, user: req.session.user });
-  else res.json({ loggedIn: false });
+app.get('/auth/me', async (req, res) => {
+  if (!req.session.user) return res.json({ loggedIn: false });
+  try {
+    // Refresh premium status from DB so owner toggles take effect without re-login
+    const { rows } = await pool.query('SELECT is_premium FROM users WHERE id=$1', [req.session.user.id]);
+    if (rows.length) req.session.user.is_premium = rows[0].is_premium === true;
+  } catch (e) { /* fall back to session value */ }
+  req.session.user.is_owner = req.session.user.discord_id === OWNER_DISCORD_ID;
+  res.json({ loggedIn: true, user: req.session.user });
 });
 
 app.post('/auth/logout', (req, res) => {
@@ -182,21 +203,77 @@ app.post('/auth/ign', requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Owner admin: premium management (server-gated to OWNER_DISCORD_ID) ────────
+// List users so the owner settings panel can show who is premium/free.
+app.get('/admin/users', requireOwner, async (req, res) => {
+  try {
+    const q = (req.query.q || '').toString().trim();
+    let rows;
+    if (q) {
+      const r = await pool.query(
+        `SELECT id, discord_id, username, is_premium, premium_since, premium_source
+         FROM users
+         WHERE username ILIKE $1 OR discord_id = $2
+         ORDER BY is_premium DESC, username ASC LIMIT 100`,
+        [`%${q}%`, q]
+      );
+      rows = r.rows;
+    } else {
+      const r = await pool.query(
+        `SELECT id, discord_id, username, is_premium, premium_since, premium_source
+         FROM users
+         ORDER BY is_premium DESC, updated_at DESC LIMIT 100`
+      );
+      rows = r.rows;
+    }
+    res.json({ ok: true, users: rows });
+  } catch (err) {
+    console.error('admin/users error:', err);
+    res.status(500).json({ error: 'Failed to list users' });
+  }
+});
+
+// Toggle a user's premium status. Body: { discord_id, premium: true|false, source? }
+app.post('/admin/set-premium', requireOwner, async (req, res) => {
+  try {
+    const { discord_id, premium, source } = req.body;
+    if (!discord_id || typeof premium !== 'boolean') {
+      return res.status(400).json({ error: 'discord_id and premium (boolean) required' });
+    }
+    const { rows } = await pool.query(
+      `UPDATE users SET
+         is_premium    = $1,
+         premium_since = CASE WHEN $1 THEN COALESCE(premium_since, NOW()) ELSE NULL END,
+         premium_source= CASE WHEN $1 THEN $2 ELSE NULL END,
+         updated_at    = NOW()
+       WHERE discord_id = $3
+       RETURNING id, discord_id, username, is_premium, premium_since, premium_source`,
+      [premium, source || 'manual', discord_id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json({ ok: true, user: rows[0] });
+  } catch (err) {
+    console.error('admin/set-premium error:', err);
+    res.status(500).json({ error: 'Failed to update premium status' });
+  }
+});
+
 // ── Profile Data (cloud sync) ─────────────────────────────────────────────────
 
 // Get saved profile data (my_build, unslotted, char_profile, inv_grid)
 app.get('/api/profile/data', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT my_build, unslotted, char_profile, inv_grid FROM users WHERE id=$1',
+      'SELECT my_build, unslotted, char_profile, inv_grid, statues_enabled FROM users WHERE id=$1',
       [req.session.user.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     res.json({
-      my_build:     rows[0].my_build     || null,
-      unslotted:    rows[0].unslotted    || null,
-      char_profile: rows[0].char_profile || null,
-      inv_grid:     rows[0].inv_grid     || null,
+      my_build:        rows[0].my_build        || null,
+      unslotted:       rows[0].unslotted       || null,
+      char_profile:    rows[0].char_profile    || null,
+      inv_grid:        rows[0].inv_grid        || null,
+      statues_enabled: rows[0].statues_enabled || null,
     });
   } catch (err) {
     console.error('profile/data GET error:', err);
@@ -207,20 +284,22 @@ app.get('/api/profile/data', requireAuth, async (req, res) => {
 // Save profile data (my_build, unslotted, char_profile, inv_grid) — partial updates OK
 app.post('/api/profile/data', requireAuth, async (req, res) => {
   try {
-    const { my_build, unslotted, char_profile, inv_grid } = req.body;
+    const { my_build, unslotted, char_profile, inv_grid, statues_enabled } = req.body;
     await pool.query(`
       UPDATE users SET
-        my_build     = COALESCE($1::jsonb, my_build),
-        unslotted    = COALESCE($2::jsonb, unslotted),
-        char_profile = COALESCE($3::jsonb, char_profile),
-        inv_grid     = COALESCE($4::jsonb, inv_grid),
-        updated_at   = NOW()
-      WHERE id=$5
+        my_build        = COALESCE($1::jsonb, my_build),
+        unslotted       = COALESCE($2::jsonb, unslotted),
+        char_profile    = COALESCE($3::jsonb, char_profile),
+        inv_grid        = COALESCE($4::jsonb, inv_grid),
+        statues_enabled = COALESCE($5::text, statues_enabled),
+        updated_at      = NOW()
+      WHERE id=$6
     `, [
       my_build     != null ? JSON.stringify(my_build)     : null,
       unslotted    != null ? JSON.stringify(unslotted)    : null,
       char_profile != null ? JSON.stringify(char_profile) : null,
       inv_grid     != null ? JSON.stringify(inv_grid)     : null,
+      statues_enabled != null ? (typeof statues_enabled === 'string' ? statues_enabled : JSON.stringify(statues_enabled)) : null,
       req.session.user.id,
     ]);
     res.json({ ok: true });
