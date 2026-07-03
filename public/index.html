@@ -536,6 +536,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .social-empty{text-align:center;padding:40px 20px;color:var(--text3)}
 .social-empty-icon{font-size:32px;margin-bottom:8px}
 
+
+/* ── New UI (Phase 2 shell) ─────────────────────────────────────────── */
+.nu-pane{max-width:820px;margin:0 auto;padding:16px 0 60px}
+.nu-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
+.nu-step-hdr{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.nu-step-letter{width:22px;height:22px;border-radius:5px;background:var(--gold3);color:var(--gold2);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.nu-step-title{font-size:15px;font-weight:700;color:var(--text)}
+.nu-step-desc{font-size:12px;color:var(--text3);margin:0 0 12px 30px}
+.nu-step-body{margin-left:30px}
+.nu-placeholder{font-size:12px;color:var(--text3);font-style:italic;padding:14px;border:1px dashed var(--border);border-radius:var(--radius-sm);text-align:center}
+.nu-run-btn{width:100%;background:var(--gold);color:#1a1400;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:16px;transition:opacity .15s}
+.nu-run-btn:disabled{opacity:.5;cursor:not-allowed}
+.nu-drawer{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px}
+.nu-drawer-hdr{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
+.nu-drawer-caret{font-size:10px;color:var(--text3);transition:transform .15s}
+.nu-drawer-teaser{margin-top:6px;font-size:11px;color:var(--text3)}
+.nu-pro{font-size:9px;font-weight:800;background:rgba(180,120,255,.15);color:#b478ff;border-radius:8px;padding:1px 6px;margin:0 1px}
+.nu-results-hdr{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -549,19 +567,66 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <span class="version-badge">v4.0.0-dev</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><button id="ui-switcher" onclick="toggleUIMode()" title="Switch between Classic and New UI" style="display:none;background:transparent;border:1px solid var(--gold);border-radius:var(--radius-sm);color:var(--gold2);font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;transition:all .15s;line-height:1">✨ New UI</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
-<div class="tabs">
+<div class="tabs" id="classic-tabs">
   <div class="tab on" onclick="showTab('gs')">Get Started</div>
   <div class="tab" onclick="showTab('opt')">Optimizer</div>
   <div class="tab" onclick="showTab('social')">Social</div>
 </div>
+<div class="tabs" id="new-tabs" style="display:none">
+  <div class="tab on" onclick="showNewTab('opt')" id="new-tab-opt">Optimizer</div>
+  <div class="tab" onclick="showNewTab('social')" id="new-tab-social">Social</div>
+</div>
 </div>
 
 <div id="new-ui-root" style="display:none">
-  <!-- New UI (Phase 1: empty shell, owner-gated). Built out in later phases. -->
-  <div style="max-width:800px;margin:40px auto;padding:32px;border:1px dashed var(--border);border-radius:var(--radius);text-align:center;color:var(--text3)">
-    <div style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:8px">✨ New UI — under construction</div>
-    <div style="font-size:12px">This is the redesigned interface. Only visible to you for now.<br>Switch back to Classic anytime using the header button.</div>
+
+  <!-- New UI · Optimizer pane -->
+  <div id="new-pane-opt" class="nu-pane">
+
+    <!-- Step A: statue on/off (wired in Phase 3) -->
+    <div class="nu-card">
+      <div class="nu-step-hdr"><span class="nu-step-letter">A</span><span class="nu-step-title">Which statues have you unlocked?</span></div>
+      <div class="nu-step-desc">New characters start with only a few. Turn off the ones still locked so results only cover what you can build.</div>
+      <div id="nu-step-a-body" class="nu-step-body"><div class="nu-placeholder">Statue toggles load here (Phase 3)</div></div>
+    </div>
+
+    <!-- Step B: feathers & inventory (wired in Phase 3) -->
+    <div class="nu-card">
+      <div class="nu-step-hdr"><span class="nu-step-letter">B</span><span class="nu-step-title">Your feathers &amp; inventory</span></div>
+      <div class="nu-step-desc">Enter the feathers in each unlocked statue, their levels, and any spare copies.</div>
+      <div id="nu-step-b-body" class="nu-step-body"><div class="nu-placeholder">Feather &amp; inventory entry loads here (Phase 3)</div></div>
+    </div>
+
+    <!-- Step C: priorities (wired in Phase 4) -->
+    <div class="nu-card">
+      <div class="nu-step-hdr"><span class="nu-step-letter">C</span><span class="nu-step-title">What matters for your class?</span></div>
+      <div class="nu-step-desc">Pick a preset for sensible priorities, or choose Custom to set your own.</div>
+      <div id="nu-step-c-body" class="nu-step-body"><div class="nu-placeholder">Presets + Custom sliders load here (Phase 4)</div></div>
+    </div>
+
+    <!-- Primary action -->
+    <button class="nu-run-btn" id="nu-run-btn" disabled title="Wired in a later phase">✦ See my builds</button>
+
+    <!-- Advanced tools drawer (wired in Phase 4/5) -->
+    <div class="nu-drawer">
+      <div class="nu-drawer-hdr" id="nu-drawer-hdr">
+        <span><span style="margin-right:6px">🛠</span>Advanced tools</span>
+        <span class="nu-drawer-caret">▶</span>
+      </div>
+      <div class="nu-drawer-teaser">Refine &amp; filters · Feather lock · Raizar mode · Inherit planner <span class="nu-pro">PRO</span> · Exhaustive optimizer <span class="nu-pro">PRO</span></div>
+    </div>
+
+    <!-- Results -->
+    <div class="nu-results-hdr"><span style="margin-right:6px">📋</span>Your builds</div>
+    <div id="nu-results-body" class="nu-step-body"><div class="nu-placeholder">Ranked builds appear here after you run (Phase 5)</div></div>
+
   </div>
+
+  <!-- New UI · Social pane -->
+  <div id="new-pane-social" class="nu-pane" style="display:none">
+    <div class="nu-placeholder">Social loads here (wired in a later phase)</div>
+  </div>
+
 </div>
 
 <div id="classic-ui-root">
@@ -3283,14 +3348,32 @@ function applyUIMode(){
   const mode = (isOwner() && getUIMode() === 'new') ? 'new' : 'classic';
   const newRoot = document.getElementById('new-ui-root');
   const classicRoot = document.getElementById('classic-ui-root');
+  const classicTabs = document.getElementById('classic-tabs');
+  const newTabs = document.getElementById('new-tabs');
   if (newRoot && classicRoot){
     newRoot.style.display = mode === 'new' ? 'block' : 'none';
     classicRoot.style.display = mode === 'new' ? 'none' : 'block';
+  }
+  if (classicTabs && newTabs){
+    classicTabs.style.display = mode === 'new' ? 'none' : 'flex';
+    newTabs.style.display = mode === 'new' ? 'flex' : 'none';
   }
   const btn = document.getElementById('ui-switcher');
   if (btn){
     btn.textContent = mode === 'new' ? '↩ Classic UI' : '✨ New UI';
   }
+}
+
+// New UI tab switching (Optimizer / Social)
+function showNewTab(id){
+  const opt = document.getElementById('new-pane-opt');
+  const social = document.getElementById('new-pane-social');
+  const tOpt = document.getElementById('new-tab-opt');
+  const tSocial = document.getElementById('new-tab-social');
+  if (opt) opt.style.display = id === 'opt' ? 'block' : 'none';
+  if (social) social.style.display = id === 'social' ? 'block' : 'none';
+  if (tOpt) tOpt.classList.toggle('on', id === 'opt');
+  if (tSocial) tSocial.classList.toggle('on', id === 'social');
 }
 
 function toggleUIMode(){
