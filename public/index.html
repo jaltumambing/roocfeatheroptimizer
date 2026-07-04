@@ -1504,7 +1504,7 @@ function runRaizarMode(){
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
   document.getElementById('raizar-btn').disabled=true;
-  const _runBtn=document.getElementById(runBtnId); if(_runBtn)_runBtn.disabled=true;
+  document.getElementById('run-btn').disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
   const _timer=startTimer();
@@ -1541,8 +1541,7 @@ function runRaizarMode(){
       }
       setProg(85);
       const seen=new Set();
-      const _rcEl=document.getElementById('results-count');
-      const maxResults=maxResultsOverride!=null?maxResultsOverride:Math.max(1,parseInt(_rcEl&&_rcEl.value)||20);
+      const maxResults=Math.max(1,parseInt(document.getElementById('results-count').value)||20);
       const results=cands.filter(c=>{
         const fp=c.statues[0].slots.map(s=>s.f).join('+')+'/'+c.statues[5].slots.map(s=>s.f).join('+')+'/'+c.atkTiers[0]+'/'+c.defTiers[0];
         if(seen.has(fp))return false;seen.add(fp);return true;
@@ -1704,7 +1703,7 @@ function runOptimizer(opts){
   COMBOS_ATK.length=0;filterCombosByLocks(_origATK.filter(c=>_allowedSets.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
   COMBOS_DEF.length=0;filterCombosByLocks(_origDEF.filter(c=>_allowedSets.has(c.set)),_lockedDEF).forEach(c=>COMBOS_DEF.push(c));
   if(!COMBOS_ATK.length||!COMBOS_DEF.length){COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));setStatus('No valid combos match your locked feathers. Locks ignored.',true);var _gb=document.getElementById(runBtnId);if(_gb)_gb.disabled=false;if(opts.onDone)opts.onDone();return;}
-  document.getElementById('run-btn').disabled=true;
+  const _runBtn=document.getElementById(runBtnId); if(_runBtn)_runBtn.disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
   const _timer=startTimer();
@@ -1727,7 +1726,8 @@ function runOptimizer(opts){
         add(st,[...st].reverse());add([...st].reverse(),st);
       }
       add([1,1,1,1,1],[1,1,1,1,1]);setProg(80);
-      const maxResults=Math.max(1,parseInt(document.getElementById('results-count').value)||20);
+      const _rcEl=document.getElementById('results-count');
+      const maxResults=maxResultsOverride!=null?maxResultsOverride:Math.max(1,parseInt(_rcEl&&_rcEl.value)||20);
       const seen=new Set();
       const deduped=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score);
       const topN=applyMinMaxFilters(deduped,state.optFiltersMin,state.optFiltersMax).slice(0,maxResults);
