@@ -592,6 +592,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .nu-drawer-body #opt-filter-body{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:0 12px 10px;margin:0}
 .nu-drawer-body .adv-sets{border:1px solid var(--border)!important;border-radius:var(--radius-sm);padding:12px!important;margin:0!important}
 .nu-drawer-body .adv-lock{border:1px solid var(--border)!important;border-radius:var(--radius-sm);padding:12px!important;margin:0!important}
+
+.nu-only{display:none!important}
+.nu-drawer-body span.nu-only{display:inline-flex!important}
+.nu-drawer-body .nu-adv-hdr.nu-only{display:flex!important;width:100%;align-items:center;gap:8px;margin-bottom:2px}
+.nu-drawer-body .nu-hide{display:none}
+.nu-help{width:15px;height:15px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text3);font-size:9px;font-weight:800;align-items:center;justify-content:center;cursor:help;flex:0 0 auto;line-height:1}
+.nu-help:hover{border-color:var(--gold);color:var(--gold2)}
+.nu-adv-icon{font-size:13px}
+.nu-adv-title{font-size:13px;font-weight:700;color:var(--text)}
+.nu-drawer-body .opt-filter-caret{margin-left:auto}
+.nu-drawer-body #lock-panel-caret{margin-left:auto}
+.nu-drawer-body .opt-filter-toggle .sec{text-transform:none;font-size:13px;font-weight:700;color:var(--text)}
+.nu-drawer-body .nu-lock-hdr>span:first-child{font-size:13px!important}
+.nu-drawer-body .adv-sets{order:-1;display:block!important}
+.nu-drawer-body .nu-sets-lbl{display:none}
+.nu-drawer-body .adv-sets .nu-adv-hdr{margin-bottom:10px}
+.nu-drawer-body .adv-sets input[type=checkbox]{display:none}
+.nu-drawer-body .adv-sets label{display:inline-flex!important;align-items:center;gap:4px;font-size:12px!important;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--bg3);color:var(--text3)!important;cursor:pointer;margin:0 6px 6px 0}
+.nu-drawer-body .adv-sets label:has(input:checked){background:var(--gold3);border-color:var(--gold);color:var(--gold2)!important}
+.nu-drawer-body .adv-sets label:has(input:checked)::before{content:"✓ ";font-weight:800}
+.nu-drawer-body .adv-sets label span{color:inherit!important}
 </style>
 </head>
 <body>
@@ -660,11 +681,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
           <span style="font-size:11px;color:var(--text3)">Uniform builds (all ATK identical, all DEF identical). Uses all 10 statues.</span>
         </div>
         <div class="nu-pro-row" onclick="requirePremium('Inherit planner')">
-          <span>🔄 Inherit planner <span class="nu-pro">PRO</span></span>
+          <span>🔄 Inherit planner <span class="nu-pro">PRO</span> <span class="nu-help" title="Plan feather inheritance conversions between paired feathers (Time↔Divine, Space↔Nature, Day↔Night, Sky↔Terra, Valor↔Virtue) to reshape an ATK build into a DEF build (or vice-versa) without re-rolling.">?</span></span>
           <span class="nu-pro-lock">🔒 Coming soon</span>
         </div>
         <div class="nu-pro-row" onclick="requirePremium('Exhaustive optimizer')">
-          <span>🎯 Exhaustive optimizer <span class="nu-pro">PRO</span></span>
+          <span>🎯 Exhaustive optimizer <span class="nu-pro">PRO</span> <span class="nu-help" title="Instead of the fast heuristic sweep, exhaustively search a much larger space of tier combinations for the true optimum. Slower, but squeezes out the last few points of score.">?</span></span>
           <span class="nu-pro-lock">🔒 Coming soon</span>
         </div>
       </div>
@@ -836,9 +857,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   <div id="adv-tools-anchor" style="display:none"></div>
   <div id="adv-tools-block">
   <div class="opt-filter-toggle" onclick="toggleOptFilter()">
-    <span class="opt-filter-caret" id="opt-filter-caret">▶</span>
+    <span class="nu-adv-icon nu-only">🎚️</span>
     <span class="sec">Stat Filters</span>
-    <span style="font-size:10px;color:var(--text3);margin-left:4px">(optional min / max per stat)</span>
+    <span class="nu-help nu-only" title="Set optional minimum and/or maximum values per stat to hard-exclude builds that don't meet your requirements. Leave blank to ignore.">?</span>
+    <span style="font-size:10px;color:var(--text3);margin-left:4px" class="nu-hide">(optional min / max per stat)</span>
+    <span class="opt-filter-caret" id="opt-filter-caret">▶</span>
     <div class="tooltip-wrap" onclick="event.stopPropagation()">
       <div class="tooltip-btn" tabindex="0">?</div>
       <div class="tooltip-box">
@@ -856,7 +879,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   </div>
 
   <div class="adv-sets" style="display:flex;align-items:center;gap:16px;margin-bottom:10px;flex-wrap:wrap">
-    <span style="font-size:11px;font-weight:700;color:var(--text2)">Sets:</span>
+    <div class="nu-adv-hdr nu-only"><span class="nu-adv-icon">🗂️</span><span class="nu-adv-title">Sets</span><span class="nu-help" title="Which Raven set patterns the optimizer may use. Raven's Hour (4Y+1P) gives the highest ATK multiplier; the others trade ATK for more Purple-feather efficiency or DEF. Leave all on unless you have a reason to exclude one.">?</span></div>
+    <span class="nu-sets-lbl" style="font-size:11px;font-weight:700;color:var(--text2)">Sets:</span>
     <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);cursor:pointer" title="Raven's Hour (4Y+1P) — Highest ATK multiplier. Best raw damage output at every budget. Recommended for most builds.">
       <input type="checkbox" id="set-filter-RH" checked> Raven's Hour <span style="color:var(--text3);font-size:10px">(4Y+1P)</span>
     </label>
@@ -874,10 +898,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
   <!-- Feather Lock -->
   <div class="adv-lock" style="margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none" onclick="toggleLockPanel()">
+    <div class="nu-lock-hdr" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none" onclick="toggleLockPanel()">
       <span style="font-size:11px;font-weight:700;color:var(--text2)">🔒 Lock Feathers</span>
-      <span id="lock-panel-caret" style="font-size:10px;color:var(--text3)">▶ expand</span>
+      <span class="nu-help nu-only" title="Force specific feathers to always be included in ATK or DEF statues. The optimizer builds around your locked feathers.">?</span>
       <span id="lock-active-badge" style="display:none;font-size:10px;background:var(--gold3);color:var(--gold2);border-radius:10px;padding:1px 7px;font-weight:700">active</span>
+      <span id="lock-panel-caret" style="font-size:10px;color:var(--text3)">▶ expand</span>
     </div>
     <div id="lock-panel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);font-size:11px">
       <div style="display:flex;gap:24px;flex-wrap:wrap">
