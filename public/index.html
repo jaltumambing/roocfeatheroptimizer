@@ -569,6 +569,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .nu-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;display:inline-block;animation:nuspin .7s linear infinite}
 @keyframes nuspin{to{transform:rotate(360deg)}}
 .gs-statue-locked{font-size:9px;color:var(--gold2);background:var(--gold3);padding:1px 6px;border-radius:8px;margin-left:auto;font-weight:700}
+.nu-upsell{margin-top:14px;padding:14px 16px;border:1px solid var(--gold);border-radius:var(--radius);background:rgba(201,162,39,.08);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2)}
+.nu-upsell strong{color:var(--gold2)}
+.nu-upsell-btn{background:var(--gold);color:#1a1400;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.owner-user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px}
+.owner-user-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.owner-user-name{font-size:13px;font-weight:600;color:var(--text)}
+.owner-user-id{font-size:10px;color:var(--text3);font-family:monospace}
+.owner-prem-badge{font-size:9px;font-weight:800;background:rgba(180,120,255,.15);color:#b478ff;border-radius:8px;padding:1px 6px;align-self:flex-start;margin-top:2px}
+.owner-toggle-btn{background:var(--gold);color:#1a1400;border:none;border-radius:var(--radius-sm);padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.owner-toggle-btn.on{background:transparent;border:1px solid var(--red2);color:var(--red2)}
 </style>
 </head>
 <body>
@@ -579,7 +589,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div class="sticky-nav"><div class="hdr">
   <div class="hdr-title">Feather <span>Optimizer</span></div>
   <span class="hdr-sub">Ragnarok Origin Classic</span>
-  <span class="version-badge">v4.0.0-dev</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><button id="ui-switcher" onclick="toggleUIMode()" title="Switch between Classic and New UI" style="display:none;background:transparent;border:1px solid var(--gold);border-radius:var(--radius-sm);color:var(--gold2);font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;transition:all .15s;line-height:1">✨ New UI</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
+  <span class="version-badge">v4.0.0-dev</span><div id="auth-area"></div><button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;transition:all .15s;line-height:1">🌙</button><button id="owner-settings-btn" onclick="openOwnerSettings()" title="Owner settings — manage premium users" style="display:none;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;padding:4px 9px;cursor:pointer;line-height:1">⚙</button><button id="ui-switcher" onclick="toggleUIMode()" title="Switch between Classic and New UI" style="display:none;background:transparent;border:1px solid var(--gold);border-radius:var(--radius-sm);color:var(--gold2);font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer;transition:all .15s;line-height:1">✨ New UI</button><a class="discord-btn" href="https://discord.gg/8n3fueB9jV" target="_blank" rel="noopener">💬 Discord</a><button class="donate-btn" onclick="openDonate()">☕ Donate</button>
 </div>
 
 <div class="tabs" id="classic-tabs">
@@ -902,6 +912,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 </div><!-- /classic-ui-root -->
 
+
+<!-- Owner Settings Modal (premium management) -->
+<div class="modal-overlay" id="owner-settings-overlay" onclick="if(event.target===this)closeOwnerSettings()">
+  <div class="mb-modal-box" style="width:560px;max-width:96vw">
+    <button class="modal-close" onclick="closeOwnerSettings()" title="Close">×</button>
+    <div class="modal-title" style="text-align:left">⚙ Premium management</div>
+    <input id="owner-user-search" type="text" placeholder="Search by username or Discord ID…" oninput="ownerUserSearch(this.value)"
+      style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:8px 10px">
+    <div id="owner-users-list" style="overflow-y:auto"></div>
+    <div style="font-size:11px;color:var(--text3)">Grant PRO after confirming payment (GCash / Wise / Ko-fi). Changes take effect on the user\'s next page load.</div>
+  </div>
+</div>
 
 <!-- My Build Modal -->
 <div class="modal-overlay" id="mybuild-overlay" onclick="handleMyBuildOverlay(event)">
@@ -1731,7 +1753,9 @@ function runOptimizer(opts){
       const seen=new Set();
       const deduped=cands.filter(c=>{const fp=c.atkTiers.join(',')+'/'+c.defTiers.join(',');if(seen.has(fp))return false;seen.add(fp);return true;}).sort((a,b)=>b.score-a.score);
       const topN=applyMinMaxFilters(deduped,state.optFiltersMin,state.optFiltersMax).slice(0,maxResults);
-      state.results=topN;state.expanded.clear();renderResults(resultsAreaId,state.results,state.expanded,'');setProg(100);
+      state.results=topN;state.expanded.clear();renderResults(resultsAreaId,state.results,state.expanded,'');
+      if(resultsAreaId==='nu-results-body' && typeof renderUpsellNote==='function'){ const _a=document.getElementById('nu-results-body'); if(_a){ _a.insertAdjacentHTML('beforeend', renderUpsellNote(topN.length)); } }
+      setProg(100);
       _timer.stop(`Found ${topN.length} builds`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     COMBOS_ATK.length=0;_origATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_origDEF.forEach(c=>COMBOS_DEF.push(c));
@@ -3250,6 +3274,7 @@ function getAvatarUrl(user) {
 function renderAuthArea() {
   const el = document.getElementById('auth-area');
   if (typeof initUISwitcher === 'function') initUISwitcher();
+  if (typeof initOwnerSettings === 'function') initOwnerSettings();
   if (!el) return;
   if (_authUser) {
     el.innerHTML = `<div class="auth-user" onclick="logoutUser()" title="Click to logout">
@@ -3494,6 +3519,82 @@ function relocateFeatherEntry(toNew){
   }
 }
 
+// ── Phase 5 · Premium / freemium gating ───────────────────────────────────────
+const FREE_RESULT_LIMIT = 20;
+const PREMIUM_RESULT_LIMIT = 200;
+
+function isPremiumUser(){
+  return !!(_authUser && (_authUser.is_premium === true || _authUser.is_owner === true));
+}
+function getResultLimit(){
+  return isPremiumUser() ? PREMIUM_RESULT_LIMIT : FREE_RESULT_LIMIT;
+}
+
+function renderUpsellNote(count){
+  if(isPremiumUser()) return '';
+  if(count < FREE_RESULT_LIMIT) return '';
+  return `<div class="nu-upsell">
+    <span>Showing the top ${FREE_RESULT_LIMIT} builds. <strong>PRO</strong> unlocks the full ranked list, advanced locking, the Inherit planner, and the exhaustive optimizer.</span>
+    <button class="nu-upsell-btn" onclick="openDonate()">Unlock PRO</button>
+  </div>`;
+}
+
+function requirePremium(featureName){
+  if(isPremiumUser()) return true;
+  flashToast('\u{1F512} '+(featureName||'That feature')+' is a PRO feature');
+  return false;
+}
+
+// ── Owner settings panel (premium management) ─────────────────────────────────
+function isOwnerUser(){ return !!(_authUser && _authUser.is_owner === true); }
+
+function initOwnerSettings(){
+  const btn = document.getElementById('owner-settings-btn');
+  if(btn) btn.style.display = isOwnerUser() ? 'inline-block' : 'none';
+}
+
+function openOwnerSettings(){
+  const ov = document.getElementById('owner-settings-overlay');
+  if(!ov) return;
+  ov.classList.add('on'); document.body.style.overflow='hidden';
+  loadOwnerUsers('');
+}
+function closeOwnerSettings(){
+  const ov = document.getElementById('owner-settings-overlay');
+  if(!ov) return;
+  ov.classList.remove('on'); document.body.style.overflow='';
+}
+
+let _ownerSearchT=null;
+function ownerUserSearch(v){ clearTimeout(_ownerSearchT); _ownerSearchT=setTimeout(()=>loadOwnerUsers(v),300); }
+
+async function loadOwnerUsers(q){
+  const list = document.getElementById('owner-users-list');
+  if(!list) return;
+  list.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Loading…</div>';
+  try{
+    const res = await fetch('/admin/users'+(q?('?q='+encodeURIComponent(q)):''));
+    if(!res.ok){ list.innerHTML='<div style="color:var(--red2);font-size:12px;padding:12px">Failed ('+res.status+'). Are you logged in as owner?</div>'; return; }
+    const data = await res.json();
+    const users = data.users||[];
+    if(!users.length){ list.innerHTML='<div style="color:var(--text3);font-size:12px;padding:12px">No users found.</div>'; return; }
+    list.innerHTML = users.map(u=>{
+      const prem = u.is_premium===true;
+      return '<div class="owner-user-row"><div class="owner-user-info"><span class="owner-user-name">'+(u.username||'(no name)')+'</span><span class="owner-user-id">'+u.discord_id+'</span>'+(prem?'<span class="owner-prem-badge">PRO</span>':'')+'</div><button class="owner-toggle-btn '+(prem?'on':'')+'" onclick="toggleUserPremium(\''+u.discord_id+'\', '+(prem?'false':'true')+', this)">'+(prem?'Revoke PRO':'Grant PRO')+'</button></div>';
+    }).join('');
+  }catch(e){ list.innerHTML='<div style="color:var(--red2);font-size:12px;padding:12px">Error loading users.</div>'; }
+}
+
+async function toggleUserPremium(discord_id, makePremium, btnEl){
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='…'; }
+  try{
+    const res = await fetch('/admin/set-premium',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({discord_id, premium: makePremium, source:'manual'}) });
+    if(!res.ok){ flashToast('Failed to update ('+res.status+')'); loadOwnerUsers(document.getElementById('owner-user-search')?.value||''); return; }
+    flashToast(makePremium ? '\u2713 PRO granted' : '\u2713 PRO revoked');
+    loadOwnerUsers(document.getElementById('owner-user-search')?.value||'');
+  }catch(e){ flashToast('Error updating user'); if(btnEl){ btnEl.disabled=false; } }
+}
+
 // Fixed-position toast — visible regardless of scroll position
 function flashToast(msg){
   let t=document.getElementById('rooc-fixed-toast');
@@ -3553,7 +3654,7 @@ function runNewOptimizer(){
   const btn=document.getElementById('nu-run-btn');
   if(btn){ btn._label=btn.innerHTML; btn.innerHTML='⏳ Running…'; btn.disabled=true; }
   const onDone=()=>{ const b=document.getElementById('nu-run-btn'); if(b){ b.innerHTML=b._label||'✦ See my builds'; b.disabled=false; } };
-  runOptimizer({nATK,nDEF,resultsAreaId:'nu-results-body',runBtnId:'nu-run-btn',maxResults:20,onDone});
+  runOptimizer({nATK,nDEF,resultsAreaId:'nu-results-body',runBtnId:'nu-run-btn',maxResults:getResultLimit(),onDone});
 }
 
 
