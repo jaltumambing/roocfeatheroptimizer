@@ -2880,12 +2880,22 @@ function saveResultAsCurrentBuild(i, sfx) {
   state.myBuild = { statues: build.statues.map(st=>({type:st.type, slots:st.slots.map(s=>({f:s.f, lv:s.lv}))})) };
   try { localStorage.setItem('rooc_mybuild', JSON.stringify(state.myBuild)); } catch(e) {}
 
-  // 2. Unslotted = total pool inventory minus what this build consumes
+  // 2. Unslotted = total pool inventory minus what THIS build actually consumes.
+  //    Compute consumption from the build's own feathers (mirrors gsComputeTotal),
+  //    because build objects do not carry a poolUsed map.
+  const buildUsed = {};
+  POOLS.forEach(p => { buildUsed[p.name] = 0; });
+  build.statues.forEach(st => st.slots.forEach(s => {
+    if (!s.f) return;
+    const f = FEATHERS.find(x => x.name === s.f);
+    if (!f) return;
+    const flv = Math.min(20, Math.max(1, parseInt(s.lv) || 1));
+    buildUsed[f.pool] += costAt(s.f, flv);
+  }));
   const unslotted = {};
   POOLS.forEach(p => {
     const total = state.pools[p.name] || 0;
-    const used  = (build.poolUsed && build.poolUsed[p.name]) || 0;
-    unslotted[p.name] = Math.max(0, total - used);
+    unslotted[p.name] = Math.max(0, total - buildUsed[p.name]);
   });
   try { localStorage.setItem('rooc_unslotted', JSON.stringify(unslotted)); } catch(e) {}
   try { localStorage.setItem('rooc_pools', JSON.stringify(state.pools)); } catch(e) {}
@@ -2911,7 +2921,7 @@ function saveResultAsCurrentBuild(i, sfx) {
   const gsPane = document.getElementById('pane-gs');
   if (gsPane?.classList.contains('on')) renderGS();
 
-  showGsToast('✓ Active build synced!');
+  flashToast('✓ Active build set — My Build & pool updated');
 }
 
 // ── Social Tab ────────────────────────────────────────────────────────────────
@@ -3482,6 +3492,20 @@ function relocateFeatherEntry(toNew){
     const anchor=document.getElementById('gs-feather-entry-anchor');
     if(anchor && fe.parentNode!==anchor.parentNode){ anchor.parentNode.insertBefore(fe, anchor.nextSibling); }
   }
+}
+
+// Fixed-position toast — visible regardless of scroll position
+function flashToast(msg){
+  let t=document.getElementById('rooc-fixed-toast');
+  if(!t){
+    t=document.createElement('div'); t.id='rooc-fixed-toast';
+    t.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);background:#1f2a1f;color:#8fe0a0;border:1px solid #4fa06a;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)';
+    document.body.appendChild(t);
+  }
+  if(t._h)clearTimeout(t._h);
+  t.textContent=msg||'Done';
+  requestAnimationFrame(()=>{ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+  t._h=setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; },2200);
 }
 
 // Button confirmation flash — temporarily shows a success label on the clicked button
