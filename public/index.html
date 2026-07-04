@@ -579,6 +579,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .owner-prem-badge{font-size:9px;font-weight:800;background:rgba(180,120,255,.15);color:#b478ff;border-radius:8px;padding:1px 6px;align-self:flex-start;margin-top:2px}
 .owner-toggle-btn{background:var(--gold);color:#1a1400;border:none;border-radius:var(--radius-sm);padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
 .owner-toggle-btn.on{background:transparent;border:1px solid var(--red2);color:var(--red2)}
+.nu-drawer-body{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.nu-adv-raizar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;padding-top:12px;border-top:1px solid var(--border)}
+.nu-adv-btn{background:transparent;border:1px solid var(--gold);color:var(--gold2);font-size:12px;font-weight:700;padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap}
+.nu-adv-btn:disabled{opacity:.5;cursor:not-allowed}
+.nu-pro-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:8px;font-size:12px;color:var(--text2);cursor:pointer;opacity:.75}
+.nu-pro-row:hover{opacity:1;border-color:var(--gold)}
+.nu-pro-lock{font-size:11px;color:var(--text3)}
 </style>
 </head>
 <body>
@@ -634,11 +641,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
     <!-- Advanced tools drawer (wired in Phase 4/5) -->
     <div class="nu-drawer">
-      <div class="nu-drawer-hdr" id="nu-drawer-hdr">
+      <div class="nu-drawer-hdr" id="nu-drawer-hdr" onclick="toggleNuDrawer()">
         <span><span style="margin-right:6px">🛠</span>Advanced tools</span>
-        <span class="nu-drawer-caret">▶</span>
+        <span class="nu-drawer-caret" id="nu-drawer-caret">▶</span>
       </div>
-      <div class="nu-drawer-teaser">Refine &amp; filters · Feather lock · Raizar mode · Inherit planner <span class="nu-pro">PRO</span> · Exhaustive optimizer <span class="nu-pro">PRO</span></div>
+      <div class="nu-drawer-teaser" id="nu-drawer-teaser">Refine &amp; filters · Feather lock · Raizar mode · Inherit planner <span class="nu-pro">PRO</span> · Exhaustive optimizer <span class="nu-pro">PRO</span></div>
+      <div class="nu-drawer-body" id="nu-drawer-body" style="display:none">
+        <div id="nu-adv-tools-slot"><div class="nu-placeholder">Advanced tools load here</div></div>
+        <div class="nu-adv-raizar">
+          <button class="nu-adv-btn" id="nu-raizar-btn" onclick="runNewRaizar()" title="Only show builds where all ATK statues are identical and all DEF statues are identical (uniform builds). Uses all 10 statues.">✦ Raizar mode</button>
+          <span style="font-size:11px;color:var(--text3)">Uniform builds (all ATK identical, all DEF identical). Uses all 10 statues.</span>
+        </div>
+        <div class="nu-pro-row" onclick="requirePremium('Inherit planner')">
+          <span>🔄 Inherit planner <span class="nu-pro">PRO</span></span>
+          <span class="nu-pro-lock">🔒 Coming soon</span>
+        </div>
+        <div class="nu-pro-row" onclick="requirePremium('Exhaustive optimizer')">
+          <span>🎯 Exhaustive optimizer <span class="nu-pro">PRO</span></span>
+          <span class="nu-pro-lock">🔒 Coming soon</span>
+        </div>
+      </div>
     </div>
 
     <!-- Results -->
@@ -804,6 +826,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
   <div class="notice">⚠ Supports <strong>Raven's Hour</strong> (4Y+1P), <strong>Raven's Prestige</strong> (3Y+2P), and <strong>Raven's Plunder</strong> (2Y+3P) sets. Surplus budget distributed globally by score-per-copy across all 10 statues.</div>
 
+  <div id="adv-tools-anchor" style="display:none"></div>
+  <div id="adv-tools-block">
   <div class="opt-filter-toggle" onclick="toggleOptFilter()">
     <span class="opt-filter-caret" id="opt-filter-caret">▶</span>
     <span class="sec">Stat Filters</span>
@@ -869,6 +893,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
       <button onclick="clearAllLocks()" style="margin-top:10px;background:transparent;border:1px solid var(--border);color:var(--text3);font-size:10px;padding:3px 10px;border-radius:var(--radius-sm);cursor:pointer">Clear All Locks</button>
     </div>
   </div>
+  </div><!-- /adv-tools-block -->
 
   <div class="run-row">
     <button class="run-btn" id="run-btn" onclick="runOptimizer()">Run Optimizer</button>
@@ -1507,7 +1532,11 @@ function buildRaizarStatues(atkSlots,defSlots,atkSet,defSet,floorT){
   return statues;
 }
 
-function runRaizarMode(){
+function runRaizarMode(opts){
+  opts=opts||{};
+  const _rResultsAreaId=opts.resultsAreaId||'results-area';
+  const _rRunBtnId=opts.runBtnId||'raizar-btn';
+  const _rMaxOverride=opts.maxResults;
   const _rAllowed=getAllowedSets();
   const _rOrigATK=[...COMBOS_ATK];const _rOrigDEF=[...COMBOS_DEF];
   COMBOS_ATK.length=0;filterCombosByLocks(_rOrigATK.filter(c=>_rAllowed.has(c.set)),_lockedATK).forEach(c=>COMBOS_ATK.push(c));
@@ -1516,8 +1545,9 @@ function runRaizarMode(){
     COMBOS_ATK.length=0;_rOrigATK.forEach(c=>COMBOS_ATK.push(c));
     COMBOS_DEF.length=0;_rOrigDEF.forEach(c=>COMBOS_DEF.push(c));
     setStatus('No valid combos match your locked feathers. Locks ignored.',true);
-    document.getElementById('raizar-btn').disabled=false;
-    document.getElementById('run-btn').disabled=false;
+    var _rb0=document.getElementById(_rRunBtnId);if(_rb0)_rb0.disabled=false;
+    var _rb0b=document.getElementById('run-btn');if(_rb0b)_rb0b.disabled=false;
+    if(opts.onDone)opts.onDone();
     return;
   }
   const weights=state.weights;
@@ -1525,8 +1555,8 @@ function runRaizarMode(){
   const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
   if(Object.values(poolBudgets).every(v=>v===0)){setStatus('Enter pool inventory first.',true);return;}
   try{localStorage.setItem('rooc_pools',JSON.stringify(state.pools));}catch(e){}
-  document.getElementById('raizar-btn').disabled=true;
-  document.getElementById('run-btn').disabled=true;
+  var _rbS=document.getElementById(_rRunBtnId);if(_rbS)_rbS.disabled=true;
+  var _rbSb=document.getElementById('run-btn');if(_rbSb)_rbSb.disabled=true;
   _comboScoreCache.clear();
   setStatus('',false);showProg(true);setProg(5);
   const _timer=startTimer();
@@ -1567,15 +1597,16 @@ function runRaizarMode(){
       const results=cands.filter(c=>{
         const fp=c.statues[0].slots.map(s=>s.f).join('+')+'/'+c.statues[5].slots.map(s=>s.f).join('+')+'/'+c.atkTiers[0]+'/'+c.defTiers[0];
         if(seen.has(fp))return false;seen.add(fp);return true;
-      }).sort((a,b)=>b.score-a.score).slice(0,maxResults);
+      }).sort((a,b)=>b.score-a.score).slice(0,(_rMaxOverride!=null?_rMaxOverride:maxResults));
       state.results=results;state.expanded.clear();
-      renderResults('results-area',state.results,state.expanded,'');
+      renderResults(_rResultsAreaId,state.results,state.expanded,'');
       setProg(100);
       _timer.stop(`✦ Raizar Mode: ${results.length} uniform build${results.length!==1?'s':''}`);
     }catch(e){_timer.stop('Error: '+e.message);setStatus('Error: '+e.message,true);console.error(e);}
     COMBOS_ATK.length=0;_rOrigATK.forEach(c=>COMBOS_ATK.push(c));COMBOS_DEF.length=0;_rOrigDEF.forEach(c=>COMBOS_DEF.push(c));
-    document.getElementById('raizar-btn').disabled=false;
-    document.getElementById('run-btn').disabled=false;
+    var _rb1=document.getElementById(_rRunBtnId);if(_rb1)_rb1.disabled=false;
+    var _rb1b=document.getElementById('run-btn');if(_rb1b)_rb1b.disabled=false;
+    if(opts.onDone)opts.onDone();
     setTimeout(()=>showProg(false),600);
   },30);
 }
@@ -3625,6 +3656,47 @@ function btnFlash(el, msg){
   },1600);
 }
 
+// Advanced tools drawer (New UI)
+function toggleNuDrawer(){
+  const body=document.getElementById('nu-drawer-body');
+  const teaser=document.getElementById('nu-drawer-teaser');
+  const caret=document.getElementById('nu-drawer-caret');
+  if(!body)return;
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(teaser)teaser.style.display=open?'none':'block';
+  if(caret)caret.textContent=open?'▼':'▶';
+}
+
+// Relocate the classic advanced tools (filters, sets, feather lock) into the drawer (and back)
+function relocateAdvTools(toNew){
+  const blk=document.getElementById('adv-tools-block');
+  if(!blk)return;
+  if(toNew){
+    const dest=document.getElementById('nu-adv-tools-slot');
+    if(dest && blk.parentNode!==dest){ dest.innerHTML=''; dest.appendChild(blk); }
+  } else {
+    const anchor=document.getElementById('adv-tools-anchor');
+    if(anchor && blk.parentNode!==anchor.parentNode){ anchor.parentNode.insertBefore(blk, anchor.nextSibling); }
+  }
+}
+
+// Raizar from the New UI — uniform builds, renders to nu-results-body
+function runNewRaizar(){
+  if(typeof gsComputeTotal==='function') gsComputeTotal();
+  const weights=state.weights;
+  const area=document.getElementById('nu-results-body');
+  function msg(t){ if(area) area.innerHTML='<div class="nu-placeholder">'+t+'</div>'; }
+  if(!Object.values(weights).some(v=>v>0)){ msg('Pick a priority preset (or set a stat) in step C first.'); return; }
+  const poolBudgets={};POOLS.forEach(p=>{poolBudgets[p.name]=state.pools[p.name]||0;});
+  if(Object.values(poolBudgets).every(v=>v===0)){ msg('Enter your feathers &amp; inventory in step B first.'); return; }
+  if(area) area.innerHTML='<div class="nu-running"><span class="nu-spinner"></span> Finding uniform builds…</div>';
+  const btn=document.getElementById('nu-raizar-btn');
+  if(btn){ btn._label=btn.innerHTML; btn.innerHTML='⏳ Running…'; btn.disabled=true; }
+  const onDone=()=>{ const b=document.getElementById('nu-raizar-btn'); if(b){ b.innerHTML=b._label||'✦ Raizar mode'; b.disabled=false; } };
+  runRaizarMode({resultsAreaId:'nu-results-body',runBtnId:'nu-raizar-btn',maxResults:getResultLimit(),onDone});
+}
+
 // Relocate the Stat Priority section (presets + sliders) into Step C (and back)
 function relocatePriority(toNew){
   const blk=document.getElementById('opt-priority-block');
@@ -3695,6 +3767,7 @@ function applyUIMode(){
   if (mode === 'new'){
     relocateFeatherEntry(true);
     relocatePriority(true);
+    relocateAdvTools(true);
     if(typeof renderGS==='function') renderGS();
     if(typeof renderSliders==='function') renderSliders('slider-grid','presets','preset-desc','weights','activePreset');
     renderStatueToggles();
@@ -3704,6 +3777,7 @@ function applyUIMode(){
   } else {
     relocateFeatherEntry(false);
     relocatePriority(false);
+    relocateAdvTools(false);
     if(typeof applyStatueDisabledStyles==='function') applyStatueDisabledStyles();
     if(typeof gsComputeTotal==='function') gsComputeTotal();
   }
