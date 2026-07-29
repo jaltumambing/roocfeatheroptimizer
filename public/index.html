@@ -672,7 +672,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
         <span><span style="margin-right:6px">🛠</span>Advanced tools</span>
         <span class="nu-drawer-caret" id="nu-drawer-caret">▶</span>
       </div>
-      <div class="nu-drawer-teaser" id="nu-drawer-teaser">Refine &amp; filters · Feather lock · Inherit planner <span class="nu-pro">PRO</span> · Exhaustive optimizer <span class="nu-pro">PRO</span></div>
+      <div class="nu-drawer-teaser" id="nu-drawer-teaser">Refine &amp; filters · Feather lock</div>
       <div class="nu-drawer-body" id="nu-drawer-body" style="display:none">
         <div id="nu-adv-tools-slot"><div class="nu-placeholder">Advanced tools load here</div></div>
         <!-- Raizar mode intentionally hidden in New UI (code retained; remove display:none to re-enable) -->
@@ -680,14 +680,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
           <button class="nu-adv-btn" id="nu-raizar-btn" onclick="runNewRaizar()" title="Only show builds where all ATK statues are identical and all DEF statues are identical (uniform builds). Uses all 10 statues.">✦ Raizar mode</button>
           <span style="font-size:11px;color:var(--text3)">Uniform builds (all ATK identical, all DEF identical). Uses all 10 statues.</span>
         </div>
-        <div class="nu-pro-row" onclick="requirePremium('Inherit planner')">
-          <span>🔄 Inherit planner <span class="nu-pro">PRO</span> <span class="nu-help" title="Plan feather inheritance conversions between paired feathers (Time↔Divine, Space↔Nature, Day↔Night, Sky↔Terra, Valor↔Virtue) to reshape an ATK build into a DEF build (or vice-versa) without re-rolling.">?</span></span>
-          <span class="nu-pro-lock">🔒 Coming soon</span>
-        </div>
-        <div class="nu-pro-row" onclick="requirePremium('Exhaustive optimizer')">
-          <span>🎯 Exhaustive optimizer <span class="nu-pro">PRO</span> <span class="nu-help" title="Instead of the fast heuristic sweep, exhaustively search a much larger space of tier combinations for the true optimum. Slower, but squeezes out the last few points of score.">?</span></span>
-          <span class="nu-pro-lock">🔒 Coming soon</span>
-        </div>
+        <!-- Inherit planner and Exhaustive optimizer stubs removed (scrapped/delayed) — see PRO feature recommendations in project notes -->
       </div>
     </div>
 
@@ -3597,7 +3590,7 @@ function renderUpsellNote(count){
   if(isPremiumUser()) return '';
   if(count < FREE_RESULT_LIMIT) return '';
   return `<div class="nu-upsell">
-    <span>Showing the top ${FREE_RESULT_LIMIT} builds. <strong>PRO</strong> unlocks the full ranked list, advanced locking, the Inherit planner, and the exhaustive optimizer.</span>
+    <span>Showing the top ${FREE_RESULT_LIMIT} builds. <strong>PRO</strong> unlocks the full ranked list and advanced locking.</span>
     <button class="nu-upsell-btn" onclick="openDonate()">Unlock PRO</button>
   </div>`;
 }
@@ -3775,12 +3768,14 @@ function runNewOptimizer(){
 }
 
 
-// ── UI Switcher (Phase 1) ─────────────────────────────────────────────────────
-// New UI is owner-gated until finalized. Classic remains the built-in fallback.
-const OWNER_DISCORD_ID = '550233480265728013';
+// ── UI Switcher ─────────────────────────────────────────────────────────────
+// New UI is now GA for all users (previously owner-gated during development).
+// isOwner() name kept for minimal diff across call sites below; it now always
+// returns true. Actual admin/owner permission checks use isOwnerUser() instead,
+// which is unaffected by this change.
 const UIMODE_KEY = 'rooc_ui_mode';
 
-function isOwner(){ return !!(_authUser && _authUser.discord_id === OWNER_DISCORD_ID); }
+function isOwner(){ return true; }
 
 function getUIMode(){
   try { return localStorage.getItem(UIMODE_KEY) || 'classic'; } catch(e){ return 'classic'; }
@@ -3790,7 +3785,7 @@ function setUIMode(mode){
 }
 
 function applyUIMode(){
-  // Only the owner may render the new UI. Everyone else is always classic.
+  // New UI is GA — mode is whatever the user last chose (default classic).
   const mode = (isOwner() && getUIMode() === 'new') ? 'new' : 'classic';
   const newRoot = document.getElementById('new-ui-root');
   const classicRoot = document.getElementById('classic-ui-root');
@@ -3841,13 +3836,13 @@ function showNewTab(id){
 }
 
 function toggleUIMode(){
-  if (!isOwner()) return; // safety: non-owners can't toggle
+  if (!isOwner()) return; // no-op safety net; isOwner() always true now that New UI is GA
   const next = getUIMode() === 'new' ? 'classic' : 'new';
   setUIMode(next);
   applyUIMode();
 }
 
-// Reveal the switcher only for the owner; refresh mode after auth resolves.
+// Show the switcher to everyone now that New UI is GA; refresh mode after auth resolves.
 function initUISwitcher(){
   const btn = document.getElementById('ui-switcher');
   if (btn) btn.style.display = isOwner() ? 'inline-block' : 'none';
